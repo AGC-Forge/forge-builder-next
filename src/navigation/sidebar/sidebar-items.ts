@@ -1,11 +1,12 @@
 import {
     Gauge,
     LayoutDashboard,
-    ListTodo,
+    Users,
     type LucideIcon,
-    SquareArrowUpRight,
-    UserCog,
+    Package,
     Cog,
+    Palette,
+    KeyRound,
 } from "lucide-react";
 
 export interface NavSubItem {
@@ -40,7 +41,7 @@ export const sidebarItems: NavGroup[] = [
         items: [
             {
                 title: "Home",
-                url: "/dashboard/default",
+                url: "/dashboard",
                 icon: LayoutDashboard,
             },
             {
@@ -51,7 +52,12 @@ export const sidebarItems: NavGroup[] = [
             {
                 title: "Products",
                 url: "/dashboard/products",
-                icon: ListTodo,
+                icon: Package,
+            },
+            {
+                title: "Users",
+                url: "/dashboard/users",
+                icon: Users,
             },
         ],
     },
@@ -65,24 +71,14 @@ export const sidebarItems: NavGroup[] = [
                 icon: Cog,
             },
             {
-                title: "Account",
-                url: "/dashboard/account",
-                icon: UserCog,
+                title: "Appearance",
+                url: "/dashboard/appearance",
+                icon: Palette,
             },
-        ],
-    },
-    {
-        id: 3,
-        label: "Legacy",
-        items: [
             {
-                title: "Dashboards",
-                url: "/dashboard/default-v1",
-                subItems: [
-                    { title: "Default V1", url: "/dashboard/default-v1" },
-                    { title: "CRM V1", url: "/dashboard/crm-v1" },
-                    { title: "Finance V1", url: "/dashboard/finance-v1" },
-                ],
+                title: "Api Key",
+                url: "/dashboard/api-key",
+                icon: KeyRound,
             },
         ],
     },

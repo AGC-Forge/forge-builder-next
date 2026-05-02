@@ -1,7 +1,6 @@
 "use client";
 
 import { Settings } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -120,13 +119,11 @@ export function LayoutControls() {
 
   return (
     <Popover>
-      <PopoverTrigger
-        render={(triggerProps) => (
-          <Button {...triggerProps} size="icon">
-            <Settings />
-          </Button>
-        )}
-      />
+      <PopoverTrigger asChild>
+        <Button size="icon">
+          <Settings />
+        </Button>
+      </PopoverTrigger>
       <PopoverContent align="end">
         <div className="flex flex-col gap-5">
           <div className="space-y-1.5">
@@ -138,10 +135,7 @@ export function LayoutControls() {
           <div className="space-y-3 **:data-[slot=toggle-group]:w-full **:data-[slot=toggle-group-item]:flex-1 **:data-[slot=toggle-group-item]:text-xs">
             <div className="space-y-1">
               <Label className="font-medium text-xs">Theme Preset</Label>
-              <Select
-                value={themePreset}
-                onValueChange={(value) => value && onThemePresetChange(value)}
-              >
+              <Select value={themePreset} onValueChange={onThemePresetChange}>
                 <SelectTrigger size="sm" className="w-full text-xs">
                   <SelectValue placeholder="Preset" />
                 </SelectTrigger>
@@ -172,10 +166,7 @@ export function LayoutControls() {
 
             <div className="space-y-1">
               <Label className="font-medium text-xs">Fonts</Label>
-              <Select
-                value={font}
-                onValueChange={(value) => value && onFontChange(value)}
-              >
+              <Select value={font} onValueChange={onFontChange}>
                 <SelectTrigger size="sm" className="w-full text-xs">
                   <SelectValue placeholder="Select font" />
                 </SelectTrigger>
@@ -200,10 +191,9 @@ export function LayoutControls() {
               <ToggleGroup
                 size="sm"
                 variant="outline"
-                value={themeMode ? [themeMode] : []}
-                onValueChange={(value) =>
-                  value && onThemeModeChange(value[0] as ThemeMode | "")
-                }
+                type="single"
+                value={themeMode}
+                onValueChange={onThemeModeChange}
               >
                 <ToggleGroupItem value="light" aria-label="Toggle light">
                   Light
@@ -222,10 +212,9 @@ export function LayoutControls() {
               <ToggleGroup
                 size="sm"
                 variant="outline"
-                value={contentLayout as unknown as readonly string[]}
-                onValueChange={(value) =>
-                  value && onContentLayoutChange(value[0] as ContentLayout | "")
-                }
+                type="single"
+                value={contentLayout}
+                onValueChange={onContentLayoutChange}
               >
                 <ToggleGroupItem value="centered" aria-label="Toggle centered">
                   Centered
@@ -244,10 +233,9 @@ export function LayoutControls() {
               <ToggleGroup
                 size="sm"
                 variant="outline"
-                value={navbarStyle as unknown as readonly string[]}
-                onValueChange={(value) =>
-                  value && onNavbarStyleChange(value[0] as NavbarStyle | "")
-                }
+                type="single"
+                value={navbarStyle}
+                onValueChange={onNavbarStyleChange}
               >
                 <ToggleGroupItem value="sticky" aria-label="Toggle sticky">
                   Sticky
@@ -263,10 +251,9 @@ export function LayoutControls() {
               <ToggleGroup
                 size="sm"
                 variant="outline"
-                value={variant as unknown as readonly string[]}
-                onValueChange={(value) =>
-                  value && onSidebarStyleChange(value[0] as SidebarVariant | "")
-                }
+                type="single"
+                value={variant}
+                onValueChange={onSidebarStyleChange}
               >
                 <ToggleGroupItem value="inset" aria-label="Toggle inset">
                   Inset
@@ -287,13 +274,9 @@ export function LayoutControls() {
               <ToggleGroup
                 size="sm"
                 variant="outline"
-                value={collapsible as unknown as readonly string[]}
-                onValueChange={(value) =>
-                  value &&
-                  onSidebarCollapseModeChange(
-                    value[0] as SidebarCollapsible | "",
-                  )
-                }
+                type="single"
+                value={collapsible}
+                onValueChange={onSidebarCollapseModeChange}
               >
                 <ToggleGroupItem value="icon" aria-label="Toggle icon">
                   Icon

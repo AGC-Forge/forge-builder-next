@@ -40,7 +40,7 @@ export function LoginForm({
 }: React.ComponentProps<"div">) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/admin";
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   const supabase = createClient();
 
   const [showPassword, setShowPassword] = useState(false);

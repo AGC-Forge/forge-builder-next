@@ -23,9 +23,18 @@ export function AccountSwitcher({
     readonly role: string;
   }>;
 }) {
+  const handleLogout = async () => {
+    const res = await fetch("/auth/callback/signout", {
+      method: "POST",
+    });
+
+    if (res.redirected) {
+      window.location.href = res.url;
+    }
+  };
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
+      <DropdownMenuTrigger asChild>
         <Avatar className="size-8 rounded-lg">
           <AvatarImage src={user.avatar || undefined} alt={user.name} />
           <AvatarFallback className="rounded-lg">
@@ -60,16 +69,12 @@ export function AccountSwitcher({
             Account
           </DropdownMenuItem>
           <DropdownMenuItem>
-            <CreditCard />
-            Billing
-          </DropdownMenuItem>
-          <DropdownMenuItem>
             <Bell />
             Notifications
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={handleLogout}>
           <LogOut />
           Log out
         </DropdownMenuItem>

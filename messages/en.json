@@ -1,0 +1,18 @@
+{
+  "HomePage": {
+    "title": "Forge Builder!",
+    "description": "Forge Builder is a social media management tool that connects all of your affiliate program with one easy link.!"
+  },
+  "NotFoundPage": {
+    "title": "404 Not Found",
+    "description": "Looks like you've ventured into the unknown digital realm.",
+    "link": "Return to website"
+  },
+  "LocaleSwitcher": {
+    "label": "Change language",
+    "locale": "{locale, select, id {Bahasa Indonesia} en {English} other {Unknown}}"
+  },
+  "Manifest": {
+    "name": "Forge Builder"
+  }
+}

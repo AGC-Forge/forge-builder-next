@@ -1,11 +1,8 @@
 "use client";
 
 import * as React from "react";
-
 import { useRouter } from "next/navigation";
-
 import { Search } from "lucide-react";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -154,7 +151,8 @@ export function SearchDialog() {
       <CommandDialog open={open} onOpenChange={handleOpenChange}>
         <Command>
           <CommandInput
-            placeholder="Search dashboards, users, and more…"
+            className="outline-none ring-0 hover:ring-0 active:ring-0 focus:ring-0 border-none"
+            placeholder="Search products, users, and more…"
             value={query}
             onValueChange={setQuery}
           />

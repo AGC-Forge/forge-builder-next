@@ -2,9 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
 import { ChevronRight, MailIcon, PlusCircleIcon } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
@@ -53,43 +51,42 @@ const NavItemExpanded = ({
   return (
     <Collapsible
       key={item.title}
+      asChild
       defaultOpen={isSubmenuOpen(item.subItems)}
       className="group/collapsible"
     >
       <SidebarMenuItem>
-        {item.subItems ? (
-          <CollapsibleTrigger
-            render={(triggerProps) => (
-              <SidebarMenuButton
-                {...triggerProps}
-                disabled={item.comingSoon}
-                isActive={isActive(item.url, item.subItems)}
-                tooltip={item.title}
-              >
-                {item.icon && <item.icon />}
-                <span>{item.title}</span>
-                {item.comingSoon && <IsComingSoon />}
-                <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-              </SidebarMenuButton>
-            )}
-          />
-        ) : (
-          <SidebarMenuButton
-            aria-disabled={item.comingSoon}
-            isActive={isActive(item.url)}
-            tooltip={item.title}
-          >
-            <Link
-              prefetch={false}
-              href={item.url}
-              target={item.newTab ? "_blank" : undefined}
+        <CollapsibleTrigger asChild>
+          {item.subItems ? (
+            <SidebarMenuButton
+              disabled={item.comingSoon}
+              isActive={isActive(item.url, item.subItems)}
+              tooltip={item.title}
             >
               {item.icon && <item.icon />}
               <span>{item.title}</span>
               {item.comingSoon && <IsComingSoon />}
-            </Link>
-          </SidebarMenuButton>
-        )}
+              <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+            </SidebarMenuButton>
+          ) : (
+            <SidebarMenuButton
+              asChild
+              aria-disabled={item.comingSoon}
+              isActive={isActive(item.url)}
+              tooltip={item.title}
+            >
+              <Link
+                prefetch={false}
+                href={item.url}
+                target={item.newTab ? "_blank" : undefined}
+              >
+                {item.icon && <item.icon />}
+                <span>{item.title}</span>
+                {item.comingSoon && <IsComingSoon />}
+              </Link>
+            </SidebarMenuButton>
+          )}
+        </CollapsibleTrigger>
         {item.subItems && (
           <CollapsibleContent>
             <SidebarMenuSub>
@@ -98,6 +95,7 @@ const NavItemExpanded = ({
                   <SidebarMenuSubButton
                     aria-disabled={subItem.comingSoon}
                     isActive={isActive(subItem.url)}
+                    asChild
                   >
                     <Link
                       prefetch={false}
@@ -129,29 +127,27 @@ const NavItemCollapsed = ({
   return (
     <SidebarMenuItem key={item.title}>
       <DropdownMenu>
-        <DropdownMenuTrigger
-          render={(triggerProps) => (
-            <SidebarMenuButton
-              {...triggerProps}
-              disabled={item.comingSoon}
-              tooltip={item.title}
-              isActive={isActive(item.url, item.subItems)}
-            >
-              {item.icon && <item.icon />}
-              <span>{item.title}</span>
-              <ChevronRight />
-            </SidebarMenuButton>
-          )}
-        />
+        <DropdownMenuTrigger asChild>
+          <SidebarMenuButton
+            disabled={item.comingSoon}
+            tooltip={item.title}
+            isActive={isActive(item.url, item.subItems)}
+          >
+            {item.icon && <item.icon />}
+            <span>{item.title}</span>
+            <ChevronRight />
+          </SidebarMenuButton>
+        </DropdownMenuTrigger>
         <DropdownMenuContent
           className="w-50 space-y-1"
           side="right"
           align="start"
         >
           {item.subItems?.map((subItem) => (
-            <DropdownMenuItem key={subItem.title}>
+            <DropdownMenuItem key={subItem.title} asChild>
               <SidebarMenuSubButton
                 key={subItem.title}
+                asChild
                 className="focus-visible:ring-0"
                 aria-disabled={subItem.comingSoon}
                 isActive={isActive(subItem.url)}
@@ -223,11 +219,11 @@ export function NavMain({ items }: NavMainProps) {
             <SidebarMenu>
               {group.items.map((item) => {
                 if (state === "collapsed" && !isMobile) {
-                  // If no subItems, just render the button as a link
                   if (!item.subItems) {
                     return (
                       <SidebarMenuItem key={item.title}>
                         <SidebarMenuButton
+                          asChild
                           aria-disabled={item.comingSoon}
                           tooltip={item.title}
                           isActive={isItemActive(item.url)}
@@ -244,7 +240,6 @@ export function NavMain({ items }: NavMainProps) {
                       </SidebarMenuItem>
                     );
                   }
-                  // Otherwise, render the dropdown as before
                   return (
                     <NavItemCollapsed
                       key={item.title}
@@ -253,7 +248,6 @@ export function NavMain({ items }: NavMainProps) {
                     />
                   );
                 }
-                // Expanded view
                 return (
                   <NavItemExpanded
                     key={item.title}

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 import { cookies } from "next/headers";
-import { AppSidebar } from "@/components/admin/app-sidebar";
+import { AppSidebar } from "@/components/dashboard/app-sidebar";
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
@@ -15,10 +15,11 @@ import {
 import { cn } from "@/lib/utils";
 import { getPreference } from "@/actions/server-actions";
 
-import { AccountSwitcher } from "@/components/admin/account-switcher";
-import { LayoutControls } from "@/components/admin/layout-controls";
-import { SearchDialog } from "@/components/admin/search-dialog";
+import { AccountSwitcher } from "@/components/dashboard/account-switcher";
+import { LayoutControls } from "@/components/dashboard/layout-controls";
+import { SearchDialog } from "@/components/dashboard/search-dialog";
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import { LanguageSwitcher } from "@/components/language-switcher";
 
 export default async function Layout({
   children,
@@ -67,6 +68,7 @@ export default async function Layout({
             <div className="flex items-center gap-2">
               <LayoutControls />
               <ThemeSwitcher />
+              <LanguageSwitcher />
               <AccountSwitcher
                 user={{
                   id: "1",

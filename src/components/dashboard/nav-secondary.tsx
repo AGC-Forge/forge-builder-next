@@ -28,8 +28,8 @@ export function NavSecondary({
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton>
-                <a href={item.url}>
+              <SidebarMenuButton asChild>
+                <a href={item.url} target="_blank" rel="noopener noreferrer">
                   <item.icon />
                   <span>{item.title}</span>
                 </a>

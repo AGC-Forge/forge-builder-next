@@ -25,7 +25,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-export function NavDocuments({
+export function NavTertiary({
   items,
 }: {
   readonly items: readonly {
@@ -38,29 +38,26 @@ export function NavDocuments({
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>Documents</SidebarGroupLabel>
+      <SidebarGroupLabel>Tertiary Menu</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <SidebarMenuItem key={item.name}>
-            <SidebarMenuButton>
+            <SidebarMenuButton asChild>
               <a href={item.url}>
                 <item.icon />
                 <span>{item.name}</span>
               </a>
             </SidebarMenuButton>
             <DropdownMenu>
-              <DropdownMenuTrigger
-                render={(triggerProps) => (
-                  <SidebarMenuAction
-                    {...triggerProps}
-                    showOnHover
-                    className="rounded-sm data-[state=open]:bg-accent"
-                  >
-                    <Ellipsis />
-                    <span className="sr-only">More</span>
-                  </SidebarMenuAction>
-                )}
-              />
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuAction
+                  showOnHover
+                  className="rounded-sm data-[state=open]:bg-accent"
+                >
+                  <Ellipsis />
+                  <span className="sr-only">More</span>
+                </SidebarMenuAction>
+              </DropdownMenuTrigger>
               <DropdownMenuContent
                 className="w-24 rounded-lg"
                 side={isMobile ? "bottom" : "right"}
