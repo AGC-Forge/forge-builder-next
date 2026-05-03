@@ -6,6 +6,7 @@ import {
   landingPageSchema,
   type LandingPageInput,
 } from "@/lib/validations/landing-page";
+import type { Database } from "@/types/database.types";
 import type {
   LandingPage,
   LandingBlock,
@@ -46,7 +47,7 @@ export async function getLandingPages(opts: {
     return {
       success: true,
       data: {
-        data: data as LandingPage[],
+        data: data as unknown as LandingPage[],
         count: count ?? 0,
         page,
         pageSize,
@@ -84,7 +85,7 @@ export async function getLandingPage(
       .single();
 
     if (error) return { success: false, error: error.message };
-    return { success: true, data: data as LandingPageWithProducts };
+    return { success: true, data: data as unknown as LandingPageWithProducts };
   } catch {
     return { success: false, error: "Failed to fetch landing page" };
   }
@@ -124,7 +125,7 @@ export async function getLandingPageBySlug(
       .eq("id", data.id)
       .then(() => {});
 
-    return { success: true, data: data as LandingPageWithProducts };
+    return { success: true, data: data as unknown as LandingPageWithProducts };
   } catch {
     return { success: false, error: "Page not found" };
   }
@@ -190,7 +191,7 @@ export async function createLandingPage(
     revalidatePath("/dashboard/landing-page");
     return {
       success: true,
-      data: data as LandingPage,
+      data: data as unknown as LandingPage,
       message: "Landing page created.",
     };
   } catch {
@@ -222,9 +223,12 @@ export async function updateLandingPage(
       }
     }
 
+    const updateData =
+      input as unknown as Database["public"]["Tables"]["landing_pages"]["Update"];
+
     const { data, error } = await supabase
       .from("landing_pages")
-      .update(input)
+      .update(updateData)
       .eq("id", id)
       .select()
       .single();
@@ -233,7 +237,7 @@ export async function updateLandingPage(
 
     revalidatePath("/dashboard/landing-page");
     revalidatePath(`/dashboard/landing-page/${id}`);
-    return { success: true, data: data as LandingPage, message: "Saved." };
+    return { success: true, data: data as unknown as LandingPage, message: "Saved." };
   } catch {
     return { success: false, error: "Failed to update landing page" };
   }
@@ -251,7 +255,10 @@ export async function updateLandingPageBlocks(
 
     const { error } = await supabase
       .from("landing_pages")
-      .update({ blocks })
+      .update({
+        blocks:
+          blocks as unknown as Database["public"]["Tables"]["landing_pages"]["Update"]["blocks"],
+      })
       .eq("id", id);
 
     if (error) return { success: false, error: error.message };
@@ -387,7 +394,10 @@ export async function trackProductClick(
     });
     // Also bump landing page click_count
     if (landingPageId) {
-      await supabase.rpc("increment_click_count", { lp_id: landingPageId });
+      await (supabase as unknown as { rpc: (fn: string, args: unknown) => unknown }).rpc(
+        "increment_click_count",
+        { lp_id: landingPageId },
+      );
     }
   } catch {
     // silent

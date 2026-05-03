@@ -24,7 +24,7 @@ export function PricingSection() {
           <br />
           {t("title2")}
         </h2>
-        <p className="text-white/50 font-light max-w-xl mb-14">
+        <p className="text-neutral-500 dark:text-neutral-400 font-light max-w-xl mb-14">
           {t("subtitle")}
         </p>
 
@@ -39,12 +39,12 @@ export function PricingSection() {
                 className={cn(
                   "relative border rounded-2xl p-8 transition-all duration-300 hover:-translate-y-1",
                   isPro
-                    ? "border-accent bg-accent/6 shadow-[0_0_40px_rgba(108,92,231,0.15)]"
-                    : "border-white/8 bg-bg-2 hover:border-white/18",
+                    ? "border-black/30 dark:border-white/20 bg-muted/20 shadow-[0_0_40px_rgba(108,92,231,0.15)]"
+                    : "border-black/10 dark:border-white/8 bg-bg-2 hover:border-black/20 dark:hover:border-white/18",
                 )}
               >
                 {isPro && (
-                  <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-accent text-white text-[11px] font-semibold px-4 py-1 rounded-full whitespace-nowrap">
+                  <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-accent text-neutral-900 dark:text-neutral-50 text-[11px] font-semibold px-4 py-1 rounded-full whitespace-nowrap">
                     {t("popular")}
                   </span>
                 )}
@@ -59,13 +59,15 @@ export function PricingSection() {
                 </div>
 
                 <div className="flex items-baseline gap-1.5 mb-1">
-                  <span className="font-display-syne text-4xl font-extrabold tracking-tight">
+                  <span className="font-body-dm-sans text-4xl font-extrabold tracking-tight">
                     {t(`plans.${key}.price`)}
                   </span>
-                  <span className="text-white/40 text-sm">{t("mo")}</span>
+                  <span className="text-neutral-700 dark:text-neutral-200 text-sm">
+                    {t("mo")}
+                  </span>
                 </div>
 
-                <p className="text-sm text-white/40 mb-6 leading-relaxed">
+                <p className="text-sm text-neutral-600 dark:text-neutral-300 mb-6 leading-relaxed">
                   {t(`plans.${key}.desc`)}
                 </p>
 
@@ -75,7 +77,9 @@ export function PricingSection() {
                       <span className="text-brand-green mt-0.5 shrink-0">
                         ✓
                       </span>
-                      <span className="text-white/70">{f}</span>
+                      <span className="text-neutral-500 dark:text-neutral-400">
+                        {f}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -88,10 +92,9 @@ export function PricingSection() {
                 >
                   <Link
                     href={
-                      key === "business"
-                        ? `/${locale}/contact`
-                        : `/${locale}/signup?plan=${key}`
+                      key === "business" ? `/contact` : `/register?plan=${key}`
                     }
+                    locale={locale}
                   >
                     {t(`plans.${key}.cta`)}
                   </Link>

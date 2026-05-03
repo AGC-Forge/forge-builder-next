@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import type { Json } from "@/types/database.types";
 
 export interface ActivityLog {
     id: string;
@@ -8,7 +9,7 @@ export interface ActivityLog {
     action: string;
     resource: string | null;
     resource_id: string | null;
-    metadata: Record<string, unknown>;
+    metadata: Json;
     ip_address: string | null;
     created_at: string;
     profile?: {
@@ -23,7 +24,7 @@ export async function logActivity(
     options?: {
         resource?: string;
         resourceId?: string;
-        metadata?: Record<string, unknown>;
+        metadata?: Json;
     },
 ): Promise<void> {
     try {
@@ -38,7 +39,7 @@ export async function logActivity(
             action,
             resource: options?.resource ?? null,
             resource_id: options?.resourceId ?? null,
-            metadata: options?.metadata ?? {},
+            metadata: options?.metadata ?? ({} as Json),
         });
     } catch {
         // Fire-and-forget — never throw from logActivity

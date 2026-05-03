@@ -92,7 +92,7 @@ export function Navbar({ profile }: { profile?: Profile }) {
                 </Link>
               </Button>
               <Button size="sm" asChild>
-                <Link href={`/signup`} locale={locale}>
+                <Link href={`/register`} locale={locale}>
                   {t("getStarted")}
                 </Link>
               </Button>
@@ -143,7 +143,7 @@ export function Navbar({ profile }: { profile?: Profile }) {
                   </Link>
                 </Button>
                 <Button size="sm" className="flex-1" asChild>
-                  <Link href={`/signup`} locale={locale}>
+                  <Link href={`/register`} locale={locale}>
                     {t("getStarted")}
                   </Link>
                 </Button>

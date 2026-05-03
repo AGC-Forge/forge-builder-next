@@ -9,21 +9,21 @@ export function Footer() {
     { label: t("links.features"), href: "#features" },
     { label: t("links.themes"), href: "#themes" },
     { label: t("links.pricing"), href: "#pricing" },
-    { label: t("links.changelog"), href: `/${locale}/changelog` },
+    { label: t("links.changelog"), href: "/changelog" },
   ];
 
   const resourceLinks = [
-    { label: t("links.docs"), href: `/${locale}/docs` },
-    { label: t("links.blog"), href: `/${locale}/blog` },
-    { label: t("links.templates"), href: `/${locale}/templates` },
-    { label: t("links.api"), href: `/${locale}/api-docs` },
+    { label: t("links.docs"), href: "/docs" },
+    { label: t("links.blog"), href: "/blog" },
+    { label: t("links.templates"), href: "/templates" },
+    { label: t("links.api"), href: "/api-docs" },
   ];
 
   const companyLinks = [
-    { label: t("links.about"), href: `/${locale}/about` },
-    { label: t("links.privacy"), href: `/${locale}/privacy` },
-    { label: t("links.terms"), href: `/${locale}/terms` },
-    { label: t("links.contact"), href: `/${locale}/contact` },
+    { label: t("links.about"), href: "/about" },
+    { label: t("links.privacy"), href: "/privacy" },
+    { label: t("links.terms"), href: "/terms" },
+    { label: t("links.contact"), href: "/contact" },
   ];
 
   return (
@@ -31,10 +31,10 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-6 lg:px-12 pt-16 pb-10 grid grid-cols-1 md:grid-cols-4 gap-12">
         {/* Brand */}
         <div className="md:col-span-1">
-          <span className="font-display-syne text-xl font-extrabold bg-linear-to-r from-accent-2 to-accent-3 bg-clip-text text-transparent block mb-3">
+          <span className="font-body-dm-sans text-xl font-extrabold bg-linear-to-r from-teal-500 via-amber-300 to-violet-500 bg-clip-text text-transparent block mb-3">
             PageForge
           </span>
-          <p className="text-sm text-white/40 leading-relaxed max-w-65">
+          <p className="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed max-w-65">
             {t("tagline")}
           </p>
         </div>
@@ -46,7 +46,7 @@ export function Footer() {
           { title: t("company"), links: companyLinks },
         ].map((col) => (
           <div key={col.title}>
-            <h4 className="font-display text-sm font-semibold text-white mb-4 tracking-wide">
+            <h4 className="font-display text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-4 tracking-wide">
               {col.title}
             </h4>
             <ul className="flex flex-col gap-3">
@@ -55,7 +55,7 @@ export function Footer() {
                   <Link
                     href={link.href}
                     locale={locale}
-                    className="text-sm text-muted-foreground hover:text-white transition-colors"
+                    className="text-sm text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors hover:font-semibold"
                   >
                     {link.label}
                   </Link>
@@ -69,19 +69,21 @@ export function Footer() {
       {/* Bottom bar */}
       <div className="border-t border-white/8">
         <div className="max-w-7xl mx-auto px-6 lg:px-12 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-xs text-muted-foreground">{t("copyright")}</p>
+          <p className="text-xs text-neutral-600 dark:text-neutral-400">
+            {t("copyright")}
+          </p>
           <div className="flex items-center gap-5">
             <Link
-              href={`/${locale}/privacy`}
+              href="/privacy"
               locale={locale}
-              className="text-xs text-muted-foreground transition-colors"
+              className="text-xs text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors hover:font-semibold"
             >
               {t("privacyPolicy")}
             </Link>
             <Link
-              href={`/${locale}/terms`}
+              href="/terms"
               locale={locale}
-              className="text-xs text-muted-foreground  transition-colors"
+              className="text-xs text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors hover:font-semibold"
             >
               {t("links.terms")}
             </Link>

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { Profile } from "@/types/database";
+import { getUserWithProfile } from "@/lib/supabase/profiles";
 
 export async function updateProfile(data: {
     full_name?: string;
@@ -108,19 +109,10 @@ export async function changePassword(data: {
 export async function getMyProfile(): Promise<ActionResult<Profile>> {
     try {
         const supabase = await createClient();
-        const {
-            data: { user },
-        } = await supabase.auth.getUser();
+        const { user, profile } = await getUserWithProfile(supabase);
         if (!user) return { success: false, error: "Unauthorized" };
-
-        const { data, error } = await supabase
-            .from("profiles")
-            .select("*")
-            .eq("id", user.id)
-            .single();
-
-        if (error) return { success: false, error: error.message };
-        return { success: true, data: data as Profile };
+        if (!profile) return { success: false, error: "Profile not found" };
+        return { success: true, data: profile as unknown as Profile };
     } catch {
         return { success: false, error: "Failed to fetch profile" };
     }

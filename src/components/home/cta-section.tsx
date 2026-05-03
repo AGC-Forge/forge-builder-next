@@ -15,25 +15,29 @@ export function CTASection() {
 
       <div className="relative max-w-3xl mx-auto px-6">
         <h2
-          className="font-display-syne font-extrabold leading-tight tracking-tight mb-5"
+          className="font-heading font-extrabold leading-tight tracking-tight mb-5 text-xl"
           style={{ fontSize: "clamp(36px,5vw,62px)" }}
         >
           {t("title1")}
           <br />
-          <span className="bg-linear-to-r from-accent-2 to-accent-3 bg-clip-text text-transparent">
+          <span className="bg-linear-to-r from-cyan-500 via-amber-400 to-violet-500 bg-clip-text text-transparent">
             {t("title2")}
           </span>
         </h2>
-        <p className="text-lg text-white/50 font-light mb-10">
+        <p className="text-lg text-neutral-600 dark:text-neutral-300 font-light mb-10">
           {t("subtitle")}
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Button size="lg" asChild>
-            <Link href={`/${locale}/signup`}>{t("btn1")}</Link>
+            <Link href="/register" locale={locale}>
+              {t("btn1")}
+            </Link>
           </Button>
           <Button size="lg" variant="outline" asChild>
-            <Link href={`/${locale}/demo`}>{t("btn2")}</Link>
+            <Link href="/demos" locale={locale}>
+              {t("btn2")}
+            </Link>
           </Button>
         </div>
       </div>

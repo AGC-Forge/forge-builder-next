@@ -4,8 +4,6 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { WebSetting, UserApiKey } from "@/types/database";
 
-// ── Web Settings ────────────────────────────────────────────
-
 export async function getSettings(
   groupName?: string,
 ): Promise<ActionResult<WebSetting[]>> {
@@ -93,8 +91,6 @@ export async function updateSettingsBulk(
   }
 }
 
-// ── API Keys ────────────────────────────────────────────────
-
 export async function getApiKey(
   provider = "openrouter",
 ): Promise<ActionResult<UserApiKey | null>> {
@@ -173,8 +169,6 @@ export async function deleteApiKey(provider = "openrouter"): Promise<ActionResul
     return { success: false, error: "Failed to delete API key" };
   }
 }
-
-// ── Analytics summary ───────────────────────────────────────
 
 export async function getAnalyticsSummary(days = 30) {
   try {

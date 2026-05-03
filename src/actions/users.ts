@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { Profile, PaginatedResult } from "@/types/database";
+import { getUserWithProfile } from "@/lib/supabase/profiles";
 
 export async function getUsers(opts: {
   page?: number;
@@ -134,17 +135,11 @@ export async function deleteUser(id: string): Promise<ActionResult> {
 export async function getCurrentProfile(): Promise<ActionResult<Profile>> {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { user, profile } = await getUserWithProfile(supabase);
     if (!user) return { success: false, error: "Unauthorized" };
+    if (!profile) return { success: false, error: "Profile not found" };
 
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", user.id)
-      .single();
-
-    if (error) return { success: false, error: error.message };
-    return { success: true, data: data as Profile };
+    return { success: true, data: profile as unknown as Profile };
   } catch {
     return { success: false, error: "Failed to fetch profile" };
   }

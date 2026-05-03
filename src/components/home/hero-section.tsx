@@ -66,10 +66,14 @@ export function HeroSection() {
         style={{ animationDelay: "0.3s" }}
       >
         <Button size="lg" asChild>
-          <Link href={`/${locale}/signup`}>{t("cta1")}</Link>
+          <Link href="/register" locale={locale}>
+            {t("cta1")}
+          </Link>
         </Button>
         <Button size="lg" variant="outline" asChild>
-          <Link href={`/${locale}/demos`}>{t("cta2")}</Link>
+          <Link href="/demos" locale={locale}>
+            {t("cta2")}
+          </Link>
         </Button>
       </div>
 

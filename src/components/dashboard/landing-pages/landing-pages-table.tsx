@@ -9,7 +9,7 @@ import {
   Eye,
   Trash2,
   Paintbrush,
-  ExternalLink,
+  QrCode,
   Globe,
   Search,
 } from "lucide-react";
@@ -20,7 +20,6 @@ import {
   setLandingPagePublished,
 } from "@/actions/landing-pages";
 import type { LandingPage, ThemeType } from "@/types/database";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -57,6 +56,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { QrCodeGenerator } from "@/components/dashboard/qr-code-generator";
 
 const THEME_LABELS: Record<ThemeType, string> = {
   linktree: "Linktree",
@@ -263,15 +263,18 @@ export function LandingPagesTable({ data, total, page, pageCount }: Props) {
                             </Link>
                           </DropdownMenuItem>
                           {lp.is_published && (
-                            <DropdownMenuItem asChild>
-                              <Link
-                                href={`${siteUrl}/${lp.slug}`}
-                                target="_blank"
-                              >
-                                <ExternalLink className="mr-2 size-4" />
-                                Preview Live
-                              </Link>
-                            </DropdownMenuItem>
+                            <QrCodeGenerator
+                              url={`${process.env.NEXT_PUBLIC_APP_URL ?? ""}/${lp.slug}`}
+                              title={lp.title}
+                              trigger={
+                                <DropdownMenuItem
+                                  onSelect={(e) => e.preventDefault()}
+                                >
+                                  <QrCode className="mr-2 size-4" />
+                                  QR Code
+                                </DropdownMenuItem>
+                              }
+                            />
                           )}
                           <DropdownMenuSeparator />
                           <DropdownMenuItem

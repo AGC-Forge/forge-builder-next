@@ -34,7 +34,7 @@ export default async function Layout({
   ]);
 
   if (!profileResult.success || !profileResult.data) {
-    redirect("/login");
+    redirect("../login");
   }
 
   const profile = profileResult.data;

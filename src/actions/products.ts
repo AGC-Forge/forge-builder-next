@@ -5,7 +5,6 @@ import { createClient } from "@/lib/supabase/server";
 import { productSchema, type ProductInput } from "@/lib/validations/product";
 import type { Product, PaginatedResult } from "@/types/database";
 
-// ── List ────────────────────────────────────────────────────
 export async function getProducts(opts: {
   page?: number;
   pageSize?: number;
@@ -50,7 +49,6 @@ export async function getProducts(opts: {
   }
 }
 
-// ── Single ──────────────────────────────────────────────────
 export async function getProduct(
   id: string,
 ): Promise<ActionResult<Product>> {
@@ -72,7 +70,6 @@ export async function getProduct(
   }
 }
 
-// ── Create ──────────────────────────────────────────────────
 export async function createProduct(
   input: ProductInput,
 ): Promise<ActionResult<Product>> {
@@ -124,7 +121,6 @@ export async function createProduct(
   }
 }
 
-// ── Update ──────────────────────────────────────────────────
 export async function updateProduct(
   id: string,
   input: Partial<ProductInput>,
@@ -160,7 +156,6 @@ export async function updateProduct(
   }
 }
 
-// ── Toggle status ────────────────────────────────────────────
 export async function toggleProductStatus(
   id: string,
   isActive: boolean,
@@ -184,7 +179,6 @@ export async function toggleProductStatus(
   }
 }
 
-// ── Delete ──────────────────────────────────────────────────
 export async function deleteProduct(id: string): Promise<ActionResult> {
   try {
     const supabase = await createClient();
@@ -205,7 +199,6 @@ export async function deleteProduct(id: string): Promise<ActionResult> {
   }
 }
 
-// ── List all active products (for LP product picker) ────────
 export async function getActiveProducts(): Promise<ActionResult<Product[]>> {
   try {
     const supabase = await createClient();
