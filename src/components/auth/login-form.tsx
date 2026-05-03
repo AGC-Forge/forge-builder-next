@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { useLocale } from "next-intl";
 import { toast } from "sonner";
 import { loginAction } from "@/actions/auth";
 import { createClient } from "@/lib/supabase/client";
@@ -39,6 +40,7 @@ export function LoginForm({
   ...props
 }: React.ComponentProps<"div">) {
   const router = useRouter();
+  const locale = useLocale();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   const supabase = createClient();
@@ -212,7 +214,8 @@ export function LoginForm({
                   <FieldLabel htmlFor="password">Password</FieldLabel>
                   <Link
                     href="/forgot-password"
-                    className="ml-auto text-sm underline-offset-4 hover:underline"
+                    locale={locale}
+                    className="ml-auto text-xs underline-offset-4 hover:underline"
                   >
                     Forgot your password?
                   </Link>
@@ -267,7 +270,9 @@ export function LoginForm({
                 </Button>
                 <FieldDescription className="text-center">
                   Don&apos;t have an account?{" "}
-                  <Link href="/register">Sign up</Link>
+                  <Link href="/register" locale={locale}>
+                    Sign up
+                  </Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>

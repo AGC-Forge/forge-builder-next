@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
+import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { fontVars } from "@/lib/fonts/registry";
 import { PREFERENCE_DEFAULTS } from "@/lib/preferences/preferences-config";
-import { ThemeBootScript } from "@/scripts/theme-boot";
+import { ThemeBootScript } from "@/components/theme-boot";
 import { PreferencesStoreProvider } from "@/stores/preferences/preferences-provider";
 import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
@@ -42,6 +43,7 @@ export default async function RootLayout({
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
+  setRequestLocale(locale);
   const {
     theme_mode,
     theme_preset,
@@ -61,6 +63,7 @@ export default async function RootLayout({
       data-sidebar-variant={sidebar_variant}
       data-sidebar-collapsible={sidebar_collapsible}
       data-font={font}
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
       className={cn("font-sans", inter.variable)}
     >

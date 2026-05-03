@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { useLocale } from "next-intl";
 import { toast } from "sonner";
 import { registerAction } from "@/actions/auth";
 import { createClient } from "@/lib/supabase/client";
@@ -48,6 +49,7 @@ export function RegisterForm({
 }: React.ComponentProps<"div">) {
   const router = useRouter();
   const supabase = createClient();
+  const locale = useLocale();
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -339,7 +341,10 @@ export function RegisterForm({
                   )}
                 </Button>
                 <FieldDescription className="text-center">
-                  Already have an account? <Link href="/login">Log in</Link>
+                  Already have an account?{" "}
+                  <Link href="/login" locale={locale}>
+                    Log in
+                  </Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>

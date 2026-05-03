@@ -7,6 +7,7 @@ import {
     Cog,
     Palette,
     KeyRound,
+    Link
 } from "lucide-react";
 
 export interface NavSubItem {
@@ -55,6 +56,11 @@ export const sidebarItems: NavGroup[] = [
                 icon: Package,
             },
             {
+                title: "Landing Page",
+                url: "/dashboard/landing-page",
+                icon: Link,
+            },
+            {
                 title: "Users",
                 url: "/dashboard/users",
                 icon: Users,
@@ -67,17 +73,12 @@ export const sidebarItems: NavGroup[] = [
         items: [
             {
                 title: "Web Settings",
-                url: "/dashboard/web-settings",
+                url: "/dashboard/settings/web",
                 icon: Cog,
             },
             {
-                title: "Appearance",
-                url: "/dashboard/appearance",
-                icon: Palette,
-            },
-            {
                 title: "Api Key",
-                url: "/dashboard/api-key",
+                url: "/dashboard/settings/api-key",
                 icon: KeyRound,
             },
         ],

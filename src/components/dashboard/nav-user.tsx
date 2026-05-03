@@ -1,12 +1,7 @@
 "use client";
 
-import {
-  CircleUser,
-  EllipsisVertical,
-  LogOut,
-  MessageSquareDot,
-} from "lucide-react";
-
+import { Link } from "@/i18n/navigation";
+import { CircleUser, EllipsisVertical, LogOut, Lock } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -23,7 +18,9 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { routing } from "@/i18n/routing";
 import { getInitials } from "@/lib/utils";
+import { useLocale } from "next-intl";
 
 export function NavUser({
   user,
@@ -35,15 +32,25 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
+  const locale = useLocale();
 
   const handleLogout = async () => {
-    const res = await fetch("/auth/callback/signout", {
+    const signoutPath =
+      locale === routing.defaultLocale
+        ? "/auth/signout"
+        : `/${locale}/auth/signout`;
+
+    const res = await fetch(signoutPath, {
       method: "POST",
     });
 
     if (res.redirected) {
       window.location.href = res.url;
+      return;
     }
+
+    window.location.href =
+      locale === routing.defaultLocale ? "/login" : `/${locale}/login`;
   };
   return (
     <SidebarMenu>
@@ -93,13 +100,17 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <CircleUser />
-                Account
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/settings/web" locale={locale}>
+                  <CircleUser />
+                  Account
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <MessageSquareDot />
-                Notifications
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/settings/security" locale={locale}>
+                  <Lock />
+                  Security
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

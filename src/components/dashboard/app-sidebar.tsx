@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { useLocale } from "next-intl";
 import { Command, HandHelping } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 import {
@@ -30,6 +31,8 @@ const _data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const locale = useLocale();
+
   const { sidebarVariant, sidebarCollapsible, isSynced } = usePreferencesStore(
     useShallow((s) => ({
       sidebarVariant: s.sidebarVariant,
@@ -47,7 +50,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <Link prefetch={false} href="/admin">
+              <Link prefetch={false} href="/admin" locale={locale}>
                 <Command />
                 <span className="font-semibold text-base">Forge Builder</span>
               </Link>

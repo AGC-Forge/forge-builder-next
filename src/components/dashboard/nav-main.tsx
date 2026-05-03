@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { useLocale } from "next-intl";
 import { usePathname } from "next/navigation";
 import { ChevronRight, MailIcon, PlusCircleIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -41,10 +42,12 @@ const IsComingSoon = () => (
 
 const NavItemExpanded = ({
   item,
+  locale,
   isActive,
   isSubmenuOpen,
 }: {
   item: NavMainItem;
+  locale: string;
   isActive: (url: string, subItems?: NavMainItem["subItems"]) => boolean;
   isSubmenuOpen: (subItems?: NavMainItem["subItems"]) => boolean;
 }) => {
@@ -78,6 +81,7 @@ const NavItemExpanded = ({
               <Link
                 prefetch={false}
                 href={item.url}
+                locale={locale}
                 target={item.newTab ? "_blank" : undefined}
               >
                 {item.icon && <item.icon />}
@@ -100,6 +104,7 @@ const NavItemExpanded = ({
                     <Link
                       prefetch={false}
                       href={subItem.url}
+                      locale={locale}
                       target={subItem.newTab ? "_blank" : undefined}
                     >
                       {subItem.icon && <subItem.icon />}
@@ -119,9 +124,11 @@ const NavItemExpanded = ({
 
 const NavItemCollapsed = ({
   item,
+  locale,
   isActive,
 }: {
   item: NavMainItem;
+  locale: string;
   isActive: (url: string, subItems?: NavMainItem["subItems"]) => boolean;
 }) => {
   return (
@@ -155,6 +162,7 @@ const NavItemCollapsed = ({
                 <Link
                   prefetch={false}
                   href={subItem.url}
+                  locale={locale}
                   target={subItem.newTab ? "_blank" : undefined}
                 >
                   {subItem.icon && (
@@ -174,6 +182,7 @@ const NavItemCollapsed = ({
 
 export function NavMain({ items }: NavMainProps) {
   const path = usePathname();
+  const locale = useLocale();
   const { state, isMobile } = useSidebar();
 
   const isItemActive = (url: string, subItems?: NavMainItem["subItems"]) => {
@@ -244,6 +253,7 @@ export function NavMain({ items }: NavMainProps) {
                     <NavItemCollapsed
                       key={item.title}
                       item={item}
+                      locale={locale}
                       isActive={isItemActive}
                     />
                   );
@@ -252,6 +262,7 @@ export function NavMain({ items }: NavMainProps) {
                   <NavItemExpanded
                     key={item.title}
                     item={item}
+                    locale={locale}
                     isActive={isItemActive}
                     isSubmenuOpen={isSubmenuOpen}
                   />

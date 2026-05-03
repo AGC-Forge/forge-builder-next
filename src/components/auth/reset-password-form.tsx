@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useLocale } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { toast } from "sonner";
 import { resetAction } from "@/actions/auth";
 import {
@@ -51,6 +53,7 @@ export function ResetPasswordForm({
   ...props
 }: React.ComponentProps<"div">) {
   const router = useRouter();
+  const locale = useLocale();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
@@ -103,9 +106,9 @@ export function ResetPasswordForm({
             The password reset token is invalid. Please request a reset link.
           </AlertDescription>
           <AlertAction>
-            <Button size="sm" onClick={() => router.push("/forgot-password")}>
-              Request new link
-            </Button>
+            <Link href="/forgot-password" locale={locale} passHref>
+              <Button size="sm">Request new link</Button>
+            </Link>
           </AlertAction>
         </Alert>
       )}
@@ -118,9 +121,9 @@ export function ResetPasswordForm({
             your new password.
           </AlertDescription>
           <AlertAction>
-            <Button size="sm" onClick={() => router.push("/login")}>
-              Go to Login
-            </Button>
+            <Link href="/login" locale={locale}>
+              <Button size="sm">Go to Login</Button>
+            </Link>
           </AlertAction>
         </Alert>
       )}

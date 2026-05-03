@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { useLocale } from "next-intl";
 import { toast } from "sonner";
 import { forgotAction } from "@/actions/auth";
 import {
@@ -46,6 +47,7 @@ export function ForgotForm({
   ...props
 }: React.ComponentProps<"div">) {
   const router = useRouter();
+  const locale = useLocale();
 
   const [submittedEmail, setSubmittedEmail] = useState("");
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -96,9 +98,9 @@ export function ForgotForm({
             Link expires in 1 hour.
           </AlertDescription>
           <AlertAction>
-            <Button size="sm" onClick={() => router.push("/login")}>
-              Go to Login
-            </Button>
+            <Link href="/login" locale={locale}>
+              <Button size="sm">Go to Login</Button>
+            </Link>
           </AlertAction>
         </Alert>
       )}
@@ -144,7 +146,9 @@ export function ForgotForm({
                 </Button>
                 <FieldDescription className="text-center">
                   Remember your password?, Back to{" "}
-                  <Link href="/login">Log in</Link>
+                  <Link href="/login" locale={locale}>
+                    Log in
+                  </Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>

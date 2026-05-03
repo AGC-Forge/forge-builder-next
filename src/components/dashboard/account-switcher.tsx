@@ -1,6 +1,8 @@
 "use client";
 
-import { BadgeCheck, Bell, CreditCard, LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Link } from "@/i18n/navigation";
+import { BadgeCheck, Lock, LogOut } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -10,7 +12,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { routing } from "@/i18n/routing";
 import { cn, getInitials } from "@/lib/utils";
+import { useLocale } from "next-intl";
 
 export function AccountSwitcher({
   user,
@@ -23,14 +27,26 @@ export function AccountSwitcher({
     readonly role: string;
   }>;
 }) {
+  const router = useRouter();
+  const locale = useLocale();
+
   const handleLogout = async () => {
-    const res = await fetch("/auth/callback/signout", {
+    const signoutPath =
+      locale === routing.defaultLocale
+        ? "/auth/signout"
+        : `/${locale}/auth/signout`;
+
+    const res = await fetch(signoutPath, {
       method: "POST",
     });
 
     if (res.redirected) {
       window.location.href = res.url;
+      return;
     }
+
+    window.location.href =
+      locale === routing.defaultLocale ? "/login" : `/${locale}/login`;
   };
   return (
     <DropdownMenu>
@@ -64,13 +80,17 @@ export function AccountSwitcher({
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <BadgeCheck />
-            Account
+          <DropdownMenuItem asChild>
+            <Link href="/dashboard/settings/web" locale={locale}>
+              <span className="font-semibold text-base">Account</span>
+              <BadgeCheck />
+            </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Bell />
-            Notifications
+          <DropdownMenuItem asChild>
+            <Link href="/dashboard/settings/security" locale={locale}>
+              <span className="font-semibold text-base">Security</span>
+              <Lock />
+            </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
