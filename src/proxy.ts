@@ -7,13 +7,24 @@ import { updateSession } from "@/lib/supabase/middleware";
 const intlMiddleware = createIntlMiddleware(routing);
 
 export async function proxy(request: NextRequest) {
-  const authResponse = await updateSession(request);
-  const authIsRedirect = authResponse.headers.has("location");
-  if (authIsRedirect) {
+  let authResponse: NextResponse;
+  try {
+    authResponse = await updateSession(request);
+  } catch (error) {
+    console.error("[proxy] updateSession failed", String(error));
+    authResponse = NextResponse.next({ request });
+  }
+
+  if (authResponse.headers.has("location")) return authResponse;
+
+  let intlResponse: NextResponse;
+  try {
+    intlResponse = intlMiddleware(request);
+  } catch (error) {
+    console.error("[proxy] intl middleware failed", String(error));
     return authResponse;
   }
 
-  const intlResponse = intlMiddleware(request);
   const location = intlResponse.headers.get("location");
   if (location) {
     const response = NextResponse.redirect(new URL(location, request.url), {
@@ -36,4 +47,3 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: ["/((?!api|trpc|_next|_vercel|.*\\..*).*)"],
 };
-

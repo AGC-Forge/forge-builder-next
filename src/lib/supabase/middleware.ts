@@ -38,10 +38,16 @@ function withLocale(locale: string | undefined, pathname: string) {
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
-  const supabase = createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error("[updateSession] missing Supabase env");
+    return supabaseResponse;
+  }
+
+  let supabase: ReturnType<typeof createServerClient<Database>>;
+  try {
+    supabase = createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
       cookies: {
         getAll() {
           return request.cookies.getAll();
@@ -56,12 +62,20 @@ export async function updateSession(request: NextRequest) {
           );
         },
       },
-    },
-  );
+    });
+  } catch (error) {
+    console.error("[updateSession] createServerClient failed", String(error));
+    return supabaseResponse;
+  }
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user: Database["public"]["Tables"]["profiles"]["Row"]["id"] | null;
+  try {
+    const res = await supabase.auth.getUser();
+    user = res.data.user?.id ?? null;
+  } catch (error) {
+    console.error("[updateSession] getUser failed", String(error));
+    user = null;
+  }
 
   const { pathname, search } = request.nextUrl;
   const { locale: detectedLocale, pathname: unlocalizedPathname } =
@@ -97,8 +111,8 @@ export async function updateSession(request: NextRequest) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("role, is_active")
-      .eq("id", user.id)
-      .single();
+      .eq("id", user)
+      .maybeSingle();
 
     if (!profile || !profile.is_active || profile.role !== "admin") {
       const unauthorizedUrl = request.nextUrl.clone();
