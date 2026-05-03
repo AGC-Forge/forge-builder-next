@@ -7,7 +7,8 @@ import {
     Cog,
     Palette,
     KeyRound,
-    Link
+    Link,
+    BarChart2,
 } from "lucide-react";
 
 export interface NavSubItem {
@@ -48,7 +49,7 @@ export const sidebarItems: NavGroup[] = [
             {
                 title: "Analytics",
                 url: "/dashboard/analytics",
-                icon: Gauge,
+                icon: BarChart2,
             },
             {
                 title: "Products",
@@ -80,6 +81,11 @@ export const sidebarItems: NavGroup[] = [
                 title: "Api Key",
                 url: "/dashboard/settings/api-key",
                 icon: KeyRound,
+            },
+            {
+                title: "Appearance",
+                url: "/dashboard/settings/appearance",
+                icon: Palette,
             },
         ],
     },

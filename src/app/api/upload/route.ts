@@ -1,0 +1,35 @@
+import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { uploadBase64Image } from "@/lib/cloudinary/upload";
+
+export async function POST(request: Request) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { base64, mimeType, folder } = body as {
+      base64: string;
+      mimeType?: string;
+      folder?: string;
+    };
+
+    if (!base64) {
+      return NextResponse.json({ error: "No image data" }, { status: 400 });
+    }
+
+    const result = await uploadBase64Image(
+      base64,
+      mimeType ?? "image/jpeg",
+      folder ?? "forgebuilder/products",
+    );
+
+    return NextResponse.json({ success: true, data: result });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Upload failed";
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
+}
