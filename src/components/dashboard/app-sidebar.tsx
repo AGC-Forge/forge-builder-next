@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/sidebar";
 import { sidebarItems } from "@/navigation/sidebar/sidebar-items";
 import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
-
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 import { NavSecondary } from "./nav-secondary";

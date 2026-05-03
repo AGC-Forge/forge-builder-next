@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { Profile, PaginatedResult } from "@/types/database";
 
-// ── List ────────────────────────────────────────────────────
 export async function getUsers(opts: {
   page?: number;
   pageSize?: number;
@@ -48,8 +47,6 @@ export async function getUsers(opts: {
     return { success: false, error: "Failed to fetch users" };
   }
 }
-
-// ── Single ──────────────────────────────────────────────────
 export async function getUser(id: string): Promise<ActionResult<Profile>> {
   try {
     const supabase = await createClient();
@@ -68,8 +65,6 @@ export async function getUser(id: string): Promise<ActionResult<Profile>> {
     return { success: false, error: "Failed to fetch user" };
   }
 }
-
-// ── Invite (admin only) ─────────────────────────────────────
 export async function inviteUser(
   email: string,
   role: "admin" | "member" = "member",
@@ -91,8 +86,6 @@ export async function inviteUser(
     return { success: false, error: "Failed to invite user" };
   }
 }
-
-// ── Update ──────────────────────────────────────────────────
 export async function updateUser(
   id: string,
   data: {
@@ -123,8 +116,6 @@ export async function updateUser(
     return { success: false, error: "Failed to update user" };
   }
 }
-
-// ── Delete ──────────────────────────────────────────────────
 export async function deleteUser(id: string): Promise<ActionResult> {
   try {
     const supabase = await createClient();
@@ -140,8 +131,6 @@ export async function deleteUser(id: string): Promise<ActionResult> {
     return { success: false, error: "Failed to delete user" };
   }
 }
-
-// ── Current user profile ────────────────────────────────────
 export async function getCurrentProfile(): Promise<ActionResult<Profile>> {
   try {
     const supabase = await createClient();
@@ -160,8 +149,6 @@ export async function getCurrentProfile(): Promise<ActionResult<Profile>> {
     return { success: false, error: "Failed to fetch profile" };
   }
 }
-
-// ── Dashboard stats ─────────────────────────────────────────
 export async function getDashboardStats() {
   try {
     const supabase = await createClient();

@@ -21,7 +21,6 @@ import {
   type LandingPage,
   type Product,
 } from "@/types/database";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -44,6 +43,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SlugInput } from "@/components/dashboard/landing-pages/slug-input";
+import { ColorPicker } from "@/components/ui/color-picker";
 
 const THEME_OPTIONS = [
   { value: "linktree", label: "Linktree", desc: "Clean vertical link list" },
@@ -128,6 +129,8 @@ export function LandingPageForm({
   const isPublished = useWatch({ control, name: "is_published" });
   const tracking = useWatch({ control, name: "tracking" });
   const seo = useWatch({ control, name: "seo" });
+  const titleValue = useWatch({ control, name: "title" });
+  const slugValue = useWatch({ control, name: "slug" });
 
   function toggleProduct(id: string) {
     setSelectedProducts((prev) =>
@@ -208,30 +211,16 @@ export function LandingPageForm({
                 )}
               </div>
 
-              <div>
-                <Label htmlFor="slug">
-                  URL Slug <span className="text-destructive">*</span>
-                </Label>
-                <div className="mt-1 flex items-center gap-2">
-                  <span className="shrink-0 text-muted-foreground text-sm">
-                    {process.env.NEXT_PUBLIC_APP_URL ?? "https://yoursite.com"}/
-                  </span>
-                  <Input
-                    id="slug"
-                    {...register("slug")}
-                    placeholder="my-product-page"
-                    className="font-mono"
-                  />
-                </div>
-                {errors.slug && (
-                  <p className="mt-1 text-destructive text-xs">
-                    {errors.slug.message}
-                  </p>
-                )}
-                <p className="mt-1 text-muted-foreground text-xs">
-                  Lowercase letters, numbers, hyphens only. Min 3 chars.
-                </p>
-              </div>
+              <SlugInput
+                value={slugValue ?? ""}
+                onChange={(val) =>
+                  setValue("slug", val, { shouldValidate: true })
+                }
+                excludeId={landingPage?.id}
+                titleValue={titleValue}
+                appUrl={process.env.NEXT_PUBLIC_APP_URL ?? ""}
+                error={errors.slug?.message}
+              />
 
               <div>
                 <Label htmlFor="description">Description</Label>
@@ -306,40 +295,18 @@ export function LandingPageForm({
                     { key: "accentColor", label: "Accent Color" },
                   ] as const
                 ).map(({ key, label }) => (
-                  <div key={key}>
-                    <Label className="text-xs">{label}</Label>
-                    <div className="mt-1 flex items-center gap-2">
-                      <input
-                        type="color"
-                        value={themeConfig?.[key] ?? "#000000"}
-                        onChange={(e) =>
-                          setValue(
-                            "theme_config",
-                            {
-                              ...(themeConfig as any),
-                              [key]: e.target.value,
-                            },
-                            { shouldDirty: true },
-                          )
-                        }
-                        className="h-8 w-16 cursor-pointer rounded border"
-                      />
-                      <Input
-                        value={themeConfig?.[key] ?? ""}
-                        onChange={(e) =>
-                          setValue(
-                            "theme_config",
-                            {
-                              ...(themeConfig as any),
-                              [key]: e.target.value,
-                            },
-                            { shouldDirty: true },
-                          )
-                        }
-                        className="h-8 font-mono text-xs"
-                      />
-                    </div>
-                  </div>
+                  <ColorPicker
+                    key={key}
+                    label={label}
+                    value={themeConfig?.[key] ?? ""}
+                    onChange={(color) =>
+                      setValue(
+                        "theme_config",
+                        { ...(themeConfig as any), [key]: color },
+                        { shouldDirty: true },
+                      )
+                    }
+                  />
                 ))}
 
                 <div>

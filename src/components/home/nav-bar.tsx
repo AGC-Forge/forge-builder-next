@@ -11,7 +11,7 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { cn } from "@/lib/utils";
 import { Menu, X } from "lucide-react";
 
-export function Navbar() {
+export function Navbar({ profile }: { profile?: Profile }) {
   const t = useTranslations("HomeSectionNav");
   const locale = useLocale();
   const pathname = usePathname();
@@ -76,16 +76,28 @@ export function Navbar() {
         <div className="hidden lg:flex items-center gap-3">
           <ThemeSwitcher />
           <LanguageSwitcher />
-          <Button variant="ghost" size="sm" asChild>
-            <Link href={`/login`} locale={locale}>
-              {t("login")}
-            </Link>
-          </Button>
-          <Button size="sm" asChild>
-            <Link href={`/signup`} locale={locale}>
-              {t("getStarted")}
-            </Link>
-          </Button>
+          {profile ? (
+            <>
+              <Button size="sm" asChild>
+                <Link href={`/dashboard`} locale={locale}>
+                  {t("dashboard")}
+                </Link>
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="ghost" size="sm" asChild>
+                <Link href={`/login`} locale={locale}>
+                  {t("login")}
+                </Link>
+              </Button>
+              <Button size="sm" asChild>
+                <Link href={`/signup`} locale={locale}>
+                  {t("getStarted")}
+                </Link>
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -115,16 +127,28 @@ export function Navbar() {
             <LanguageSwitcher />
           </div>
           <div className="flex items-center gap-3 pt-2 border-t dark:border-white/8 border-white/40">
-            <Button variant="outline" size="sm" className="flex-1" asChild>
-              <Link href={`/login`} locale={locale}>
-                {t("login")}
-              </Link>
-            </Button>
-            <Button size="sm" className="flex-1" asChild>
-              <Link href={`/signup`} locale={locale}>
-                {t("getStarted")}
-              </Link>
-            </Button>
+            {profile ? (
+              <>
+                <Button size="sm" asChild>
+                  <Link href={`/dashboard`} locale={locale}>
+                    {t("dashboard")}
+                  </Link>
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" size="sm" className="flex-1" asChild>
+                  <Link href={`/login`} locale={locale}>
+                    {t("login")}
+                  </Link>
+                </Button>
+                <Button size="sm" className="flex-1" asChild>
+                  <Link href={`/signup`} locale={locale}>
+                    {t("getStarted")}
+                  </Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       )}

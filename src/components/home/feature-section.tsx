@@ -43,9 +43,9 @@ export function FeaturesSection() {
         </h2>
 
         {/* Bento grid layout */}
-        <div className="border border-white/8 rounded-2xl overflow-hidden divide-y divide-white/8">
+        <div className="border border-black/15 dark:border-white/8 rounded-2xl overflow-hidden divide-y divide-black/15 dark:divide-white/8">
           {/* Row 1: dragdrop (wide) + slug */}
-          <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/8">
+          <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-black/15 dark:divide-white/8">
             <FeatureCell
               featureKey="dragdrop"
               t={t}
@@ -56,14 +56,14 @@ export function FeaturesSection() {
           </div>
 
           {/* Row 2: product + i18n + ai */}
-          <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/8">
+          <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-black/15 dark:divide-white/8">
             <FeatureCell featureKey="product" t={t} />
             <FeatureCell featureKey="i18n" t={t} />
             <FeatureCell featureKey="ai" t={t} />
           </div>
 
           {/* Row 3: analytics + dashboard (wide) */}
-          <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/8">
+          <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-black/15 dark:divide-white/8">
             <FeatureCell featureKey="analytics" t={t} />
             <FeatureCell
               featureKey="dashboard"
@@ -114,7 +114,7 @@ function FeatureCell({
       <h3 className="font-display-syne text-lg font-semibold tracking-tight mb-2.5">
         {t(`items.${featureKey}.title`)}
       </h3>
-      <p className="text-sm text-white/45 leading-relaxed">
+      <p className="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed">
         {t(`items.${featureKey}.desc`)}
       </p>
     </div>

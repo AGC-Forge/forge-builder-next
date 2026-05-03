@@ -15,7 +15,7 @@ export function HeroSection() {
       color: "bg-accent/15",
     },
     { icon: "🔗", label: t("components.link"), color: "bg-blue-300/10" },
-    { icon: "🖼", label: t("components.image"), color: "bg-amber-400/10" },
+    { icon: "🖼", label: t("components.image"), color: "bg-blue-400/20" },
     { icon: "🛒", label: t("components.product"), color: "bg-green-400/10" },
     { icon: "📊", label: t("components.stats"), color: "bg-cyan-400/10" },
   ];
@@ -33,14 +33,14 @@ export function HeroSection() {
       <div className="pointer-events-none absolute top-[30%] right-[10%] w-100 h-100 rounded-full bg-[radial-gradient(circle,rgba(0,206,201,0.08)_0%,transparent_70%)]" />
 
       {/* Badge */}
-      <Badge className="mb-7 animate-fade-up">
-        <span className="w-1.5 h-1.5 rounded-full bg-accent-3 animate-pulse" />
+      <Badge className="mb-7 animate-fade-up bg-linear-to-r from-sky-400 via-blue-500 to-indigo-600 text-white">
+        <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" />
         {t("badge")}
       </Badge>
 
       {/* Headline */}
       <h1
-        className="font-display-syne font-extrabold leading-[1.05] tracking-[-0.04em] mb-6 animate-fade-up"
+        className="font-heading bg-linear-to-r font-extrabold leading-[1.05] tracking-[-0.04em] mb-6 animate-fade-up bg-clip-text text-transparent from-emerald-200 to-fuchsia-200"
         style={{ fontSize: "clamp(42px, 6vw, 76px)", animationDelay: "0.1s" }}
       >
         {t("title1")}
@@ -75,16 +75,16 @@ export function HeroSection() {
 
       {/* Browser Mockup */}
       <div
-        className="w-full max-w-225 bg-bg-2 border border-white/40 dark:border-white/[0.14] rounded-2xl overflow-hidden shadow-[0_40px_80px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.05)] animate-fade-up"
+        className="w-full max-w-225 bg-bg-2 border border-neutral-300 dark:border-neutral-700 rounded-2xl overflow-hidden shadow-[0_40px_80px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.05)] animate-fade-up"
         style={{ animationDelay: "0.4s" }}
       >
         {/* Browser Bar */}
-        <div className="flex items-center gap-2 px-5 py-3.5 bg-bg-3 border-b dark:border-white/8 border-white/40">
+        <div className="flex items-center gap-2 px-5 py-3.5 bg-bg-3 border-b border-neutral-300 dark:border-neutral-700">
           <span className="w-2.5 h-2.5 rounded-full bg-[#FF5F57]" />
           <span className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]" />
           <span className="w-2.5 h-2.5 rounded-full bg-[#28CA40]" />
           <div className="flex-1 flex justify-center">
-            <div className="bg-bg border dark:border-white/8 border-white/40 rounded-md px-3 py-1 text-xs text-neutral-400 dark:text-neutral-600 text-center w-full max-w-xs">
+            <div className="bg-muted border border-neutral-300 dark:border-neutral-600 rounded-md px-3 py-1 text-xs text-muted-foreground text-center w-full max-w-xs">
               {t("previewUrl")}
             </div>
           </div>
@@ -93,8 +93,8 @@ export function HeroSection() {
         {/* Builder Preview */}
         <div className="grid grid-cols-[220px_1fr] min-h-70">
           {/* Sidebar */}
-          <div className="bg-bg-3 border-r dark:border-white/8 border-white/40 p-4">
-            <p className="text-[10px] uppercase tracking-widest text-neutral-200 dark:text-neutral-700 mb-2.5">
+          <div className="bg-sidebar border-r border-border p-4">
+            <p className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground mb-2.5">
               {t("previewComponents")}
             </p>
             {sidebarItems.map((item) => (
@@ -102,8 +102,8 @@ export function HeroSection() {
                 key={item.label}
                 className={`flex items-center gap-2.5 px-2.5 py-2 rounded-md mb-1 text-xs cursor-pointer transition-colors ${
                   item.active
-                    ? "bg-accent/15 text-accent-2"
-                    : "text-neutral-200 hover:text-neutral-400 dark:text-neutral-600 dark:hover:text-neutral-800"
+                    ? "bg-muted text-neutral-800 dark:text-neutral-100 font-semibold"
+                    : "text-muted-foreground hover:text-neutral-600 dark:hover:text-neutral-300 hover:font-medium"
                 }`}
               >
                 <span
@@ -115,14 +115,14 @@ export function HeroSection() {
               </div>
             ))}
 
-            <div className="mt-3 pt-3 border-t dark:border-white/8 border-white/40">
-              <p className="text-[10px] uppercase tracking-widest text-neutral-200 dark:text-neutral-700 mb-2.5">
+            <div className="mt-3 pt-3 border-t border-border">
+              <p className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground mb-2.5">
                 {t("previewSettings")}
               </p>
               {settingsItems.map((item) => (
                 <div
                   key={item.label}
-                  className="flex items-center gap-2.5 px-2.5 py-2 rounded-md mb-1 text-xs text-neutral-200 hover:text-neutral-400 dark:text-neutral-600 dark:hover:text-neutral-800 cursor-pointer transition-colors"
+                  className="flex items-center gap-2.5 px-2.5 py-2 rounded-md mb-1 text-xs text-muted-foreground hover:text-neutral-600 dark:hover:text-neutral-300 hover:font-medium cursor-pointer transition-colors"
                 >
                   <span
                     className={`w-7 h-7 rounded-md flex items-center justify-center text-sm shrink-0 ${item.color}`}
@@ -137,20 +137,20 @@ export function HeroSection() {
 
           {/* Canvas */}
           <div className="p-5 flex flex-col gap-2.5">
-            <div className="h-17.5 rounded-lg border-[1.5px] border-dashed border-accent/30 bg-accent/5 flex items-center justify-center text-xs font-medium text-blue-200 dark:text-blue-500">
+            <div className="h-17.5 rounded-lg border-[1.5px] border-dashed border-neutral-300 dark:border-neutral-700 bg-muted flex items-center justify-center text-xs font-medium text-blue-500 dark:text-blue-600">
               {t("heroBlock")}
             </div>
             <div className="grid grid-cols-3 gap-2">
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className="h-12.5 rounded-lg border-[1.5px] border-dashed border-white/40 dark:border-white/[0.14] bg-white/40 dark:bg-white/2 flex items-center justify-center text-xs text-neutral-200 dark:text-neutral-700"
+                  className="h-12.5 rounded-lg border-[1.5px] border-dashed border-neutral-300 dark:border-neutral-700 bg-muted/50 flex items-center justify-center text-xs text-muted-foreground"
                 >
                   {t("feature")}
                 </div>
               ))}
             </div>
-            <div className="h-9 rounded-lg border-[1.5px] border-dashed border-blue-100/20 dark:border-blue-300/30 bg-accent-3/5 flex items-center justify-center text-xs font-medium text-blue-200 dark:text-blue-500">
+            <div className="h-9 rounded-lg border-[1.5px] border-dashed border-blue-400 dark:border-blue-500 bg-blue-400/20 dark:bg-blue-600/20 flex items-center justify-center text-xs font-medium text-blue-700 dark:text-blue-200">
               {t("ctaBlock")}
             </div>
           </div>

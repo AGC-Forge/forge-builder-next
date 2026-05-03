@@ -1,16 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-import { hash } from "bcryptjs";
-import { randomBytes } from "crypto";
 import { createClient } from "@/lib/supabase/server";
-import type {
-  LoginInput,
-  RegisterInput,
-  ForgotPasswordInput,
-  ResetPasswordInput,
-} from "@/lib/validations/auth";
 import {
   loginSchema,
   registerSchema,

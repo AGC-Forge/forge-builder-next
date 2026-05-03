@@ -96,7 +96,7 @@ export function IntegrationsSection() {
 
 function IntegPill({ name, color }: { name: string; color: string }) {
   return (
-    <div className="flex items-center gap-2 px-4 py-2.5 bg-bg-2 border border-white/8 rounded-full text-sm text-white/50 whitespace-nowrap font-medium shrink-0 hover:border-white/18 hover:text-white/80 transition-colors">
+    <div className="flex items-center gap-2 px-4 py-2.5 bg-bg-2 border border-black/10 dark:border-white/8 rounded-full text-sm text-neutral-500 dark:text-neutral-400 whitespace-nowrap font-medium shrink-0 hover:border-black/20dark:hover:border-white/18 dark:hover:text-neutral-200 hover:text-neutral-700 transition-colors">
       <span
         className="w-2 h-2 rounded-full shrink-0"
         style={{ background: color }}

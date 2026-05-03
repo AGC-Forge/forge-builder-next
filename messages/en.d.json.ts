@@ -26,7 +26,8 @@ declare const messages: {
     "pricing": "Pricing",
     "integrations": "Integrations",
     "login": "Log in",
-    "getStarted": "Get started free"
+    "getStarted": "Get started free",
+    "dashboard": "Dashboard"
   },
   "HomeSectionHero": {
     "badge": "Now with AI-powered builder",

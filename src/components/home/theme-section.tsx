@@ -162,16 +162,18 @@ export function ThemesSection() {
           <br />
           {t("title2")}
         </h2>
-        <p className="text-white/50 font-light max-w-xl">{t("subtitle")}</p>
+        <p className="text-neutral-600 dark:text-neutral-300 font-light max-w-xl">
+          {t("subtitle")}
+        </p>
 
         <div className="mt-12 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
           {themes.map((theme) => (
             <div
               key={theme.id}
-              className="group relative rounded-xl border border-white/8 overflow-hidden cursor-pointer transition-all duration-300 hover:border-white/20 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] bg-bg-2"
+              className="group relative rounded-xl border border-black/15 dark:border-white/8 overflow-hidden cursor-pointer transition-all duration-300 hover:border-black/40 dark:hover:border-white/20 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] bg-bg-2"
             >
               {theme.isNew && (
-                <span className="absolute top-2 right-2 z-10 text-[9px] font-bold px-2 py-0.5 rounded bg-accent text-white tracking-wide">
+                <span className="absolute top-2 right-2 z-10 text-[9px] font-bold px-2 py-0.5 rounded bg-accent text-neutral-900 dark:text-neutral-50 tracking-wide">
                   {t("new")}
                 </span>
               )}
@@ -184,7 +186,9 @@ export function ThemesSection() {
               <div className="px-3 py-2.5 border-t border-white/8">
                 <p
                   className={`text-xs font-medium ${
-                    theme.id === "ai" ? "text-accent-2" : "text-white/50"
+                    theme.id === "ai"
+                      ? "text-accent-2"
+                      : "text-neutral-500 dark:text-neutral-400"
                   }`}
                 >
                   {t(`items.${theme.id}`)}

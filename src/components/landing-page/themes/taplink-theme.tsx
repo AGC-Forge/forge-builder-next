@@ -7,6 +7,7 @@ import type {
   ThemeConfig,
   LandingBlock,
 } from "@/types/database";
+import { VideoBlock } from "@/components/landing-page/video-block";
 
 interface Props {
   landingPage: LandingPageWithProducts;
@@ -538,6 +539,10 @@ function BlockRenderer({
         style={{ marginBottom: "1rem" }}
       />
     );
+  }
+
+  if (type === "video" && content?.videoId) {
+    return <VideoBlock content={content} radius={radius} />;
   }
 
   return null;

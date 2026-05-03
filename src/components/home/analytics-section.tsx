@@ -55,12 +55,12 @@ export function AnalyticsSection() {
           <br />
           {t("title2")}
         </h2>
-        <p className="text-white/50 font-light max-w-xl mb-12">
+        <p className="text-neutral-500 dark:text-neutral-400 font-light max-w-xl mb-12">
           {t("subtitle")}
         </p>
 
         {/* Dashboard Card */}
-        <div className="bg-bg-2 border border-white/[0.14] rounded-2xl p-8">
+        <div className="bg-bg-2 border border-black/10 dark:border-white/[0.14] rounded-2xl p-8">
           {/* Header */}
           <div className="flex flex-wrap items-center justify-between gap-4 mb-7">
             <h3 className="font-display-syne text-base font-semibold">
@@ -74,8 +74,8 @@ export function AnalyticsSection() {
                   className={cn(
                     "px-4 py-1.5 rounded-md text-xs transition-all duration-200",
                     activeTab === tab.key
-                      ? "bg-accent text-white font-medium"
-                      : "text-white/40 hover:text-white/70",
+                      ? "bg-accent text-neutral-900 dark:text-neutral-50 font-medium"
+                      : "text-neutral-400 dark:text-neutral-300 hover:text-neutral-600 dark:hover:text-neutral-200",
                   )}
                 >
                   {tab.label}
@@ -87,15 +87,19 @@ export function AnalyticsSection() {
           {/* Metrics */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             {metrics.map((m, i) => (
-              <div key={i} className="bg-bg-3 rounded-xl p-4 lg:p-5">
+              <div key={i} className="bg-muted rounded-xl p-4 lg:p-5">
                 <div className="font-display-syne text-2xl font-bold">
                   {m.value}
                 </div>
-                <div className="text-xs text-white/40 mt-1">{m.label}</div>
+                <div className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+                  {m.label}
+                </div>
                 <div
                   className={cn(
                     "text-xs mt-2 font-medium",
-                    m.up ? "text-brand-green" : "text-brand-coral",
+                    m.up
+                      ? "text-green-500 dark:text-green-400"
+                      : "text-red-500 dark:text-red-400",
                   )}
                 >
                   {m.change}
@@ -125,7 +129,7 @@ export function AnalyticsSection() {
             {days.map((d) => (
               <span
                 key={d}
-                className="text-[11px] text-white/30 flex-1 text-center"
+                className="text-[11px] text-neutral-500 dark:text-neutral-400 flex-1 text-center"
               >
                 {d}
               </span>
