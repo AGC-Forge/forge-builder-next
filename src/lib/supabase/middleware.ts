@@ -89,7 +89,9 @@ export async function updateSession(request: NextRequest) {
   const { locale: detectedLocale, pathname: unlocalizedPathname } =
     stripLocaleFromPathname(pathname);
   const locale = detectedLocale ?? routing.defaultLocale;
-  const isPublicPath = PUBLIC_PATHS.some((p) => unlocalizedPathname.startsWith(p));
+  const isPublicPath = PUBLIC_PATHS.some((p) =>
+    p === "/" ? unlocalizedPathname === "/" : unlocalizedPathname.startsWith(p),
+  );
   const isApiRoute = unlocalizedPathname.startsWith("/api");
 
   if (!user && !isPublicPath) {

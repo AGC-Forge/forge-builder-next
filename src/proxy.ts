@@ -61,10 +61,11 @@ export async function proxy(request: NextRequest) {
 
   intlResponse.headers.forEach((value, key) => {
     if (key.toLowerCase() === "set-cookie") return;
-    // Fix x-middleware-rewrite so Next.js doesn't proxy to https://localhost
-    if (key.toLowerCase() === "x-middleware-rewrite") {
-      value = fixInternalRewrite(value);
-    }
+    // Skip x-middleware-rewrite: in Next.js 16 proxy.ts mode this triggers an
+    // actual HTTP proxy request to localhost which causes a redirect loop.
+    // With localePrefix:'always' the App Router resolves locale from the URL
+    // segment directly — no rewrite header needed.
+    if (key.toLowerCase() === "x-middleware-rewrite") return;
     authResponse.headers.set(key, value);
   });
 
