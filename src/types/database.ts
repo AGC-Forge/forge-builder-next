@@ -1,9 +1,9 @@
 // Database table types — mirrors supabase/schema.sql exactly
 
-export type UserRole   = 'admin' | 'member';
-export type InputMode  = 'manual' | 'auto';
+export type UserRole = 'admin' | 'member';
+export type InputMode = 'manual' | 'auto';
 export type DeviceType = 'mobile' | 'tablet' | 'desktop' | 'unknown';
-export type ClickType  = 'affiliate' | 'marketplace' | 'detail';
+export type ClickType = 'affiliate' | 'marketplace' | 'detail';
 
 export type ThemeType =
   | 'linktree'
@@ -75,7 +75,7 @@ export interface LandingBlock {
   type: BlockType;
   visible: boolean;
   settings: BlockSettings;
-  content: Record<string, unknown>;
+  content: Record<string, any>;
 }
 
 export interface ThemeConfig {

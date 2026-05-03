@@ -39,7 +39,7 @@ export function ImageUploader({ images, onChange, maxImages = 8 }: Props) {
           body: JSON.stringify({
             base64,
             mimeType: file.type,
-            folder: "forgebuilder/products",
+            folder: "snapland/products",
           }),
         });
         const json = await res.json();

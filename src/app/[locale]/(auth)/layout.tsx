@@ -20,7 +20,7 @@ export default function AuthLayout({
           <div className="flex size-6 items-center justify-center rounded-md">
             <Image
               src="/logo.png"
-              alt="Forge Builder Logo"
+              alt="Snapland Logo"
               width={24}
               height={24}
               className="rounded-sm"

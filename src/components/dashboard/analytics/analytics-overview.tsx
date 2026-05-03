@@ -1,4 +1,11 @@
-import { Eye, MousePointerClick, Package, Link2, Users, TrendingUp } from "lucide-react";
+import {
+  Eye,
+  MousePointerClick,
+  Package,
+  Link2,
+  Users,
+  TrendingUp,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -81,7 +88,7 @@ export function AnalyticsOverview({ stats }: { stats: Stats | null }) {
       {metrics.map(({ label, value, sub, icon: Icon }) => (
         <Card
           key={label}
-          className="bg-gradient-to-t from-primary/5 to-card dark:bg-card"
+          className="bg-linear-to-t from-primary/5 to-card dark:bg-card"
         >
           <CardHeader className="pb-1 pt-3">
             <div className="flex size-7 items-center justify-center rounded-lg border bg-muted text-muted-foreground">

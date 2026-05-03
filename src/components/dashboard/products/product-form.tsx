@@ -7,7 +7,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Plus, Trash2, Wand2, PenLine } from "lucide-react";
-import { productSchema, type ProductInput } from "@/lib/validations/product";
+import {
+  productSchema,
+  type ProductFormInput,
+  type ProductInput,
+} from "@/lib/validations/product";
 import { createProduct, updateProduct } from "@/actions/products";
 import { PRODUCT_CATEGORIES } from "@/lib/constants";
 import type { Product } from "@/types/database";
@@ -56,8 +60,7 @@ export function ProductForm({ mode, product }: Props) {
     setValue,
     watch,
     formState: { errors },
-  } = useForm<ProductInput>({
-    // @@ts-expect-error - Default values are set in the schema
+  } = useForm<ProductFormInput, unknown, ProductInput>({
     resolver: zodResolver(productSchema),
     defaultValues: {
       title: product?.title ?? "",
@@ -121,8 +124,8 @@ export function ProductForm({ mode, product }: Props) {
 
   function addTag() {
     const t = tagInput.trim().toLowerCase();
-    if (t && !tags.includes(t)) {
-      setValue("tags", [...tags, t]);
+    if (t && !tags?.includes(t)) {
+      setValue("tags", [...(tags ?? []), t]);
     }
     setTagInput("");
   }
@@ -130,21 +133,24 @@ export function ProductForm({ mode, product }: Props) {
   function removeTag(tag: string) {
     setValue(
       "tags",
-      tags.filter((t) => t !== tag),
+      tags?.filter((t) => t !== tag),
     );
   }
 
   function addFeature() {
-    setValue("features", [...features, { title: "", description: "" }]);
+    setValue("features", [...(features ?? []), { title: "", description: "" }]);
   }
 
   function addSpec() {
-    setValue("specifications", [...specifications, { name: "", value: "" }]);
+    setValue("specifications", [
+      ...(specifications ?? []),
+      { name: "", value: "" },
+    ]);
   }
 
   function addBadge() {
     setValue("badges", [
-      ...badges,
+      ...(badges ?? []),
       { text: "", color: "#ffffff", bgColor: "#6366f1" },
     ]);
   }
@@ -215,7 +221,12 @@ export function ProductForm({ mode, product }: Props) {
             <AiAnalyzer
               title={title}
               category={category ?? undefined}
-              images={images}
+              images={
+                images?.map((img) => ({
+                  ...img,
+                  source: img.source ?? "url",
+                })) ?? []
+              }
               onResult={applyAiResult}
             />
           )}
@@ -333,7 +344,7 @@ export function ProductForm({ mode, product }: Props) {
                     Add
                   </Button>
                 </div>
-                {tags.length > 0 && (
+                {tags && tags?.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1">
                     {tags.map((tag) => (
                       <Badge key={tag} variant="secondary" className="gap-1">
@@ -380,7 +391,12 @@ export function ProductForm({ mode, product }: Props) {
             </CardHeader>
             <CardContent>
               <ImageUploader
-                images={images}
+                images={
+                  images?.map((img) => ({
+                    ...img,
+                    source: img.source ?? "url",
+                  })) ?? []
+                }
                 onChange={(imgs) =>
                   setValue(
                     "images",
@@ -404,47 +420,48 @@ export function ProductForm({ mode, product }: Props) {
               <CardDescription>Key product selling points.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              {features.map((_, i) => (
-                <div key={i} className="flex gap-2">
-                  <div className="flex-1 space-y-1">
-                    <Input
-                      placeholder="Feature title"
-                      value={features[i].title}
-                      onChange={(e) => {
-                        const updated = [...features];
-                        updated[i] = { ...updated[i], title: e.target.value };
-                        setValue("features", updated);
-                      }}
-                    />
-                    <Input
-                      placeholder="Description (optional)"
-                      value={features[i].description ?? ""}
-                      onChange={(e) => {
-                        const updated = [...features];
-                        updated[i] = {
-                          ...updated[i],
-                          description: e.target.value,
-                        };
-                        setValue("features", updated);
-                      }}
-                    />
+              {features &&
+                features?.map((_, i) => (
+                  <div key={i} className="flex gap-2">
+                    <div className="flex-1 space-y-1">
+                      <Input
+                        placeholder="Feature title"
+                        value={features[i].title}
+                        onChange={(e) => {
+                          const updated = [...features];
+                          updated[i] = { ...updated[i], title: e.target.value };
+                          setValue("features", updated);
+                        }}
+                      />
+                      <Input
+                        placeholder="Description (optional)"
+                        value={features[i].description ?? ""}
+                        onChange={(e) => {
+                          const updated = [...features];
+                          updated[i] = {
+                            ...updated[i],
+                            description: e.target.value,
+                          };
+                          setValue("features", updated);
+                        }}
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      className="mt-1 self-start text-destructive"
+                      onClick={() =>
+                        setValue(
+                          "features",
+                          features.filter((_, fi) => fi !== i),
+                        )
+                      }
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
                   </div>
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="ghost"
-                    className="mt-1 self-start text-destructive"
-                    onClick={() =>
-                      setValue(
-                        "features",
-                        features.filter((_, fi) => fi !== i),
-                      )
-                    }
-                  >
-                    <Trash2 className="size-4" />
-                  </Button>
-                </div>
-              ))}
+                ))}
               <Button
                 type="button"
                 variant="outline"
@@ -466,42 +483,43 @@ export function ProductForm({ mode, product }: Props) {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              {specifications.map((_, i) => (
-                <div key={i} className="flex gap-2">
-                  <Input
-                    placeholder="Name (e.g. RAM)"
-                    value={specifications[i].name}
-                    onChange={(e) => {
-                      const updated = [...specifications];
-                      updated[i] = { ...updated[i], name: e.target.value };
-                      setValue("specifications", updated);
-                    }}
-                  />
-                  <Input
-                    placeholder="Value (e.g. 8 GB)"
-                    value={specifications[i].value}
-                    onChange={(e) => {
-                      const updated = [...specifications];
-                      updated[i] = { ...updated[i], value: e.target.value };
-                      setValue("specifications", updated);
-                    }}
-                  />
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="ghost"
-                    className="text-destructive"
-                    onClick={() =>
-                      setValue(
-                        "specifications",
-                        specifications.filter((_, si) => si !== i),
-                      )
-                    }
-                  >
-                    <Trash2 className="size-4" />
-                  </Button>
-                </div>
-              ))}
+              {specifications &&
+                specifications?.map((_, i) => (
+                  <div key={i} className="flex gap-2">
+                    <Input
+                      placeholder="Name (e.g. RAM)"
+                      value={specifications[i].name}
+                      onChange={(e) => {
+                        const updated = [...specifications];
+                        updated[i] = { ...updated[i], name: e.target.value };
+                        setValue("specifications", updated);
+                      }}
+                    />
+                    <Input
+                      placeholder="Value (e.g. 8 GB)"
+                      value={specifications[i].value}
+                      onChange={(e) => {
+                        const updated = [...specifications];
+                        updated[i] = { ...updated[i], value: e.target.value };
+                        setValue("specifications", updated);
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      className="text-destructive"
+                      onClick={() =>
+                        setValue(
+                          "specifications",
+                          specifications.filter((_, si) => si !== i),
+                        )
+                      }
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </div>
+                ))}
               <Button
                 type="button"
                 variant="outline"
@@ -523,59 +541,63 @@ export function ProductForm({ mode, product }: Props) {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              {badges.map((badge, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <Input
-                    placeholder="Badge text"
-                    value={badge.text}
-                    onChange={(e) => {
-                      const updated = [...badges];
-                      updated[i] = { ...updated[i], text: e.target.value };
-                      setValue("badges", updated);
-                    }}
-                  />
-                  <div className="flex items-center gap-1">
-                    <Label className="text-xs">Text</Label>
-                    <input
-                      type="color"
-                      value={badge.color ?? "#ffffff"}
+              {badges &&
+                badges?.map((badge, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <Input
+                      placeholder="Badge text"
+                      value={badge.text}
                       onChange={(e) => {
                         const updated = [...badges];
-                        updated[i] = { ...updated[i], color: e.target.value };
+                        updated[i] = { ...updated[i], text: e.target.value };
                         setValue("badges", updated);
                       }}
-                      className="h-7 w-10 cursor-pointer rounded border"
                     />
+                    <div className="flex items-center gap-1">
+                      <Label className="text-xs">Text</Label>
+                      <input
+                        type="color"
+                        value={badge.color ?? "#ffffff"}
+                        onChange={(e) => {
+                          const updated = [...badges];
+                          updated[i] = { ...updated[i], color: e.target.value };
+                          setValue("badges", updated);
+                        }}
+                        className="h-7 w-10 cursor-pointer rounded border"
+                      />
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Label className="text-xs">BG</Label>
+                      <input
+                        type="color"
+                        value={badge.bgColor ?? "#6366f1"}
+                        onChange={(e) => {
+                          const updated = [...badges];
+                          updated[i] = {
+                            ...updated[i],
+                            bgColor: e.target.value,
+                          };
+                          setValue("badges", updated);
+                        }}
+                        className="h-7 w-10 cursor-pointer rounded border"
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      className="text-destructive"
+                      onClick={() =>
+                        setValue(
+                          "badges",
+                          badges.filter((_, bi) => bi !== i),
+                        )
+                      }
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Label className="text-xs">BG</Label>
-                    <input
-                      type="color"
-                      value={badge.bgColor ?? "#6366f1"}
-                      onChange={(e) => {
-                        const updated = [...badges];
-                        updated[i] = { ...updated[i], bgColor: e.target.value };
-                        setValue("badges", updated);
-                      }}
-                      className="h-7 w-10 cursor-pointer rounded border"
-                    />
-                  </div>
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="ghost"
-                    className="text-destructive"
-                    onClick={() =>
-                      setValue(
-                        "badges",
-                        badges.filter((_, bi) => bi !== i),
-                      )
-                    }
-                  >
-                    <Trash2 className="size-4" />
-                  </Button>
-                </div>
-              ))}
+                ))}
               <Button
                 type="button"
                 variant="outline"

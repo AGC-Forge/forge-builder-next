@@ -2,12 +2,13 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import {
   landingPageSchema,
   type LandingPageInput,
+  type LandingPageFormInput,
 } from "@/lib/validations/landing-page";
 import {
   createLandingPage,
@@ -16,6 +17,7 @@ import {
 } from "@/actions/landing-pages";
 import {
   DEFAULT_THEME_CONFIG,
+  type ThemeConfig,
   type LandingPage,
   type Product,
 } from "@/types/database";
@@ -78,12 +80,11 @@ export function LandingPageForm({
 
   const {
     register,
+    control,
     handleSubmit,
     setValue,
-    watch,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<LandingPageInput>({
-    // @@ts-expect-error - Default values are set in the schema
     resolver: zodResolver(landingPageSchema),
     defaultValues: {
       slug: landingPage?.slug ?? "",
@@ -122,9 +123,11 @@ export function LandingPageForm({
     },
   });
 
-  const themeType = watch("theme_type");
-  const themeConfig = watch("theme_config");
-  const isPublished = watch("is_published");
+  const themeType = useWatch({ control, name: "theme_type" });
+  const themeConfig = useWatch({ control, name: "theme_config" });
+  const isPublished = useWatch({ control, name: "is_published" });
+  const tracking = useWatch({ control, name: "tracking" });
+  const seo = useWatch({ control, name: "seo" });
 
   function toggleProduct(id: string) {
     setSelectedProducts((prev) =>
@@ -308,27 +311,30 @@ export function LandingPageForm({
                     <div className="mt-1 flex items-center gap-2">
                       <input
                         type="color"
-                        value={
-                          (themeConfig as Record<string, string>)[key] ??
-                          "#000000"
-                        }
+                        value={themeConfig?.[key] ?? "#000000"}
                         onChange={(e) =>
-                          setValue("theme_config", {
-                            ...themeConfig,
-                            [key]: e.target.value,
-                          })
+                          setValue(
+                            "theme_config",
+                            {
+                              ...(themeConfig as any),
+                              [key]: e.target.value,
+                            },
+                            { shouldDirty: true },
+                          )
                         }
                         className="h-8 w-16 cursor-pointer rounded border"
                       />
                       <Input
-                        value={
-                          (themeConfig as Record<string, string>)[key] ?? ""
-                        }
+                        value={themeConfig?.[key] ?? ""}
                         onChange={(e) =>
-                          setValue("theme_config", {
-                            ...themeConfig,
-                            [key]: e.target.value,
-                          })
+                          setValue(
+                            "theme_config",
+                            {
+                              ...(themeConfig as any),
+                              [key]: e.target.value,
+                            },
+                            { shouldDirty: true },
+                          )
                         }
                         className="h-8 font-mono text-xs"
                       />
@@ -339,12 +345,16 @@ export function LandingPageForm({
                 <div>
                   <Label className="text-xs">Font Family</Label>
                   <Select
-                    value={themeConfig.fontFamily ?? "Inter"}
+                    value={themeConfig?.fontFamily ?? "Inter"}
                     onValueChange={(v) =>
-                      setValue("theme_config", {
-                        ...themeConfig,
-                        fontFamily: v,
-                      })
+                      setValue(
+                        "theme_config",
+                        {
+                          ...(themeConfig as any),
+                          fontFamily: v,
+                        },
+                        { shouldDirty: true },
+                      )
                     }
                   >
                     <SelectTrigger className="mt-1 h-8">
@@ -372,12 +382,16 @@ export function LandingPageForm({
                 <div>
                   <Label className="text-xs">Border Radius</Label>
                   <Select
-                    value={themeConfig.borderRadius ?? "md"}
+                    value={themeConfig?.borderRadius ?? "md"}
                     onValueChange={(v) =>
-                      setValue("theme_config", {
-                        ...themeConfig,
-                        borderRadius: v as typeof themeConfig.borderRadius,
-                      })
+                      setValue(
+                        "theme_config",
+                        {
+                          ...(themeConfig as any),
+                          borderRadius: v as ThemeConfig["borderRadius"],
+                        },
+                        { shouldDirty: true },
+                      )
                     }
                   >
                     <SelectTrigger className="mt-1 h-8">
@@ -396,12 +410,16 @@ export function LandingPageForm({
                 <div>
                   <Label className="text-xs">Button Style</Label>
                   <Select
-                    value={themeConfig.buttonStyle ?? "filled"}
+                    value={themeConfig?.buttonStyle ?? "filled"}
                     onValueChange={(v) =>
-                      setValue("theme_config", {
-                        ...themeConfig,
-                        buttonStyle: v as typeof themeConfig.buttonStyle,
-                      })
+                      setValue(
+                        "theme_config",
+                        {
+                          ...(themeConfig as any),
+                          buttonStyle: v as ThemeConfig["buttonStyle"],
+                        },
+                        { shouldDirty: true },
+                      )
                     }
                   >
                     <SelectTrigger className="mt-1 h-8">
@@ -528,13 +546,16 @@ export function LandingPageForm({
                     placeholder={placeholder}
                     className="mt-1"
                     defaultValue={
-                      (landingPage?.tracking as Record<string, string>)?.[
-                        key
-                      ] ?? ""
+                      (
+                        landingPage?.tracking as unknown as Record<
+                          string,
+                          string
+                        >
+                      )?.[key] ?? ""
                     }
                     onChange={(e) =>
                       setValue("tracking", {
-                        ...watch("tracking"),
+                        ...tracking,
                         [key]: e.target.value || null,
                       })
                     }
@@ -563,7 +584,7 @@ export function LandingPageForm({
                   defaultValue={landingPage?.seo?.title ?? ""}
                   onChange={(e) =>
                     setValue("seo", {
-                      ...watch("seo"),
+                      ...seo,
                       title: e.target.value || null,
                     })
                   }
@@ -577,7 +598,7 @@ export function LandingPageForm({
                   defaultValue={landingPage?.seo?.description ?? ""}
                   onChange={(e) =>
                     setValue("seo", {
-                      ...watch("seo"),
+                      ...seo,
                       description: e.target.value || null,
                     })
                   }
@@ -591,7 +612,7 @@ export function LandingPageForm({
                   defaultValue={landingPage?.seo?.og_image ?? ""}
                   onChange={(e) =>
                     setValue("seo", {
-                      ...watch("seo"),
+                      ...seo,
                       og_image: e.target.value || null,
                     })
                   }

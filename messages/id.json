@@ -1,7 +1,8 @@
 {
   "HomePage": {
-    "title": "Forge Builder!",
-    "description": "Forge Builder adalah aplikasi manajemen media sosial yang menghubungkan semua media sosial Anda dengan satu link mudah."
+    "title": "Snapland!",
+    "tagline": "AI Landing Page Builder: Buat Halaman Landing yang Tinggi Konversi Dalam Detik",
+    "description": "Snapland adalah aplikasi manajemen media sosial yang menghubungkan semua media sosial Anda dengan satu link mudah."
   },
   "NotFoundPage": {
     "title": "404 Tidak Ditemukan",
@@ -10,9 +11,212 @@
   },
   "LocaleSwitcher": {
     "label": "Ganti bahasa",
-    "locale": "{locale, select, id {Bahasa Indonesia} dan {Bahasa Inggris} other {Tidak Diketahui}}"
+    "locale": "{locale, select, id {Bahasa Indonesia} en {Bahasa Inggris}}"
   },
   "Manifest": {
-    "name": "Forge Builder"
+    "name": "Snapland"
+  },
+  "HomeSectionNav": {
+    "features": "Fitur",
+    "themes": "Tema",
+    "analytics": "Analitik",
+    "pricing": "Harga",
+    "integrations": "Integrasi",
+    "login": "Masuk",
+    "getStarted": "Mulai gratis"
+  },
+  "HomeSectionHero": {
+    "badge": "Kini dengan AI builder cerdas",
+    "title1": "Buat landing page",
+    "title2": "memukau",
+    "title3": "yang mengkonversi",
+    "subtitle": "Drag, drop, kustomisasi. Pilih dari 10+ gaya platform — Linktree, Beacons, e-commerce, dan lainnya. Tanpa kode.",
+    "cta1": "Mulai buat halaman gratis →",
+    "cta2": "Lihat demo",
+    "previewUrl": "pageforge.io/slugkamu",
+    "previewComponents": "Komponen",
+    "previewSettings": "Pengaturan",
+    "heroBlock": "Seksi Hero — Seret untuk mengurutkan",
+    "feature": "Fitur",
+    "ctaBlock": "⚡ Tombol CTA",
+    "components": {
+      "hero": "Blok Hero",
+      "link": "Tombol Link",
+      "image": "Kartu Gambar",
+      "product": "Kartu Produk",
+      "stats": "Baris Statistik",
+      "theme": "Tema",
+      "slug": "Custom Slug",
+      "ai": "Bantuan AI"
+    }
+  },
+  "HomeSectionStats": {
+    "pages": "Halaman dibuat",
+    "themes": "Gaya tema",
+    "uptime": "Uptime SLA",
+    "conversion": "Rata-rata peningkatan konversi"
+  },
+  "HomeSectionThemes": {
+    "tag": "Tema Platform",
+    "title1": "Setiap gaya,",
+    "title2": "satu platform",
+    "subtitle": "Pilih tata letak yang sesuai kebutuhan — dari bio link hingga toko e-commerce lengkap.",
+    "new": "BARU",
+    "items": {
+      "linktree": "Gaya Linktree",
+      "beacons": "Gaya Beacons",
+      "taplink": "Gaya Taplink",
+      "campsite": "Gaya Campsite",
+      "carrd": "Gaya Carrd",
+      "seedprod": "Gaya SeedProd",
+      "lnkbio": "Gaya Lnk.bio",
+      "amazon": "E-commerce (Amazon)",
+      "shopee": "E-commerce (Shopee)",
+      "ai": "Dibuat AI ✦"
+    }
+  },
+  "HomeSectionFeatures": {
+    "tag": "Fitur Utama",
+    "title1": "Semua yang kamu butuhkan",
+    "title2": "untuk mulai",
+    "items": {
+      "dragdrop": {
+        "title": "Drag & Drop Builder",
+        "desc": "Buat halaman secara visual dengan editor blok yang powerful. Tambahkan teks, gambar, tombol, kartu produk, form, dan lainnya — semua dengan preview real-time dan publish instan."
+      },
+      "slug": {
+        "title": "Custom Slug",
+        "desc": "Klaim URL bermerek kamu sendiri seperti pageforge.io/brandkamu"
+      },
+      "product": {
+        "title": "Assign Produk",
+        "desc": "Hubungkan dan tampilkan produk kamu langsung di landing page dengan harga, gambar, dan tombol beli."
+      },
+      "i18n": {
+        "title": "Dukungan i18n",
+        "desc": "Dukungan penuh Bahasa Inggris dan Bahasa Indonesia out of the box. Bahasa lain segera hadir."
+      },
+      "ai": {
+        "title": "Integrasi AI",
+        "desc": "Generate teks, saran tata letak, auto-tulis deskripsi produk, dan optimalkan halaman untuk konversi dengan AI bawaan."
+      },
+      "analytics": {
+        "title": "Tracking & Analitik",
+        "desc": "Dukungan native untuk Google Tag Manager, Facebook Pixel, dan Histats — setup dalam hitungan detik, tanpa kode."
+      },
+      "dashboard": {
+        "title": "Dashboard Analitik Admin",
+        "desc": "Lihat semua performa halaman di satu tempat. Pantau kunjungan, klik, tingkat konversi, dan pendapatan di semua halaman dalam dashboard real-time yang bersih."
+      },
+      "theme": {
+        "title": "Kustomisasi Tema",
+        "desc": "Sesuaikan warna, font, spasi, dan lainnya di dalam tema yang dipilih."
+      }
+    }
+  },
+  "HomeSectionAnalytics": {
+    "tag": "Dashboard Analitik",
+    "title1": "Pantau setiap klik,",
+    "title2": "setiap konversi",
+    "subtitle": "Insight real-time dari GTM, Facebook Pixel, dan Histats — semua dalam satu tampilan terpadu.",
+    "overview": "Ringkasan Dashboard",
+    "tabs": {
+      "7days": "7 hari",
+      "30days": "30 hari",
+      "90days": "90 hari"
+    },
+    "metrics": {
+      "pageviews": "Tampilan Halaman",
+      "visitors": "Pengunjung Unik",
+      "ctr": "Click-through Rate",
+      "revenue": "Pendapatan Dihasilkan"
+    }
+  },
+  "HomeSectionIntegrations": {
+    "tag": "Integrasi",
+    "title1": "Terhubung dengan",
+    "title2": "seluruh ekosistem kamu"
+  },
+  "HomeSectionPricing": {
+    "tag": "Harga",
+    "title1": "Mulai gratis,",
+    "title2": "kembangkan saat siap",
+    "subtitle": "Tidak perlu kartu kredit. Semua paket sudah termasuk halaman tak terbatas dan SSL gratis.",
+    "popular": "⚡ Paling Populer",
+    "mo": "/ bln",
+    "plans": {
+      "free": {
+        "name": "Gratis",
+        "price": "Rp 0",
+        "desc": "Sempurna untuk memulai dan menguji ide.",
+        "cta": "Mulai gratis",
+        "features": [
+          "3 landing page",
+          "Custom slug",
+          "5 gaya tema",
+          "Analitik dasar",
+          "Bahasa EN & ID"
+        ]
+      },
+      "pro": {
+        "name": "Pro",
+        "price": "Rp 89K",
+        "desc": "Untuk kreator, penjual, dan bisnis yang berkembang.",
+        "cta": "Coba Pro gratis",
+        "features": [
+          "Halaman tak terbatas",
+          "Semua 10+ tema",
+          "Drag & Drop builder",
+          "GTM + FB Pixel + Histats",
+          "Integrasi AI (50x/bln)",
+          "Assign produk",
+          "Dashboard admin"
+        ]
+      },
+      "business": {
+        "name": "Bisnis",
+        "price": "Rp 249K",
+        "desc": "Untuk tim, agensi, dan pengguna profesional.",
+        "cta": "Hubungi sales",
+        "features": [
+          "Semua fitur Pro",
+          "AI tanpa batas",
+          "Domain kustom",
+          "Kolaborasi tim",
+          "Opsi white-label",
+          "Prioritas dukungan",
+          "Export analitik lanjutan"
+        ]
+      }
+    }
+  },
+  "HomeSectionCta": {
+    "title1": "Siap membangun",
+    "title2": "halaman impianmu?",
+    "subtitle": "Bergabung dengan ribuan kreator, penjual, dan brand yang sudah menggunakan PageForge.",
+    "btn1": "Mulai gratis — tanpa kartu kredit",
+    "btn2": "Jadwalkan demo"
+  },
+  "HomeSectionFooter": {
+    "tagline": "Buat landing page indah untuk tujuan apapun — bio link, produk, portofolio, dan lainnya. Didukung Next.js 16.",
+    "product": "Produk",
+    "resources": "Sumber Daya",
+    "company": "Perusahaan",
+    "links": {
+      "features": "Fitur",
+      "themes": "Tema",
+      "pricing": "Harga",
+      "changelog": "Changelog",
+      "docs": "Dokumentasi",
+      "blog": "Blog",
+      "templates": "Template",
+      "api": "API",
+      "about": "Tentang Kami",
+      "privacy": "Privasi",
+      "terms": "Syarat & Ketentuan",
+      "contact": "Kontak"
+    },
+    "copyright": "© 2026 PageForge. Dibangun dengan Next.js 16 · Tailwind CSS · Shadcn UI",
+    "privacyPolicy": "Kebijakan Privasi"
   }
 }

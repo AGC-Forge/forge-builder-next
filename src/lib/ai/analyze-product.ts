@@ -1,5 +1,5 @@
-import OpenAI from "@openrouter/sdk";
-import type { ChatCompletionContentPart } from "@openrouter/sdk/resources/chat/completions";
+import { OpenRouter } from "@openrouter/sdk";
+import type { ChatRequest } from "@openrouter/sdk/models";
 
 export interface AnalyzeProductInput {
   title: string;
@@ -32,13 +32,11 @@ export interface AnalyzeProductOutput {
 export async function analyzeProduct(
   input: AnalyzeProductInput,
 ): Promise<AnalyzeProductOutput> {
-  const client = new OpenAI({
+  const client = new OpenRouter({
     apiKey: input.apiKey,
-    baseURL: "https://openrouter.ai/api/v1",
-    defaultHeaders: {
-      "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL ?? "https://localhost",
-      "X-Title": "ForgeBuilder",
-    },
+    appTitle: process.env.APP_NAME ?? "Snapland",
+    appCategories: "product-analysis",
+    httpReferer: process.env.NEXT_PUBLIC_APP_URL ?? "https://localhost",
   });
 
   const textContent = `Analyze this product and return a JSON object with EXACTLY these fields:
@@ -63,7 +61,7 @@ ${input.marketplaceUrl ? `Marketplace URL (reference only): ${input.marketplaceU
 
 IMPORTANT: Return ONLY raw JSON — no markdown, no code block, no explanation.`;
 
-  const userContent: ChatCompletionContentPart[] = [
+  const userContent: ChatRequest["messages"][0]["content"][] = [
     { type: "text", text: textContent },
   ];
 
@@ -80,18 +78,20 @@ IMPORTANT: Return ONLY raw JSON — no markdown, no code block, no explanation.`
   }
 
   try {
-    const response = await client.chat.completions.create({
-      model: input.modelId,
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are an expert e-commerce product analyst. Analyze product information and return structured JSON data that will be used to populate a product listing. Be precise, market-aware, and focus on Indonesian/Asian e-commerce conventions when relevant.",
-        },
-        { role: "user", content: userContent },
-      ],
-      max_tokens: 2500,
-      temperature: 0.4,
+    const response = await client.chat.send({
+      chatRequest: {
+        model: input.modelId,
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are an expert e-commerce product analyst. Analyze product information and return structured JSON data that will be used to populate a product listing. Be precise, market-aware, and focus on Indonesian/Asian e-commerce conventions when relevant.",
+          },
+          { role: "user", content: userContent },
+        ],
+        maxTokens: 2500,
+        temperature: 0.4,
+      },
     });
 
     const raw = response.choices[0]?.message?.content ?? "";

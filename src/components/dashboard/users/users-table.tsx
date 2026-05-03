@@ -3,7 +3,14 @@
 import { useState, useTransition } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { format } from "date-fns";
-import { MoreHorizontal, Search, Trash2, Edit, Shield, ShieldOff } from "lucide-react";
+import {
+  MoreHorizontal,
+  Search,
+  Trash2,
+  Edit,
+  Shield,
+  ShieldOff,
+} from "lucide-react";
 import { toast } from "sonner";
 import { deleteUser, updateUser } from "@/actions/users";
 import type { Profile } from "@/types/database";
@@ -93,7 +100,14 @@ export function UsersTable({ data, total, page, pageCount }: Props) {
   function handleEdit() {
     if (!editUser) return;
     startTransition(async () => {
-      const result = await updateUser(editUser.id, editData);
+      const payload = {
+        full_name: editData.full_name ?? undefined,
+        role: editData.role,
+        is_active: editData.is_active,
+        max_products: editData.max_products,
+        max_landing_pages: editData.max_landing_pages,
+      };
+      const result = await updateUser(editUser.id, payload);
       if (result.success) toast.success("User updated.");
       else toast.error(result.error ?? "Failed.");
       setEditUser(null);
@@ -123,7 +137,7 @@ export function UsersTable({ data, total, page, pageCount }: Props) {
       <Card>
         <CardHeader className="pb-3">
           <div className="flex flex-wrap items-center gap-2">
-            <div className="relative min-w-[200px] flex-1">
+            <div className="relative min-w-50 flex-1">
               <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Search by email…"
@@ -140,7 +154,7 @@ export function UsersTable({ data, total, page, pageCount }: Props) {
                 updateParams({ role: v === "all" ? undefined : v })
               }
             >
-              <SelectTrigger className="w-[140px]">
+              <SelectTrigger className="w-35">
                 <SelectValue placeholder="Role" />
               </SelectTrigger>
               <SelectContent>
@@ -155,7 +169,7 @@ export function UsersTable({ data, total, page, pageCount }: Props) {
                 updateParams({ status: v === "all" ? undefined : v })
               }
             >
-              <SelectTrigger className="w-[140px]">
+              <SelectTrigger className="w-35">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -186,7 +200,10 @@ export function UsersTable({ data, total, page, pageCount }: Props) {
               <TableBody>
                 {data.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={6} className="py-12 text-center text-muted-foreground">
+                    <TableCell
+                      colSpan={6}
+                      className="py-12 text-center text-muted-foreground"
+                    >
                       No users found.
                     </TableCell>
                   </TableRow>
@@ -213,7 +230,9 @@ export function UsersTable({ data, total, page, pageCount }: Props) {
                     </TableCell>
                     <TableCell>
                       <Badge
-                        variant={user.role === "admin" ? "default" : "secondary"}
+                        variant={
+                          user.role === "admin" ? "default" : "secondary"
+                        }
                         className="text-xs"
                       >
                         {user.role}
@@ -236,7 +255,11 @@ export function UsersTable({ data, total, page, pageCount }: Props) {
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="size-8">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8"
+                          >
                             <MoreHorizontal className="size-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -255,7 +278,9 @@ export function UsersTable({ data, total, page, pageCount }: Props) {
                             <Edit className="mr-2 size-4" />
                             Edit
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleToggleRole(user)}>
+                          <DropdownMenuItem
+                            onClick={() => handleToggleRole(user)}
+                          >
                             {user.role === "admin" ? (
                               <>
                                 <ShieldOff className="mr-2 size-4" />
@@ -268,7 +293,9 @@ export function UsersTable({ data, total, page, pageCount }: Props) {
                               </>
                             )}
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleToggleStatus(user)}>
+                          <DropdownMenuItem
+                            onClick={() => handleToggleStatus(user)}
+                          >
                             {user.is_active ? "Suspend" : "Reactivate"}
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
@@ -294,12 +321,20 @@ export function UsersTable({ data, total, page, pageCount }: Props) {
                 Page {page} of {pageCount}
               </p>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" disabled={page <= 1}
-                  onClick={() => updateParams({ page: String(page - 1) })}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page <= 1}
+                  onClick={() => updateParams({ page: String(page - 1) })}
+                >
                   Previous
                 </Button>
-                <Button variant="outline" size="sm" disabled={page >= pageCount}
-                  onClick={() => updateParams({ page: String(page + 1) })}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page >= pageCount}
+                  onClick={() => updateParams({ page: String(page + 1) })}
+                >
                   Next
                 </Button>
               </div>

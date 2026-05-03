@@ -237,15 +237,16 @@ export function ProductsTable({ data, total, page, pageCount }: Props) {
                         {product.price != null ? (
                           <div>
                             <p className="font-medium text-sm">
-                              {formatCurrency(product.price, product.currency)}
+                              {formatCurrency(product.price, {
+                                currency: product.currency,
+                              })}
                             </p>
                             {product.original_price &&
                               product.original_price > product.price && (
                                 <p className="text-muted-foreground text-xs line-through">
-                                  {formatCurrency(
-                                    product.original_price,
-                                    product.currency,
-                                  )}
+                                  {formatCurrency(product.original_price, {
+                                    currency: product.currency,
+                                  })}
                                 </p>
                               )}
                           </div>

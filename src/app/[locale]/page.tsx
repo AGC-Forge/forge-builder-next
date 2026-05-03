@@ -1,4 +1,9 @@
+import type { Metadata } from "next";
 import Image from "next/image";
+
+export const metadata: Metadata = {
+  title: "AI Landing Page Builder: Create High-Converting Pages in Seconds",
+};
 
 export default function Home() {
   return (

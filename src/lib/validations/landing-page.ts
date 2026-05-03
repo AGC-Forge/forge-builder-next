@@ -1,9 +1,5 @@
 import * as z from "zod";
-import {
-  DEFAULT_THEME_CONFIG,
-  type LandingPage,
-  type Product,
-} from "@/types/database";
+import { DEFAULT_THEME_CONFIG } from "@/types/database";
 
 const themeConfigSchema = z.object({
   primaryColor: z.string().default("#6366f1"),
@@ -71,9 +67,34 @@ export const landingPageSchema = z.object({
       "ecommerce",
     ])
     .default("linktree"),
-  theme_config: themeConfigSchema.optional().default({}),
-  tracking: trackingSchema.optional().default({}),
-  seo: seoSchema.optional().default({}),
+  theme_config: themeConfigSchema.optional().default({
+    primaryColor: DEFAULT_THEME_CONFIG.primaryColor ?? "#6366f1",
+    secondaryColor: DEFAULT_THEME_CONFIG.secondaryColor ?? "",
+    backgroundColor: DEFAULT_THEME_CONFIG.backgroundColor ?? "",
+    textColor: DEFAULT_THEME_CONFIG.textColor ?? "",
+    accentColor: DEFAULT_THEME_CONFIG.accentColor ?? "",
+    fontFamily: DEFAULT_THEME_CONFIG.fontFamily ?? "Inter",
+    borderRadius: DEFAULT_THEME_CONFIG.borderRadius ?? "md",
+    buttonStyle: DEFAULT_THEME_CONFIG.buttonStyle ?? "filled",
+    backgroundType: DEFAULT_THEME_CONFIG.backgroundType ?? "solid",
+    backgroundGradient: DEFAULT_THEME_CONFIG.backgroundGradient ?? "",
+    backgroundImageUrl: DEFAULT_THEME_CONFIG.backgroundImageUrl ?? "",
+    profileImageUrl: DEFAULT_THEME_CONFIG.profileImageUrl ?? "",
+    coverImageUrl: DEFAULT_THEME_CONFIG.coverImageUrl ?? "",
+    linkStyle: DEFAULT_THEME_CONFIG.linkStyle ?? "card",
+    shadow: DEFAULT_THEME_CONFIG.shadow ?? "none",
+  }),
+  tracking: trackingSchema.optional().default({
+    gtm_id: null,
+    fb_pixel_id: null,
+    histats_id: null,
+    ga_id: null,
+  }),
+  seo: seoSchema.optional().default({
+    title: null,
+    description: null,
+    og_image: null,
+  }),
   is_published: z.boolean().default(false),
 });
 
@@ -82,7 +103,10 @@ export const updateBlocksSchema = z.object({
   blocks: z.array(z.record(z.string(), z.unknown())),
 });
 
-export type LandingPageInput = z.infer<typeof landingPageSchema>;
+export type LandingPageFormInput = z.input<typeof landingPageSchema>;
+export type LandingPageInput = z.input<typeof landingPageSchema>;
+export type LandingPageBlocksInput = z.input<typeof updateBlocksSchema>;
+export type LandingPageBlocksUpdate = z.output<typeof updateBlocksSchema>;
 export type ThemeConfigInput = z.infer<typeof themeConfigSchema>;
 export type TrackingInput = z.infer<typeof trackingSchema>;
 export type SeoInput = z.infer<typeof seoSchema>;

@@ -18,7 +18,7 @@ export interface UploadResult {
 
 export async function uploadImage(
   source: string | Buffer,
-  folder = "forgebuilder/products",
+  folder = "snapland/products",
 ): Promise<UploadResult> {
   const result = await cloudinary.uploader.upload(
     typeof source === "string" ? source : `data:image/jpeg;base64,${source.toString("base64")}`,
@@ -54,7 +54,7 @@ export async function deleteImage(publicId: string): Promise<boolean> {
 export async function uploadBase64Image(
   base64: string,
   mimeType = "image/jpeg",
-  folder = "forgebuilder/products",
+  folder = "snapland/products",
 ): Promise<UploadResult> {
   const dataUrl = base64.startsWith("data:")
     ? base64

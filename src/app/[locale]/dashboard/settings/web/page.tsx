@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "Web Settings" };
 
 export default async function WebSettingsPage() {
   const result = await getSettings();
-  const settings = result.success ? result.data ?? [] : [];
+  const settings = result.success ? (result.data ?? []) : [];
 
   // Group by group_name
   const groups = settings.reduce<Record<string, typeof settings>>((acc, s) => {
@@ -20,7 +20,7 @@ export default async function WebSettingsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Web Settings</h1>
         <p className="text-muted-foreground text-sm">
-          Global configuration for your ForgeBuilder platform.
+          Global configuration for your Snapland platform.
         </p>
       </div>
       <WebSettingsForm groups={groups} />

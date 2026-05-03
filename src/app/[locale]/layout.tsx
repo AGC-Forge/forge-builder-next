@@ -16,17 +16,24 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   title: {
-    default: "Forge Builder",
-    template: "%s | Forge Builder",
+    default: "Snapland",
+    template: "%s - Snapland",
   },
   description:
-    "Forge Builder is a social media management tool that connects all of your affiliate program with one easy link.",
+    "Build professional, high-converting landing pages with Landoo.ai. No coding required. Use our AI-powered builder to grow your business and boost conversions instantly.",
   keywords: [
     "social media management",
     "social media link in bio",
     "linktree alternative",
     "affiliate program",
     "e-commerce",
+    "landing page builder",
+    "AI website builder",
+    "no-code landing page",
+    "conversion rate optimization",
+    "Landoo AI",
+    "custom landing pages",
+    "marketing tools 2026",
   ],
 };
 

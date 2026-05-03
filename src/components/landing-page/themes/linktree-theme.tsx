@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { ExternalLink, Star } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
-import type { LandingPageWithProducts, ThemeConfig } from "@/types/database";
+import type {
+  LandingPageWithProducts,
+  ThemeConfig,
+  LandingBlock,
+} from "@/types/database";
 
 interface Props {
   landingPage: LandingPageWithProducts;
@@ -19,7 +23,11 @@ export function LinktreeTheme({ landingPage }: Props) {
     backgroundType: "solid",
     linkStyle: "card",
     shadow: "md",
-    ...landingPage.theme_config,
+    accentColor: landingPage.theme_config.primaryColor,
+    backgroundGradient: landingPage.theme_config.backgroundGradient,
+    backgroundImageUrl: landingPage.theme_config.backgroundImageUrl,
+    profileImageUrl: landingPage.theme_config.profileImageUrl,
+    coverImageUrl: landingPage.theme_config.coverImageUrl,
   };
 
   const products = (landingPage.landing_page_products ?? [])
@@ -115,19 +123,24 @@ export function LinktreeTheme({ landingPage }: Props) {
               tc={tc}
               radius={radius}
               shadow={shadow}
-              products={products.filter(Boolean) as NonNullable<typeof products[0]>[]}
+              products={
+                products.filter(Boolean) as NonNullable<(typeof products)[0]>[]
+              }
             />
           ))}
 
         {/* Products as link cards */}
         {products.length > 0 && landingPage.blocks.length === 0 && (
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+          >
             {products.map((product) => {
               if (!product) return null;
               const thumb =
                 product.images.find((i) => i.is_primary)?.url ??
                 product.images[0]?.url;
-              const href = product.affiliate_url ?? product.marketplace_url ?? "#";
+              const href =
+                product.affiliate_url ?? product.marketplace_url ?? "#";
 
               return (
                 <a
@@ -164,7 +177,9 @@ export function LinktreeTheme({ landingPage }: Props) {
                     />
                   )}
                   <div style={{ flex: 1 }}>
-                    <p style={{ fontWeight: 600, fontSize: "0.9rem", margin: 0 }}>
+                    <p
+                      style={{ fontWeight: 600, fontSize: "0.9rem", margin: 0 }}
+                    >
                       {product.title}
                     </p>
                     {product.price != null && (
@@ -176,12 +191,19 @@ export function LinktreeTheme({ landingPage }: Props) {
                           fontWeight: 600,
                         }}
                       >
-                        {formatCurrency(product.price, product.currency)}
+                        {formatCurrency(product.price, {
+                          currency: product.currency,
+                        })}
                       </p>
                     )}
                   </div>
                   <ExternalLink
-                    style={{ width: 16, height: 16, opacity: 0.4, flexShrink: 0 }}
+                    style={{
+                      width: 16,
+                      height: 16,
+                      opacity: 0.4,
+                      flexShrink: 0,
+                    }}
                   />
                 </a>
               );
@@ -197,7 +219,7 @@ export function LinktreeTheme({ landingPage }: Props) {
             opacity: 0.4,
           }}
         >
-          Powered by ForgeBuilder
+          Powered by Snapland
         </p>
       </div>
     </div>
@@ -211,11 +233,13 @@ function BlockRenderer({
   shadow,
   products,
 }: {
-  block: { type: string; content: Record<string, unknown>; settings: Record<string, unknown> };
+  block: Partial<LandingBlock>;
   tc: ThemeConfig;
   radius: string;
   shadow: string;
-  products: NonNullable<LandingPageWithProducts['landing_page_products']>[0]['product'][];
+  products: NonNullable<
+    LandingPageWithProducts["landing_page_products"]
+  >[0]["product"][];
 }) {
   const { type, content } = block;
 
@@ -227,22 +251,23 @@ function BlockRenderer({
           padding: "2rem 1rem",
           marginBottom: "1.5rem",
           borderRadius: radius,
-          background:
-            content.backgroundImageUrl
-              ? `linear-gradient(rgba(0,0,0,.4), rgba(0,0,0,.4)), url(${content.backgroundImageUrl}) center/cover`
-              : tc.primaryColor,
+          background: content?.backgroundImageUrl
+            ? `linear-gradient(rgba(0,0,0,.4), rgba(0,0,0,.4)), url(${content.backgroundImageUrl}) center/cover`
+            : tc.primaryColor,
           color: "#ffffff",
         }}
       >
-        <h2 style={{ fontSize: "1.6rem", fontWeight: 800, margin: "0 0 0.5rem" }}>
-          {(content.headline as string) ?? ""}
+        <h2
+          style={{ fontSize: "1.6rem", fontWeight: 800, margin: "0 0 0.5rem" }}
+        >
+          {(content?.headline as string) ?? ""}
         </h2>
-        {content.subheadline && (
+        {content?.subheadline && (
           <p style={{ fontSize: "1rem", opacity: 0.85, margin: "0 0 1.5rem" }}>
             {content.subheadline as string}
           </p>
         )}
-        {content.ctaText && content.ctaUrl && (
+        {content?.ctaText && content?.ctaUrl && (
           <a
             href={content.ctaUrl as string}
             target="_blank"
@@ -268,7 +293,7 @@ function BlockRenderer({
   if (type === "text") {
     return (
       <div style={{ marginBottom: "1rem", lineHeight: 1.6 }}>
-        {content.text as string}
+        {(content?.text as string) ?? ""}
       </div>
     );
   }
@@ -278,7 +303,7 @@ function BlockRenderer({
       <hr
         style={{
           border: "none",
-          borderTop: `1px solid ${(content.color as string) ?? "#e2e8f0"}`,
+          borderTop: `1px solid ${(content?.color as string) ?? "#e2e8f0"}`,
           margin: "1.5rem 0",
         }}
       />
@@ -286,10 +311,10 @@ function BlockRenderer({
   }
 
   if (type === "spacer") {
-    return <div style={{ height: `${(content.height as number) ?? 32}px` }} />;
+    return <div style={{ height: `${(content?.height as number) ?? 32}px` }} />;
   }
 
-  if (type === "cta-button" && content.ctaUrl) {
+  if (type === "cta-button" && content?.ctaUrl) {
     return (
       <a
         href={content.ctaUrl as string}
@@ -313,7 +338,7 @@ function BlockRenderer({
     );
   }
 
-  if (type === "image" && content.url) {
+  if (type === "image" && content?.url) {
     const el = (
       // eslint-disable-next-line @next/next/no-img-element
       <img
@@ -328,7 +353,11 @@ function BlockRenderer({
       />
     );
     return content.link ? (
-      <a href={content.link as string} target="_blank" rel="noopener noreferrer">
+      <a
+        href={content.link as string}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
         {el}
       </a>
     ) : (
@@ -336,14 +365,19 @@ function BlockRenderer({
     );
   }
 
-  if (type === "product-single" && content.productId) {
+  if (type === "product-single" && content?.productId) {
     const product = products.find((p) => p?.id === content.productId);
     if (!product) return null;
-    return <ProductCard product={product} tc={tc} radius={radius} shadow={shadow} />;
+    return (
+      <ProductCard product={product} tc={tc} radius={radius} shadow={shadow} />
+    );
   }
 
-  if ((type === "product-grid" || type === "product-list") && Array.isArray(content.productIds)) {
-    const selectedProducts = (content.productIds as string[])
+  if (
+    (type === "product-grid" || type === "product-list") &&
+    Array.isArray(content?.productIds)
+  ) {
+    const selectedProducts = (content?.productIds as string[])
       .map((id) => products.find((p) => p?.id === id))
       .filter(Boolean);
     const cols = (content.columns as number) ?? 2;
@@ -351,7 +385,10 @@ function BlockRenderer({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: type === "product-list" ? "1fr" : `repeat(${Math.min(cols, 2)}, 1fr)`,
+          gridTemplateColumns:
+            type === "product-list"
+              ? "1fr"
+              : `repeat(${Math.min(cols, 2)}, 1fr)`,
           gap: "12px",
           marginBottom: "1.5rem",
         }}
@@ -372,7 +409,7 @@ function BlockRenderer({
     );
   }
 
-  if (type === "custom-html" && content.html) {
+  if (type === "custom-html" && content?.html) {
     return (
       <div
         // biome-ignore lint/security/noDangerouslySetInnerHtml: user-provided custom HTML block
@@ -391,7 +428,9 @@ function ProductCard({
   radius,
   shadow,
 }: {
-  product: NonNullable<LandingPageWithProducts['landing_page_products']>[0]['product'];
+  product: NonNullable<
+    LandingPageWithProducts["landing_page_products"]
+  >[0]["product"];
   tc: ThemeConfig;
   radius: string;
   shadow: string;
@@ -427,7 +466,14 @@ function ProductCard({
       )}
       <div style={{ padding: "10px 12px 12px" }}>
         {product.badges.length > 0 && (
-          <div style={{ display: "flex", gap: "4px", flexWrap: "wrap", marginBottom: "4px" }}>
+          <div
+            style={{
+              display: "flex",
+              gap: "4px",
+              flexWrap: "wrap",
+              marginBottom: "4px",
+            }}
+          >
             {product.badges.map((b, i) => (
               <span
                 key={i}
@@ -486,13 +532,22 @@ function ProductCard({
                 color: tc.primaryColor,
               }}
             >
-              {formatCurrency(product.price, product.currency)}
+              {formatCurrency(product.price, { currency: product.currency })}
             </span>
-            {product.original_price && product.original_price > product.price && (
-              <span style={{ fontSize: "0.75rem", opacity: 0.5, textDecoration: "line-through" }}>
-                {formatCurrency(product.original_price, product.currency)}
-              </span>
-            )}
+            {product.original_price &&
+              product.original_price > product.price && (
+                <span
+                  style={{
+                    fontSize: "0.75rem",
+                    opacity: 0.5,
+                    textDecoration: "line-through",
+                  }}
+                >
+                  {formatCurrency(product.original_price, {
+                    currency: product.currency,
+                  })}
+                </span>
+              )}
           </div>
         )}
         <div

@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     const result = await uploadBase64Image(
       base64,
       mimeType ?? "image/jpeg",
-      folder ?? "forgebuilder/products",
+      folder ?? "snapland/products",
     );
 
     return NextResponse.json({ success: true, data: result });

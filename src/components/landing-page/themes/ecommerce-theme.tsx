@@ -1,6 +1,10 @@
 import { ExternalLink, ShoppingCart, Star } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
-import type { LandingPageWithProducts, ThemeConfig } from "@/types/database";
+import type {
+  LandingPageWithProducts,
+  ThemeConfig,
+  LandingBlock,
+} from "@/types/database";
 
 interface Props {
   landingPage: LandingPageWithProducts;
@@ -18,7 +22,11 @@ export function EcommerceTheme({ landingPage }: Props) {
     backgroundType: "solid",
     linkStyle: "card",
     shadow: "md",
-    ...landingPage.theme_config,
+    accentColor: landingPage.theme_config.primaryColor,
+    backgroundGradient: landingPage.theme_config.backgroundGradient,
+    backgroundImageUrl: landingPage.theme_config.backgroundImageUrl,
+    profileImageUrl: landingPage.theme_config.profileImageUrl,
+    coverImageUrl: landingPage.theme_config.coverImageUrl,
   };
 
   const products = (landingPage.landing_page_products ?? [])
@@ -56,7 +64,14 @@ export function EcommerceTheme({ landingPage }: Props) {
   const visibleBlocks = landingPage.blocks.filter((b) => b.visible);
 
   return (
-    <div style={{ minHeight: "100vh", fontFamily: tc.fontFamily, color: tc.textColor, ...bgStyle }}>
+    <div
+      style={{
+        minHeight: "100vh",
+        fontFamily: tc.fontFamily,
+        color: tc.textColor,
+        ...bgStyle,
+      }}
+    >
       {/* Store Header */}
       <header
         style={{
@@ -69,25 +84,44 @@ export function EcommerceTheme({ landingPage }: Props) {
           boxShadow: "0 2px 8px rgba(0,0,0,.15)",
         }}
       >
-        <div style={{ maxWidth: "960px", margin: "0 auto", display: "flex", alignItems: "center", gap: "12px" }}>
+        <div
+          style={{
+            maxWidth: "960px",
+            margin: "0 auto",
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+          }}
+        >
           {tc.profileImageUrl && (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={tc.profileImageUrl}
               alt={landingPage.title}
-              style={{ width: "36px", height: "36px", borderRadius: "50%", objectFit: "cover" }}
+              style={{
+                width: "36px",
+                height: "36px",
+                borderRadius: "50%",
+                objectFit: "cover",
+              }}
             />
           )}
           <div>
-            <h1 style={{ fontWeight: 700, fontSize: "1.1rem", margin: 0 }}>{landingPage.title}</h1>
+            <h1 style={{ fontWeight: 700, fontSize: "1.1rem", margin: 0 }}>
+              {landingPage.title}
+            </h1>
             {landingPage.description && (
-              <p style={{ fontSize: "0.75rem", opacity: 0.85, margin: 0 }}>{landingPage.description}</p>
+              <p style={{ fontSize: "0.75rem", opacity: 0.85, margin: 0 }}>
+                {landingPage.description}
+              </p>
             )}
           </div>
         </div>
       </header>
 
-      <main style={{ maxWidth: "960px", margin: "0 auto", padding: "1.5rem 1rem" }}>
+      <main
+        style={{ maxWidth: "960px", margin: "0 auto", padding: "1.5rem 1rem" }}
+      >
         {/* Blocks */}
         {visibleBlocks.length > 0 &&
           visibleBlocks.map((block) => (
@@ -97,7 +131,9 @@ export function EcommerceTheme({ landingPage }: Props) {
               tc={tc}
               radius={radius}
               shadow={shadow}
-              products={products.filter(Boolean) as NonNullable<typeof products[0]>[]}
+              products={
+                products.filter(Boolean) as NonNullable<(typeof products)[0]>[]
+              }
             />
           ))}
 
@@ -136,7 +172,7 @@ export function EcommerceTheme({ landingPage }: Props) {
           marginTop: "2rem",
         }}
       >
-        Powered by ForgeBuilder
+        Powered by Snapland
       </footer>
     </div>
   );
@@ -149,11 +185,13 @@ function BlockRenderer({
   shadow,
   products,
 }: {
-  block: { type: string; content: Record<string, unknown>; settings: Record<string, unknown> };
+  block: Partial<LandingBlock>;
   tc: ThemeConfig;
   radius: string;
   shadow: string;
-  products: NonNullable<LandingPageWithProducts["landing_page_products"]>[0]["product"][];
+  products: NonNullable<
+    LandingPageWithProducts["landing_page_products"]
+  >[0]["product"][];
 }) {
   const { type, content } = block;
 
@@ -164,7 +202,7 @@ function BlockRenderer({
           borderRadius: radius,
           overflow: "hidden",
           marginBottom: "1.5rem",
-          background: content.backgroundImageUrl
+          background: content?.backgroundImageUrl
             ? `linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url(${content.backgroundImageUrl}) center/cover`
             : `linear-gradient(135deg, ${tc.primaryColor}, ${tc.secondaryColor ?? tc.primaryColor})`,
           color: "#fff",
@@ -172,15 +210,17 @@ function BlockRenderer({
           textAlign: "center",
         }}
       >
-        <h2 style={{ fontSize: "2rem", fontWeight: 800, margin: "0 0 0.75rem" }}>
-          {(content.headline as string) ?? ""}
+        <h2
+          style={{ fontSize: "2rem", fontWeight: 800, margin: "0 0 0.75rem" }}
+        >
+          {(content?.headline as string) ?? ""}
         </h2>
-        {content.subheadline && (
+        {content?.subheadline && (
           <p style={{ fontSize: "1.1rem", opacity: 0.9, margin: "0 0 1.5rem" }}>
             {content.subheadline as string}
           </p>
         )}
-        {content.ctaText && content.ctaUrl && (
+        {content?.ctaText && content?.ctaUrl && (
           <a
             href={content.ctaUrl as string}
             target="_blank"
@@ -205,7 +245,13 @@ function BlockRenderer({
   }
 
   if (type === "text") {
-    return <div style={{ marginBottom: "1.5rem", lineHeight: 1.7, fontSize: "0.95rem" }}>{content.text as string}</div>;
+    return (
+      <div
+        style={{ marginBottom: "1.5rem", lineHeight: 1.7, fontSize: "0.95rem" }}
+      >
+        {(content?.text as string) ?? ""}
+      </div>
+    );
   }
 
   if (type === "divider") {
@@ -213,7 +259,7 @@ function BlockRenderer({
       <hr
         style={{
           border: "none",
-          borderTop: `1px solid ${(content.color as string) ?? "#e5e7eb"}`,
+          borderTop: `1px solid ${(content?.color as string) ?? "#e5e7eb"}`,
           margin: "1.5rem 0",
         }}
       />
@@ -221,10 +267,10 @@ function BlockRenderer({
   }
 
   if (type === "spacer") {
-    return <div style={{ height: `${(content.height as number) ?? 32}px` }} />;
+    return <div style={{ height: `${(content?.height as number) ?? 32}px` }} />;
   }
 
-  if (type === "cta-button" && content.ctaUrl) {
+  if (type === "cta-button" && content?.ctaUrl) {
     return (
       <a
         href={content.ctaUrl as string}
@@ -244,40 +290,67 @@ function BlockRenderer({
           fontSize: "1rem",
         }}
       >
-        <ShoppingCart style={{ display: "inline", marginRight: "8px", width: 18, height: 18 }} />
+        <ShoppingCart
+          style={{
+            display: "inline",
+            marginRight: "8px",
+            width: 18,
+            height: 18,
+          }}
+        />
         {(content.text as string) ?? "Shop Now"}
       </a>
     );
   }
 
-  if (type === "image" && content.url) {
+  if (type === "image" && content?.url) {
     const el = (
       // eslint-disable-next-line @next/next/no-img-element
       <img
         src={content.url as string}
         alt={(content.alt as string) ?? ""}
-        style={{ width: "100%", borderRadius: radius, marginBottom: "1.5rem", display: "block" }}
+        style={{
+          width: "100%",
+          borderRadius: radius,
+          marginBottom: "1.5rem",
+          display: "block",
+        }}
       />
     );
     return content.link ? (
-      <a href={content.link as string} target="_blank" rel="noopener noreferrer">{el}</a>
+      <a
+        href={content.link as string}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {el}
+      </a>
     ) : (
       el
     );
   }
 
-  if (type === "product-single" && content.productId) {
+  if (type === "product-single" && content?.productId) {
     const product = products.find((p) => p?.id === content.productId);
     if (!product) return null;
     return (
       <div style={{ marginBottom: "1.5rem" }}>
-        <ProductCard product={product} tc={tc} radius={radius} shadow={shadow} featured />
+        <ProductCard
+          product={product}
+          tc={tc}
+          radius={radius}
+          shadow={shadow}
+          featured
+        />
       </div>
     );
   }
 
-  if ((type === "product-grid" || type === "product-list") && Array.isArray(content.productIds)) {
-    const cols = (content.columns as number) ?? 3;
+  if (
+    (type === "product-grid" || type === "product-list") &&
+    Array.isArray(content?.productIds)
+  ) {
+    const cols = (content?.columns as number) ?? 3;
     const selectedProducts = (content.productIds as string[])
       .map((id) => products.find((p) => p?.id === id))
       .filter(Boolean);
@@ -286,7 +359,9 @@ function BlockRenderer({
         style={{
           display: "grid",
           gridTemplateColumns:
-            type === "product-list" ? "1fr" : `repeat(${Math.min(cols, 4)}, 1fr)`,
+            type === "product-list"
+              ? "1fr"
+              : `repeat(${Math.min(cols, 4)}, 1fr)`,
           gap: "16px",
           marginBottom: "1.5rem",
         }}
@@ -307,7 +382,7 @@ function BlockRenderer({
     );
   }
 
-  if (type === "custom-html" && content.html) {
+  if (type === "custom-html" && content?.html) {
     return (
       <div
         // biome-ignore lint/security/noDangerouslySetInnerHtml: user-provided custom HTML block
@@ -327,18 +402,26 @@ function ProductCard({
   shadow,
   featured = false,
 }: {
-  product: NonNullable<LandingPageWithProducts["landing_page_products"]>[0]["product"];
+  product: NonNullable<
+    LandingPageWithProducts["landing_page_products"]
+  >[0]["product"];
   tc: ThemeConfig;
   radius: string;
   shadow: string;
   featured?: boolean;
 }) {
   if (!product) return null;
-  const thumb = product.images.find((i) => i.is_primary)?.url ?? product.images[0]?.url;
+  const thumb =
+    product.images.find((i) => i.is_primary)?.url ?? product.images[0]?.url;
   const href = product.affiliate_url ?? product.marketplace_url ?? "#";
-  const hasDiscount = product.original_price != null && product.original_price > (product.price ?? 0);
+  const hasDiscount =
+    product.original_price != null &&
+    product.original_price > (product.price ?? 0);
   const discountPct = hasDiscount
-    ? Math.round(((product.original_price! - product.price!) / product.original_price!) * 100)
+    ? Math.round(
+        ((product.original_price! - product.price!) / product.original_price!) *
+          100,
+      )
     : 0;
 
   if (featured) {
@@ -377,7 +460,14 @@ function ProductCard({
         )}
         <div style={{ flex: 1 }}>
           {product.badges.length > 0 && (
-            <div style={{ display: "flex", gap: "4px", flexWrap: "wrap", marginBottom: "8px" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: "4px",
+                flexWrap: "wrap",
+                marginBottom: "8px",
+              }}
+            >
               {product.badges.map((b, i) => (
                 <span
                   key={i}
@@ -395,35 +485,75 @@ function ProductCard({
               ))}
             </div>
           )}
-          <h3 style={{ fontWeight: 700, fontSize: "1.1rem", margin: "0 0 8px" }}>{product.title}</h3>
+          <h3
+            style={{ fontWeight: 700, fontSize: "1.1rem", margin: "0 0 8px" }}
+          >
+            {product.title}
+          </h3>
           {product.product_rating != null && (
-            <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "13px", marginBottom: "8px" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                fontSize: "13px",
+                marginBottom: "8px",
+              }}
+            >
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star
                   key={i}
                   style={{
                     width: 14,
                     height: 14,
-                    fill: i < Math.round(product.product_rating!) ? "#f59e0b" : "transparent",
+                    fill:
+                      i < Math.round(product.product_rating!)
+                        ? "#f59e0b"
+                        : "transparent",
                     color: "#f59e0b",
                   }}
                 />
               ))}
-              <span style={{ fontWeight: 600 }}>{product.product_rating.toFixed(1)}</span>
+              <span style={{ fontWeight: 600 }}>
+                {product.product_rating.toFixed(1)}
+              </span>
               {product.review_count > 0 && (
-                <span style={{ opacity: 0.6 }}>({product.review_count.toLocaleString()} reviews)</span>
+                <span style={{ opacity: 0.6 }}>
+                  ({product.review_count.toLocaleString()} reviews)
+                </span>
               )}
             </div>
           )}
           {product.price != null && (
-            <div style={{ display: "flex", alignItems: "baseline", gap: "8px", marginBottom: "12px" }}>
-              <span style={{ fontSize: "1.5rem", fontWeight: 800, color: tc.primaryColor }}>
-                {formatCurrency(product.price, product.currency)}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "baseline",
+                gap: "8px",
+                marginBottom: "12px",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "1.5rem",
+                  fontWeight: 800,
+                  color: tc.primaryColor,
+                }}
+              >
+                {formatCurrency(product.price, { currency: product.currency })}
               </span>
               {hasDiscount && (
                 <>
-                  <span style={{ fontSize: "0.9rem", opacity: 0.5, textDecoration: "line-through" }}>
-                    {formatCurrency(product.original_price!, product.currency)}
+                  <span
+                    style={{
+                      fontSize: "0.9rem",
+                      opacity: 0.5,
+                      textDecoration: "line-through",
+                    }}
+                  >
+                    {formatCurrency(product.original_price!, {
+                      currency: product.currency,
+                    })}
                   </span>
                   <span
                     style={{
@@ -502,12 +632,24 @@ function ProductCard({
         <img
           src={thumb}
           alt={product.title}
-          style={{ width: "100%", aspectRatio: "1", objectFit: "cover", display: "block" }}
+          style={{
+            width: "100%",
+            aspectRatio: "1",
+            objectFit: "cover",
+            display: "block",
+          }}
         />
       )}
       <div style={{ padding: "10px 12px 14px" }}>
         {product.badges.length > 0 && (
-          <div style={{ display: "flex", gap: "4px", flexWrap: "wrap", marginBottom: "6px" }}>
+          <div
+            style={{
+              display: "flex",
+              gap: "4px",
+              flexWrap: "wrap",
+              marginBottom: "6px",
+            }}
+          >
             {product.badges.map((b, i) => (
               <span
                 key={i}
@@ -539,22 +681,55 @@ function ProductCard({
           {product.title}
         </p>
         {product.product_rating != null && (
-          <div style={{ display: "flex", alignItems: "center", gap: "3px", fontSize: "11px", marginBottom: "6px" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "3px",
+              fontSize: "11px",
+              marginBottom: "6px",
+            }}
+          >
             <span style={{ color: "#f59e0b" }}>★</span>
-            <span style={{ fontWeight: 600 }}>{product.product_rating.toFixed(1)}</span>
+            <span style={{ fontWeight: 600 }}>
+              {product.product_rating.toFixed(1)}
+            </span>
             {product.review_count > 0 && (
-              <span style={{ opacity: 0.5 }}>({product.review_count.toLocaleString()})</span>
+              <span style={{ opacity: 0.5 }}>
+                ({product.review_count.toLocaleString()})
+              </span>
             )}
           </div>
         )}
         {product.price != null && (
-          <div style={{ display: "flex", alignItems: "baseline", gap: "6px", marginBottom: "10px" }}>
-            <span style={{ fontWeight: 800, fontSize: "1rem", color: tc.primaryColor }}>
-              {formatCurrency(product.price, product.currency)}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "baseline",
+              gap: "6px",
+              marginBottom: "10px",
+            }}
+          >
+            <span
+              style={{
+                fontWeight: 800,
+                fontSize: "1rem",
+                color: tc.primaryColor,
+              }}
+            >
+              {formatCurrency(product.price, { currency: product.currency })}
             </span>
             {hasDiscount && (
-              <span style={{ fontSize: "0.75rem", opacity: 0.5, textDecoration: "line-through" }}>
-                {formatCurrency(product.original_price!, product.currency)}
+              <span
+                style={{
+                  fontSize: "0.75rem",
+                  opacity: 0.5,
+                  textDecoration: "line-through",
+                }}
+              >
+                {formatCurrency(product.original_price!, {
+                  currency: product.currency,
+                })}
               </span>
             )}
           </div>

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/static-components */
 import type { LandingPageWithProducts } from "@/types/database";
 import { LinktreeTheme } from "./themes/linktree-theme";
 import { EcommerceTheme } from "./themes/ecommerce-theme";

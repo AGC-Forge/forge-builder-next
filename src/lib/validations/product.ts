@@ -65,7 +65,8 @@ export const productSchema = z.object({
   input_mode: z.enum(["manual", "auto"]).default("manual"),
 });
 
-export type ProductInput = z.infer<typeof productSchema>;
+export type ProductFormInput = z.input<typeof productSchema>;
+export type ProductInput = z.output<typeof productSchema>;
 export type ProductImageInput = z.infer<typeof productImageSchema>;
 export type ProductFeatureInput = z.infer<typeof featureSchema>;
 export type ProductSpecInput = z.infer<typeof specSchema>;

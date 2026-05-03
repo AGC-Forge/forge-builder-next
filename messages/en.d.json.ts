@@ -3,8 +3,9 @@
 
 declare const messages: {
   "HomePage": {
-    "title": "Forge Builder!",
-    "description": "Forge Builder is a social media management tool that connects all of your affiliate program with one easy link.!"
+    "title": "Snapland!",
+    "tagline": "AI Landing Page Builder: Create High-Converting Pages in Seconds",
+    "description": "Build professional, high-converting landing pages with Landoo.ai. No coding required. Use our AI-powered builder to grow your business and boost conversions instantly."
   },
   "NotFoundPage": {
     "title": "404 Not Found",
@@ -13,10 +14,10 @@ declare const messages: {
   },
   "LocaleSwitcher": {
     "label": "Change language",
-    "locale": "{locale, select, id {Bahasa Indonesia} en {English} other {Unknown}}"
+    "locale": "{locale, select, id {Bahasa Indonesia} en {English}}"
   },
   "Manifest": {
-    "name": "Forge Builder"
+    "name": "Snapland"
   }
 };
 export default messages;

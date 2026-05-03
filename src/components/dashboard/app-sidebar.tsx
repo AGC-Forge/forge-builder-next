@@ -52,7 +52,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuButton asChild>
               <Link prefetch={false} href="/admin" locale={locale}>
                 <Command />
-                <span className="font-semibold text-base">Forge Builder</span>
+                <span className="font-semibold text-base">Snapland</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

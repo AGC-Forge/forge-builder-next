@@ -1,5 +1,5 @@
 -- ============================================================
--- FORGE BUILDER — SUPABASE DATABASE SCHEMA
+-- SNAPLAND — SUPABASE DATABASE SCHEMA
 -- Run this in Supabase SQL Editor → New Query → Run All
 -- ============================================================
 
@@ -298,7 +298,7 @@ CREATE POLICY "pc_own_select"     ON public.product_clicks FOR SELECT TO authent
 -- SEED DATA
 -- ============================================================
 INSERT INTO public.web_settings (key, value, group_name, description, is_public) VALUES
-  ('site_name',                  'ForgeBuilder',                                         'general',  'Website / app name',                                true),
+  ('site_name',                  'Snapland',                                         'general',  'Website / app name',                                true),
   ('site_tagline',               'Build stunning landing pages for your products',        'general',  'Short tagline shown in header',                     true),
   ('site_description',           'Create, publish, and track affiliate landing pages',    'general',  'Meta description used for SEO',                     true),
   ('site_logo',                  NULL,                                                    'general',  'Logo image URL',                                    true),

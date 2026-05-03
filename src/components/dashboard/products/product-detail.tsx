@@ -9,12 +9,7 @@ import type { Product } from "@/types/database";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
 export function ProductDetail({ product }: { product: Product }) {
@@ -97,15 +92,16 @@ export function ProductDetail({ product }: { product: Product }) {
               {product.price != null && (
                 <div>
                   <p className="font-bold text-2xl text-primary">
-                    {formatCurrency(product.price, product.currency)}
+                    {formatCurrency(product.price, {
+                      currency: product.currency,
+                    })}
                   </p>
                   {product.original_price &&
                     product.original_price > product.price && (
                       <p className="text-muted-foreground text-sm line-through">
-                        {formatCurrency(
-                          product.original_price,
-                          product.currency,
-                        )}
+                        {formatCurrency(product.original_price, {
+                          currency: product.currency,
+                        })}
                       </p>
                     )}
                 </div>
@@ -192,7 +188,9 @@ export function ProductDetail({ product }: { product: Product }) {
               <CardTitle>Description</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="whitespace-pre-wrap text-sm">{product.description}</p>
+              <p className="whitespace-pre-wrap text-sm">
+                {product.description}
+              </p>
             </CardContent>
           </Card>
         )}
