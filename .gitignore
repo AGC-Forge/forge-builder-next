@@ -44,3 +44,4 @@ ecosystem.config.js
 .vercel
 docs/*
 nginx/*
+scripts/deploy.sh
