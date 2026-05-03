@@ -4,14 +4,15 @@ import { useState, useEffect } from "react";
 import { Link } from "@/i18n/navigation";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
-import type { Profile } from "@/types/database";
 import { Button } from "@/components/ui/button";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { cn } from "@/lib/utils";
 import { Menu, X } from "lucide-react";
+import { useCurrentUser } from "@/components/current-user-provider";
 
-export function Navbar({ profile }: { profile?: Profile }) {
+export function Navbar() {
+  const { profile } = useCurrentUser();
   const t = useTranslations("HomeSectionNav");
   const locale = useLocale();
   const pathname = usePathname();

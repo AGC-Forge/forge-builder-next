@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import type { WebSetting, UserApiKey } from "@/types/database";
 
@@ -26,24 +27,24 @@ export async function getSettings(
   }
 }
 
-export async function getPublicSettings(): Promise<
-  ActionResult<Record<string, string | null>>
-> {
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("web_settings")
-      .select("key, value")
-      .eq("is_public", true);
-    if (error) return { success: false, error: error.message };
+export const getPublicSettings = cache(
+  async (): Promise<ActionResult<Record<string, string | null>>> => {
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase
+        .from("web_settings")
+        .select("key, value")
+        .eq("is_public", true);
+      if (error) return { success: false, error: error.message };
 
-    const map: Record<string, string | null> = {};
-    for (const s of data ?? []) map[s.key] = s.value;
-    return { success: true, data: map };
-  } catch {
-    return { success: false, error: "Failed to fetch settings" };
-  }
-}
+      const map: Record<string, string | null> = {};
+      for (const s of data ?? []) map[s.key] = s.value;
+      return { success: true, data: map };
+    } catch {
+      return { success: false, error: "Failed to fetch settings" };
+    }
+  },
+);
 
 export async function updateSetting(
   key: string,

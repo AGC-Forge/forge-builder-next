@@ -93,7 +93,12 @@ export function ApiKeyForm({ existing }: Props) {
       return;
     }
     startTransition(async () => {
-      const result = await saveApiKey("openrouter", apiKey.trim(), modelId, label || undefined);
+      const result = await saveApiKey(
+        "openrouter",
+        apiKey.trim(),
+        modelId,
+        label || undefined,
+      );
       if (result.success) toast.success("API key saved.");
       else toast.error(result.error ?? "Failed to save.");
     });
@@ -116,7 +121,7 @@ export function ApiKeyForm({ existing }: Props) {
   }
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="w-full space-y-6">
       <Card>
         <CardHeader>
           <CardTitle>OpenRouter API Key</CardTitle>
@@ -186,8 +191,8 @@ export function ApiKeyForm({ existing }: Props) {
               </SelectContent>
             </Select>
             <p className="mt-1 text-muted-foreground text-xs">
-              Model used for AI product analysis. Models with vision support work
-              best when using product images.
+              Model used for AI product analysis. Models with vision support
+              work best when using product images.
             </p>
           </div>
 

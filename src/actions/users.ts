@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { Profile, PaginatedResult } from "@/types/database";
 import { getUserWithProfile } from "@/lib/supabase/profiles";
+import { cache } from "react";
 
 export async function getUsers(opts: {
   page?: number;
@@ -133,17 +134,20 @@ export async function deleteUser(id: string): Promise<ActionResult> {
   }
 }
 export async function getCurrentProfile(): Promise<ActionResult<Profile>> {
+  return getCurrentProfileCached();
+}
+
+const getCurrentProfileCached = cache(async (): Promise<ActionResult<Profile>> => {
   try {
     const supabase = await createClient();
     const { user, profile } = await getUserWithProfile(supabase);
     if (!user) return { success: false, error: "Unauthorized" };
     if (!profile) return { success: false, error: "Profile not found" };
-
     return { success: true, data: profile as unknown as Profile };
   } catch {
     return { success: false, error: "Failed to fetch profile" };
   }
-}
+});
 export async function getDashboardStats() {
   try {
     const supabase = await createClient();

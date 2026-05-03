@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { getCurrentProfile } from "@/actions/users";
 import { Navbar } from "@/components/home/nav-bar";
 import { Footer } from "@/components/home/footer";
 import { HeroSection } from "@/components/home/hero-section";
@@ -16,14 +15,12 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const profileResult = await getCurrentProfile();
-  const profile = profileResult.data;
   return (
     <div
       className="max-w-7xl mx-auto px-6 lg:px-12 bg-background"
       style={{ boxSizing: "border-box" }}
     >
-      <Navbar profile={profile} />
+      <Navbar />
       <main>
         <HeroSection />
         <hr className="section-divider" />

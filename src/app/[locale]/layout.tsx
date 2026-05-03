@@ -13,6 +13,13 @@ import {
 } from "@/lib/preferences/preferences-config";
 import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { getCurrentProfile } from "@/actions/users";
+import { getPublicSettings } from "@/actions/settings";
+import {
+  CurrentUserProvider,
+  type CurrentUser,
+} from "@/components/current-user-provider";
+import type { Profile } from "@/types/database";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -82,6 +89,25 @@ export default async function RootLayout({
     sidebar_variant: PREFERENCE_DEFAULTS.sidebar_variant,
     sidebar_collapsible: PREFERENCE_DEFAULTS.sidebar_collapsible,
   });
+
+  let currentUser: CurrentUser = null;
+  let currentProfile: Profile | null = null;
+  let publicSettings: Record<string, string | null> = {};
+
+  const [profileResult, settingsResult] = await Promise.all([
+    getCurrentProfile().catch(() => null),
+    getPublicSettings().catch(() => null),
+  ]);
+
+  if (profileResult?.success && profileResult.data) {
+    const p = profileResult.data;
+    currentUser = { id: p.id, email: p.email ?? null };
+    currentProfile = p;
+  }
+
+  if (settingsResult?.success && settingsResult.data) {
+    publicSettings = settingsResult.data;
+  }
 
   return (
     <html
@@ -190,8 +216,10 @@ export default async function RootLayout({
               navbarStyle={navbar_style}
               font={font}
             >
-              {children}
-              <Toaster />
+              <CurrentUserProvider user={currentUser} profile={currentProfile} publicSettings={publicSettings}>
+                {children}
+                <Toaster />
+              </CurrentUserProvider>
             </PreferencesStoreProvider>
           </TooltipProvider>
         </NextIntlClientProvider>

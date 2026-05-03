@@ -75,11 +75,12 @@ export function AppearanceSettingsForm({ settings }: Props) {
   }
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="w-full space-y-6">
       <Alert>
         <AlertDescription>
           These tracking codes will be injected globally on ALL landing pages.
-          Per-page tracking can be configured in each landing page&apos;s settings.
+          Per-page tracking can be configured in each landing page&apos;s
+          settings.
         </AlertDescription>
       </Alert>
 
@@ -108,7 +109,10 @@ export function AppearanceSettingsForm({ settings }: Props) {
                 id={field.key}
                 value={values[field.key] ?? ""}
                 onChange={(e) =>
-                  setValues((v) => ({ ...v, [field.key]: e.target.value || null }))
+                  setValues((v) => ({
+                    ...v,
+                    [field.key]: e.target.value || null,
+                  }))
                 }
                 placeholder={field.placeholder}
                 className="mt-1 font-mono"
