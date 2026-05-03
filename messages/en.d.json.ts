@@ -3,9 +3,9 @@
 
 declare const messages: {
   "HomePage": {
-    "title": "Snapland!",
+    "title": "SnapLand!",
     "tagline": "AI Landing Page Builder: Create High-Converting Pages in Seconds",
-    "description": "Build professional, high-converting landing pages with Landoo.ai. No coding required. Use our AI-powered builder to grow your business and boost conversions instantly."
+    "description": "Build professional, high-converting landing pages with SnapLand. No coding required. Use our AI-powered builder to grow your business and boost conversions instantly."
   },
   "NotFoundPage": {
     "title": "404 Not Found",
@@ -17,7 +17,210 @@ declare const messages: {
     "locale": "{locale, select, id {Bahasa Indonesia} en {English}}"
   },
   "Manifest": {
-    "name": "Snapland"
+    "name": "SnapLand"
+  },
+  "HomeSectionNav": {
+    "features": "Features",
+    "themes": "Themes",
+    "analytics": "Analytics",
+    "pricing": "Pricing",
+    "integrations": "Integrations",
+    "login": "Log in",
+    "getStarted": "Get started free"
+  },
+  "HomeSectionHero": {
+    "badge": "Now with AI-powered builder",
+    "title1": "Build stunning",
+    "title2": "landing pages",
+    "title3": "that convert",
+    "subtitle": "Drag, drop, customize. Choose from 10+ platform styles — Linktree, Beacons, e-commerce, and more. No code needed.",
+    "cta1": "Start building for free →",
+    "cta2": "View live demos",
+    "previewUrl": "pageforge.io/yourslug",
+    "previewComponents": "Components",
+    "previewSettings": "Settings",
+    "heroBlock": "Hero Section — Drag to reorder",
+    "feature": "Feature",
+    "ctaBlock": "⚡ CTA Button",
+    "components": {
+      "hero": "Hero Block",
+      "link": "Link Button",
+      "image": "Image Card",
+      "product": "Product Card",
+      "stats": "Stats Row",
+      "theme": "Theme",
+      "slug": "Custom Slug",
+      "ai": "AI Assist"
+    }
+  },
+  "HomeSectionStats": {
+    "pages": "Pages created",
+    "themes": "Theme styles",
+    "uptime": "Uptime SLA",
+    "conversion": "Avg conversion boost"
+  },
+  "HomeSectionThemes": {
+    "tag": "Platform Themes",
+    "title1": "Every style,",
+    "title2": "one platform",
+    "subtitle": "Pick the layout that matches your use case — from bio links to full e-commerce storefronts.",
+    "new": "NEW",
+    "items": {
+      "linktree": "Linktree Style",
+      "beacons": "Beacons Style",
+      "taplink": "Taplink Style",
+      "campsite": "Campsite Style",
+      "carrd": "Carrd Style",
+      "seedprod": "SeedProd Style",
+      "lnkbio": "Lnk.bio Style",
+      "amazon": "E-commerce (Amazon)",
+      "shopee": "E-commerce (Shopee)",
+      "ai": "AI Generated ✦"
+    }
+  },
+  "HomeSectionFeatures": {
+    "tag": "Core Features",
+    "title1": "Everything you need",
+    "title2": "to launch",
+    "items": {
+      "dragdrop": {
+        "title": "Drag & Drop Builder",
+        "desc": "Build your page visually with a powerful block editor. Add text, images, buttons, product cards, forms, and more — all with real-time preview and instant publishing."
+      },
+      "slug": {
+        "title": "Custom Slug",
+        "desc": "Claim your own branded URL like pageforge.io/yourbrand"
+      },
+      "product": {
+        "title": "Product Assignment",
+        "desc": "Connect and feature your products directly on your landing page with prices, images, and buy buttons."
+      },
+      "i18n": {
+        "title": "i18n Support",
+        "desc": "Full English and Bahasa Indonesia support out of the box. More languages coming soon."
+      },
+      "ai": {
+        "title": "AI Integration",
+        "desc": "Generate copy, suggest layouts, auto-write product descriptions, and optimize your page for conversions with built-in AI."
+      },
+      "analytics": {
+        "title": "Tracking & Analytics",
+        "desc": "Native support for Google Tag Manager, Facebook Pixel, and Histats — set up in seconds, no code needed."
+      },
+      "dashboard": {
+        "title": "Admin Analytics Dashboard",
+        "desc": "See all your page performance in one place. Track visits, clicks, conversion rates, and revenue across all your pages in a clean, real-time dashboard."
+      },
+      "theme": {
+        "title": "Theme Customization",
+        "desc": "Customize colors, fonts, spacing, and more within any selected theme."
+      }
+    }
+  },
+  "HomeSectionAnalytics": {
+    "tag": "Analytics Dashboard",
+    "title1": "Track every click,",
+    "title2": "every conversion",
+    "subtitle": "Real-time insights powered by GTM, Facebook Pixel, and Histats — all in one unified view.",
+    "overview": "Dashboard Overview",
+    "tabs": {
+      "7days": "7 days",
+      "30days": "30 days",
+      "90days": "90 days"
+    },
+    "metrics": {
+      "pageviews": "Page Views",
+      "visitors": "Unique Visitors",
+      "ctr": "Click-through Rate",
+      "revenue": "Revenue Driven"
+    }
+  },
+  "HomeSectionIntegrations": {
+    "tag": "Integrations",
+    "title1": "Connects with your",
+    "title2": "entire stack"
+  },
+  "HomeSectionPricing": {
+    "tag": "Pricing",
+    "title1": "Start free,",
+    "title2": "scale when ready",
+    "subtitle": "No credit card required. All plans include unlimited pages and free SSL.",
+    "popular": "⚡ Most Popular",
+    "mo": "/ mo",
+    "plans": {
+      "free": {
+        "name": "Free",
+        "price": "Rp 0",
+        "desc": "Perfect for getting started and testing ideas.",
+        "cta": "Get started free",
+        "features": [
+          "3 landing pages",
+          "Custom slug",
+          "5 theme styles",
+          "Basic analytics",
+          "EN & ID language"
+        ]
+      },
+      "pro": {
+        "name": "Pro",
+        "price": "Rp 89K",
+        "desc": "For creators, sellers, and growing businesses.",
+        "cta": "Start Pro free trial",
+        "features": [
+          "Unlimited pages",
+          "All 10+ themes",
+          "Drag & Drop builder",
+          "GTM + FB Pixel + Histats",
+          "AI integration (50 uses/mo)",
+          "Product assignment",
+          "Admin dashboard"
+        ]
+      },
+      "business": {
+        "name": "Business",
+        "price": "Rp 249K",
+        "desc": "For teams, agencies, and power users.",
+        "cta": "Contact sales",
+        "features": [
+          "Everything in Pro",
+          "Unlimited AI usage",
+          "Custom domain",
+          "Team collaboration",
+          "White-label option",
+          "Priority support",
+          "Advanced analytics export"
+        ]
+      }
+    }
+  },
+  "HomeSectionCTA": {
+    "title1": "Ready to build your",
+    "title2": "perfect page?",
+    "subtitle": "Join thousands of creators, sellers, and brands already using PageForge.",
+    "btn1": "Start for free — no card needed",
+    "btn2": "Schedule a demo"
+  },
+  "HomeSectionFooter": {
+    "tagline": "Build beautiful landing pages for any purpose — bio links, products, portfolios, and more. Powered by Next.js 16.",
+    "product": "Product",
+    "resources": "Resources",
+    "company": "Company",
+    "links": {
+      "features": "Features",
+      "themes": "Themes",
+      "pricing": "Pricing",
+      "changelog": "Changelog",
+      "docs": "Documentation",
+      "blog": "Blog",
+      "templates": "Templates",
+      "api": "API",
+      "about": "About",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "contact": "Contact"
+    },
+    "copyright": "© 2026 PageForge. Built with Next.js 16 · Tailwind CSS · Shadcn UI",
+    "privacyPolicy": "Privacy Policy"
   }
 };
 export default messages;

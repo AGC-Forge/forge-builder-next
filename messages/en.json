@@ -1,8 +1,8 @@
 {
   "HomePage": {
-    "title": "Snapland!",
+    "title": "SnapLand!",
     "tagline": "AI Landing Page Builder: Create High-Converting Pages in Seconds",
-    "description": "Build professional, high-converting landing pages with Landoo.ai. No coding required. Use our AI-powered builder to grow your business and boost conversions instantly."
+    "description": "Build professional, high-converting landing pages with SnapLand. No coding required. Use our AI-powered builder to grow your business and boost conversions instantly."
   },
   "NotFoundPage": {
     "title": "404 Not Found",
@@ -14,7 +14,7 @@
     "locale": "{locale, select, id {Bahasa Indonesia} en {English}}"
   },
   "Manifest": {
-    "name": "Snapland"
+    "name": "SnapLand"
   },
   "HomeSectionNav": {
     "features": "Features",

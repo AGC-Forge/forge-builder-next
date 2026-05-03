@@ -20,7 +20,7 @@ export default async function WebSettingsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Web Settings</h1>
         <p className="text-muted-foreground text-sm">
-          Global configuration for your Snapland platform.
+          Global configuration for your SnapLand platform.
         </p>
       </div>
       <WebSettingsForm groups={groups} />

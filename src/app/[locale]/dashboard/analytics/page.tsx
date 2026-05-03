@@ -24,8 +24,11 @@ export default async function AnalyticsPage() {
           Track performance across all your landing pages (last 30 days).
         </p>
       </div>
-      <AnalyticsOverview stats={stats} />
-      <AnalyticsCharts views={analytics?.views ?? []} clicks={analytics?.clicks ?? []} />
+      <AnalyticsOverview stats={stats ?? null} />
+      <AnalyticsCharts
+        views={analytics?.views ?? []}
+        clicks={analytics?.clicks ?? []}
+      />
       <TopPagesTable pages={analytics?.topPages ?? []} />
     </div>
   );

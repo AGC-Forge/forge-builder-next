@@ -172,7 +172,7 @@ export function EcommerceTheme({ landingPage }: Props) {
           marginTop: "2rem",
         }}
       >
-        Powered by Snapland
+        Powered by SnapLand
       </footer>
     </div>
   );

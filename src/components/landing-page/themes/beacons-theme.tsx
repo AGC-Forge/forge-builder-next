@@ -237,7 +237,7 @@ export function BeaconsTheme({ landingPage }: Props) {
             opacity: 0.3,
           }}
         >
-          Powered by Snapland
+          Powered by SnapLand
         </p>
       </div>
     </div>

@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap");
+
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -19,6 +21,8 @@
   --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
+  --font-syne: "Syne", sans-serif;
+  --font-dm-sans: "DM Sans", sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -61,6 +65,9 @@
   --animate-shimmer: shimmer 1s linear infinite;
   --animate-fade-in: fade-in 0.5s ease-in-out;
   --animate-fade-out: fade-out 0.5s ease-in-out;
+  --animate-fade-up: fade-up 0.6s ease forwards;
+  --animate-scroll-left: scroll-left 30s linear infinite;
+  --animate-scroll-left-delay: scroll-left 30s linear -15s infinite;
 
   @keyframes marquee {
     from {
@@ -109,6 +116,24 @@
     }
     to {
       opacity: 0;
+    }
+  }
+  @keyframes scroll-left {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
   }
 }
@@ -198,6 +223,7 @@
   html {
     @apply font-sans;
     scroll-behavior: smooth;
+    overscroll-behavior: none;
   }
   button:not(:disabled),
   [role="button"]:not(:disabled) {
@@ -296,12 +322,20 @@
   html[data-font="playfairDisplay"] body {
     --font-sans: var(--font-playfair-display);
   }
-}
+  .font-display-syne {
+    font-family: var(--font-syne);
+  }
 
-html {
-  overscroll-behavior: none;
+  .font-body-dm-sans {
+    font-family: var(--font-dm-sans);
+  }
 }
-
-.disable-transitions * {
-  transition: none !important;
+@layer components {
+  .disable-transitions * {
+    transition: none !important;
+  }
+  .section-divider {
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
 }

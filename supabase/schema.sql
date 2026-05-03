@@ -298,7 +298,7 @@ CREATE POLICY "pc_own_select"     ON public.product_clicks FOR SELECT TO authent
 -- SEED DATA
 -- ============================================================
 INSERT INTO public.web_settings (key, value, group_name, description, is_public) VALUES
-  ('site_name',                  'Snapland',                                         'general',  'Website / app name',                                true),
+  ('site_name',                  'SnapLand',                                         'general',  'Website / app name',                                true),
   ('site_tagline',               'Build stunning landing pages for your products',        'general',  'Short tagline shown in header',                     true),
   ('site_description',           'Create, publish, and track affiliate landing pages',    'general',  'Meta description used for SEO',                     true),
   ('site_logo',                  NULL,                                                    'general',  'Logo image URL',                                    true),
@@ -326,3 +326,30 @@ INSERT INTO public.web_settings (key, value, group_name, description, is_public)
   ('cloudinary_cloud_name',      NULL,                                                    'storage',  'Cloudinary cloud name',                             false),
   ('cloudinary_upload_preset',   NULL,                                                    'storage',  'Cloudinary unsigned upload preset name',            false)
 ON CONFLICT (key) DO NOTHING;
+
+-- ============================================================
+-- RPC: increment counters (bypasses RLS for public tracking)
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION public.increment_view_count(page_id UUID)
+RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER AS $$
+BEGIN
+  UPDATE public.landing_pages
+  SET view_count = view_count + 1
+  WHERE id = page_id;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.increment_click_count(page_id UUID)
+RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER AS $$
+BEGIN
+  UPDATE public.landing_pages
+  SET click_count = click_count + 1
+  WHERE id = page_id;
+END;
+$$;
+
+-- Allow anonymous callers to invoke these RPCs (public landing pages)
+GRANT EXECUTE ON FUNCTION public.increment_view_count(UUID)  TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.increment_click_count(UUID) TO anon, authenticated;
+

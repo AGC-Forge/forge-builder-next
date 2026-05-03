@@ -1,5 +1,4 @@
 import {
-    Gauge,
     LayoutDashboard,
     Users,
     type LucideIcon,

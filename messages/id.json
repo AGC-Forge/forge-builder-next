@@ -1,8 +1,8 @@
 {
   "HomePage": {
-    "title": "Snapland!",
-    "tagline": "AI Landing Page Builder: Buat Halaman Landing yang Tinggi Konversi Dalam Detik",
-    "description": "Snapland adalah aplikasi manajemen media sosial yang menghubungkan semua media sosial Anda dengan satu link mudah."
+    "title": "SnapLand!",
+    "tagline": "Pembuat Landing Page AI: Buat Halaman Landing yang Tinggi Konversi Dalam Detik",
+    "description": "Buat landing page profesional dan berkonversi tinggi dengan SnapLand. Tidak perlu coding. Gunakan builder berbasis AI kami untuk mengembangkan bisnis Anda dan meningkatkan konversi secara instan."
   },
   "NotFoundPage": {
     "title": "404 Tidak Ditemukan",
@@ -14,7 +14,7 @@
     "locale": "{locale, select, id {Bahasa Indonesia} en {Bahasa Inggris}}"
   },
   "Manifest": {
-    "name": "Snapland"
+    "name": "SnapLand"
   },
   "HomeSectionNav": {
     "features": "Fitur",
@@ -190,7 +190,7 @@
       }
     }
   },
-  "HomeSectionCta": {
+  "HomeSectionCTA": {
     "title1": "Siap membangun",
     "title2": "halaman impianmu?",
     "subtitle": "Bergabung dengan ribuan kreator, penjual, dan brand yang sudah menggunakan PageForge.",

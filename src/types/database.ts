@@ -252,8 +252,8 @@ export interface DashboardStats {
   total_views: number;
   total_clicks: number;
   total_users: number;
-  views_today: number;
-  clicks_today: number;
+  views_last_7d: number;
+  clicks_last_7d: number;
 }
 
 // ── Pagination ───────────────────────────────────────────────

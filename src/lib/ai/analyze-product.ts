@@ -34,7 +34,7 @@ export async function analyzeProduct(
 ): Promise<AnalyzeProductOutput> {
   const client = new OpenRouter({
     apiKey: input.apiKey,
-    appTitle: process.env.APP_NAME ?? "Snapland",
+    appTitle: process.env.APP_NAME ?? "SnapLand",
     appCategories: "product-analysis",
     httpReferer: process.env.NEXT_PUBLIC_APP_URL ?? "https://localhost",
   });

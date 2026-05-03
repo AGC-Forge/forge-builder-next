@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "API Key" };
 
 export default async function ApiKeyPage() {
   const result = await getApiKey("openrouter");
-  const existing = result.success ? result.data : null;
+  const existing = result.success && result.data ? result.data : null;
 
   return (
     <div className="@container/main flex flex-col gap-4 md:gap-6">
