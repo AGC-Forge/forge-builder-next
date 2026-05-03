@@ -5,6 +5,7 @@ import type { Database } from "@/types/database.types";
 import { routing } from "@/i18n/routing";
 
 const PUBLIC_PATHS = [
+  "/",
   "/login",
   "/register",
   "/forgot-password",
@@ -33,6 +34,13 @@ function withLocale(locale: string | undefined, pathname: string) {
   if (locale === routing.defaultLocale) return pathname;
   if (pathname === "/") return `/${locale}`;
   return `/${locale}${pathname}`;
+}
+
+function buildRedirectUrl(request: NextRequest, pathname: string): URL {
+  const proto = request.headers.get("x-forwarded-proto") ?? request.nextUrl.protocol.replace(":", "");
+  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? request.nextUrl.host;
+  const url = new URL(pathname, `${proto}://${host}`);
+  return url;
 }
 
 export async function updateSession(request: NextRequest) {
@@ -88,18 +96,13 @@ export async function updateSession(request: NextRequest) {
     if (isApiRoute) {
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     }
-    const homeUrl = request.nextUrl.clone();
-    homeUrl.pathname = withLocale(locale, "/");
-    if (pathname !== "/") {
-      homeUrl.searchParams.set("redirectTo", `${pathname}${search}`);
-    }
+    const homeUrl = buildRedirectUrl(request, withLocale(locale, "/login"));
+    homeUrl.searchParams.set("redirectTo", `${pathname}${search}`);
     return NextResponse.redirect(homeUrl);
   }
 
   if (user && isPublicPath && unlocalizedPathname !== "/auth/callback") {
-    const dashboardUrl = request.nextUrl.clone();
-    dashboardUrl.pathname = withLocale(locale, "/dashboard");
-    dashboardUrl.search = "";
+    const dashboardUrl = buildRedirectUrl(request, withLocale(locale, "/dashboard"));
     return NextResponse.redirect(dashboardUrl);
   }
 
@@ -115,9 +118,7 @@ export async function updateSession(request: NextRequest) {
       .maybeSingle();
 
     if (!profile || !profile.is_active || profile.role !== "admin") {
-      const unauthorizedUrl = request.nextUrl.clone();
-      unauthorizedUrl.pathname = withLocale(locale, "/dashboard/unauthorized");
-      unauthorizedUrl.search = "";
+      const unauthorizedUrl = buildRedirectUrl(request, withLocale(locale, "/dashboard/unauthorized"));
       return NextResponse.redirect(unauthorizedUrl);
     }
   }
