@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
+import type { Database } from "@/types/database.types";
 
 import { routing } from "@/i18n/routing";
 
@@ -10,7 +11,10 @@ const PUBLIC_PATHS = [
   "/reset-password",
   "/auth/callback",
 ];
-
+const ADMIN_ONLY_PATHS = [
+  "/dashboard/users",
+  "/dashboard/settings/web",
+];
 function stripLocaleFromPathname(pathname: string) {
   for (const locale of routing.locales) {
     if (pathname === `/${locale}`) {
@@ -34,7 +38,7 @@ function withLocale(locale: string | undefined, pathname: string) {
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
-  const supabase = createServerClient(
+  const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -70,12 +74,12 @@ export async function updateSession(request: NextRequest) {
     if (isApiRoute) {
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     }
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = withLocale(locale, "/login");
+    const homeUrl = request.nextUrl.clone();
+    homeUrl.pathname = withLocale(locale, "/");
     if (pathname !== "/") {
-      loginUrl.searchParams.set("redirectTo", `${pathname}${search}`);
+      homeUrl.searchParams.set("redirectTo", `${pathname}${search}`);
     }
-    return NextResponse.redirect(loginUrl);
+    return NextResponse.redirect(homeUrl);
   }
 
   if (user && isPublicPath && unlocalizedPathname !== "/auth/callback") {
@@ -83,6 +87,25 @@ export async function updateSession(request: NextRequest) {
     dashboardUrl.pathname = withLocale(locale, "/dashboard");
     dashboardUrl.search = "";
     return NextResponse.redirect(dashboardUrl);
+  }
+
+  const isAdminRoute = ADMIN_ONLY_PATHS.some((p) =>
+    unlocalizedPathname.startsWith(p),
+  );
+
+  if (user && isAdminRoute) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role, is_active")
+      .eq("id", user.id)
+      .single();
+
+    if (!profile || !profile.is_active || profile.role !== "admin") {
+      const unauthorizedUrl = request.nextUrl.clone();
+      unauthorizedUrl.pathname = withLocale(locale, "/dashboard/unauthorized");
+      unauthorizedUrl.search = "";
+      return NextResponse.redirect(unauthorizedUrl);
+    }
   }
 
   return supabaseResponse;

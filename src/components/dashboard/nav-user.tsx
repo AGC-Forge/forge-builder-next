@@ -1,7 +1,13 @@
 "use client";
 
 import { Link } from "@/i18n/navigation";
-import { CircleUser, EllipsisVertical, LogOut, Lock } from "lucide-react";
+import {
+  CircleUser,
+  EllipsisVertical,
+  KeyRound,
+  LogOut,
+  ShieldCheck,
+} from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -40,9 +46,7 @@ export function NavUser({
         ? "/auth/signout"
         : `/${locale}/auth/signout`;
 
-    const res = await fetch(signoutPath, {
-      method: "POST",
-    });
+    const res = await fetch(signoutPath, { method: "POST" });
 
     if (res.redirected) {
       window.location.href = res.url;
@@ -52,6 +56,7 @@ export function NavUser({
     window.location.href =
       locale === routing.defaultLocale ? "/login" : `/${locale}/login`;
   };
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -101,21 +106,21 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <Link href="/dashboard/settings/web" locale={locale}>
-                  <CircleUser />
-                  Account
+                <Link href="/dashboard/settings/profile" locale={locale}>
+                  <CircleUser className="size-4" />
+                  Profile Settings
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/dashboard/settings/security" locale={locale}>
-                  <Lock />
-                  Security
+                <Link href="/dashboard/settings/api-key" locale={locale}>
+                  <KeyRound className="size-4" />
+                  API Key
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
-              <LogOut />
+              <LogOut className="size-4" />
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>

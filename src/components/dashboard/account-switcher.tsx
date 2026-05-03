@@ -1,8 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { Link } from "@/i18n/navigation";
-import { BadgeCheck, Lock, LogOut } from "lucide-react";
+import { CircleUser, KeyRound, LogOut } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -27,7 +26,6 @@ export function AccountSwitcher({
     readonly role: string;
   }>;
 }) {
-  const router = useRouter();
   const locale = useLocale();
 
   const handleLogout = async () => {
@@ -36,9 +34,7 @@ export function AccountSwitcher({
         ? "/auth/signout"
         : `/${locale}/auth/signout`;
 
-    const res = await fetch(signoutPath, {
-      method: "POST",
-    });
+    const res = await fetch(signoutPath, { method: "POST" });
 
     if (res.redirected) {
       window.location.href = res.url;
@@ -48,10 +44,11 @@ export function AccountSwitcher({
     window.location.href =
       locale === routing.defaultLocale ? "/login" : `/${locale}/login`;
   };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Avatar className="size-8 rounded-lg">
+        <Avatar className="size-8 cursor-pointer rounded-lg">
           <AvatarImage src={user.avatar || undefined} alt={user.name} />
           <AvatarFallback className="rounded-lg">
             {getInitials(user.name)}
@@ -64,38 +61,46 @@ export function AccountSwitcher({
         align="end"
         sideOffset={4}
       >
-        <DropdownMenuItem key={user.email} className={cn("p-0")}>
-          <div className="flex w-full items-center justify-between gap-2 px-1 py-1.5">
-            <Avatar className="size-9 rounded-lg">
-              <AvatarImage src={user.avatar || undefined} alt={user.name} />
-              <AvatarFallback className="rounded-lg">
-                {getInitials(user.name)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-semibold">{user.name}</span>
-              <span className="truncate text-xs capitalize">{user.role}</span>
-            </div>
+        {/* User info header */}
+        <div className={cn("flex w-full items-center gap-2 px-2 py-2")}>
+          <Avatar className="size-9 rounded-lg">
+            <AvatarImage src={user.avatar || undefined} alt={user.name} />
+            <AvatarFallback className="rounded-lg">
+              {getInitials(user.name)}
+            </AvatarFallback>
+          </Avatar>
+          <div className="grid flex-1 text-left text-sm leading-tight">
+            <span className="truncate font-semibold">{user.name}</span>
+            <span className="truncate text-muted-foreground text-xs capitalize">
+              {user.role}
+            </span>
           </div>
-        </DropdownMenuItem>
+        </div>
+
         <DropdownMenuSeparator />
+
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
-            <Link href="/dashboard/settings/web" locale={locale}>
-              <span className="font-semibold text-base">Account</span>
-              <BadgeCheck />
+            <Link href="/dashboard/settings/profile" locale={locale}>
+              <CircleUser className="size-4" />
+              Profile Settings
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/dashboard/settings/security" locale={locale}>
-              <span className="font-semibold text-base">Security</span>
-              <Lock />
+            <Link href="/dashboard/settings/api-key" locale={locale}>
+              <KeyRound className="size-4" />
+              API Key
             </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
+
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout}>
-          <LogOut />
+
+        <DropdownMenuItem
+          onClick={handleLogout}
+          className="text-destructive focus:text-destructive"
+        >
+          <LogOut className="size-4" />
           Log out
         </DropdownMenuItem>
       </DropdownMenuContent>

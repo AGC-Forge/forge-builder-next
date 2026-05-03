@@ -4,7 +4,10 @@ import { useState, useEffect } from "react";
 import { Link } from "@/i18n/navigation";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
+import type { Profile } from "@/types/database";
 import { Button } from "@/components/ui/button";
+import { ThemeSwitcher } from "@/components/theme-switcher";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { cn } from "@/lib/utils";
 import { Menu, X } from "lucide-react";
 
@@ -50,9 +53,9 @@ export function Navbar() {
         <Link
           href="/"
           locale={locale}
-          className="font-display-syne text-xl font-extrabold tracking-tight bg-linear-to-r from-accent-2 to-accent-3 bg-clip-text text-transparent"
+          className="font-body-dm-sans text-xl font-extrabold tracking-tight bg-linear-to-r from-violet-500 to-cyan-600 bg-clip-text text-transparent"
         >
-          PageForge
+          SnapLand
         </Link>
 
         {/* Desktop Nav */}
@@ -61,7 +64,7 @@ export function Navbar() {
             <li key={link.href}>
               <a
                 href={link.href}
-                className="text-sm text-white/50 hover:text-white transition-colors duration-200"
+                className="text-sm font-medium text-neutral-700 dark:text-neutral-200 hover:text-black dark:hover:text-white transition-colors duration-200"
               >
                 {link.label}
               </a>
@@ -71,24 +74,8 @@ export function Navbar() {
 
         {/* Right Actions */}
         <div className="hidden lg:flex items-center gap-3">
-          {/* Language Toggle */}
-          <div className="flex items-center bg-bg-3 border border-white/8 rounded-md overflow-hidden">
-            {["en", "id"].map((lang) => (
-              <button
-                key={lang}
-                onClick={() => switchLocale(lang)}
-                className={cn(
-                  "px-3 py-1.5 text-xs font-medium transition-all duration-200 uppercase tracking-wide",
-                  locale === lang
-                    ? "bg-accent text-white"
-                    : "text-white/40 hover:text-white/70",
-                )}
-              >
-                {lang}
-              </button>
-            ))}
-          </div>
-
+          <ThemeSwitcher />
+          <LanguageSwitcher />
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/login`} locale={locale}>
               {t("login")}
@@ -104,7 +91,7 @@ export function Navbar() {
         {/* Mobile Menu Button */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="lg:hidden text-white/70 hover:text-white transition-colors"
+          className="lg:hidden font-medium text-neutral-800 dark:text-neutral-100 hover:text-black dark:hover:text-white transition-colors duration-200"
         >
           {menuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
@@ -118,28 +105,16 @@ export function Navbar() {
               key={link.href}
               href={link.href}
               onClick={() => setMenuOpen(false)}
-              className="text-sm text-white/60 hover:text-white transition-colors"
+              className="text-sm font-medium text-neutral-700 dark:text-neutral-200 hover:text-black dark:hover:text-white transition-colors duration-200"
             >
               {link.label}
             </a>
           ))}
-          <div className="flex items-center gap-3 pt-2 border-t border-white/8">
-            <div className="flex items-center bg-bg-3 border border-white/8 rounded-md overflow-hidden">
-              {["en", "id"].map((lang) => (
-                <button
-                  key={lang}
-                  onClick={() => switchLocale(lang)}
-                  className={cn(
-                    "px-3 py-1.5 text-xs font-medium transition-all duration-200 uppercase",
-                    locale === lang
-                      ? "bg-accent text-white"
-                      : "text-white/40 hover:text-white/70",
-                  )}
-                >
-                  {lang}
-                </button>
-              ))}
-            </div>
+          <div className="flex items-center gap-3 pt-2 border-t dark:border-white/8 border-white/40">
+            <ThemeSwitcher />
+            <LanguageSwitcher />
+          </div>
+          <div className="flex items-center gap-3 pt-2 border-t dark:border-white/8 border-white/40">
             <Button variant="outline" size="sm" className="flex-1" asChild>
               <Link href={`/login`} locale={locale}>
                 {t("login")}

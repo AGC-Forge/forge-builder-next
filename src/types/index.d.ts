@@ -76,10 +76,27 @@ declare global {
     productCategory?: string;
   };
 
-  export type AnalyzeProductResponse = {
+  type AnalyzeProductResponse = {
     description?: string;
     error?: string;
   };
+
+  // Drag and Drop Builder Props
+  interface CountdownPart {
+    value: number;
+    unit: string;
+  }
+  interface CountdownBlockProps {
+    targetDate: string;
+    label?: string;
+    cardBg?: string;
+    cardBorder?: string;
+    radius?: string;
+    primaryColor?: string;
+    btnTextColor?: string;
+    textColor?: string;
+    borderRadius?: string;
+  }
 }
 
-export {};
+export { };

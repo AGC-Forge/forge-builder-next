@@ -8,6 +8,8 @@ import {
     KeyRound,
     Link,
     BarChart2,
+    CircleUser,
+    Activity,
 } from "lucide-react";
 
 export interface NavSubItem {
@@ -65,12 +67,22 @@ export const sidebarItems: NavGroup[] = [
                 url: "/dashboard/users",
                 icon: Users,
             },
+            {
+                title: "Activity Log",
+                url: "/dashboard/activity",
+                icon: Activity,
+            },
         ],
     },
     {
         id: 2,
         label: "Settings",
         items: [
+            {
+                title: "Profile",
+                url: "/dashboard/settings/profile",
+                icon: CircleUser,
+            },
             {
                 title: "Web Settings",
                 url: "/dashboard/settings/web",

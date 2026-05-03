@@ -322,6 +322,8 @@
   html[data-font="playfairDisplay"] body {
     --font-sans: var(--font-playfair-display);
   }
+}
+@layer components {
   .font-display-syne {
     font-family: var(--font-syne);
   }
@@ -329,13 +331,14 @@
   .font-body-dm-sans {
     font-family: var(--font-dm-sans);
   }
-}
-@layer components {
   .disable-transitions * {
     transition: none !important;
   }
   .section-divider {
     border: none;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .bg-accent-3 {
+    @apply bg-accent/20;
   }
 }

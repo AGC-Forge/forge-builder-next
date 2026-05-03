@@ -1,8 +1,12 @@
-/* eslint-disable react-hooks/static-components */
 import type { LandingPageWithProducts } from "@/types/database";
 import { LinktreeTheme } from "./themes/linktree-theme";
 import { EcommerceTheme } from "./themes/ecommerce-theme";
 import { BeaconsTheme } from "./themes/beacons-theme";
+import { TaplinkTheme } from "./themes/taplink-theme";
+import { CampsiteTheme } from "./themes/campsite-theme";
+import { CarrdTheme } from "./themes/carrd-theme";
+import { SeedprodTheme } from "./themes/seedprod-theme";
+import { LnkbioTheme } from "./themes/lnkbio-theme";
 import { TrackingScripts } from "./tracking-scripts";
 
 interface Props {
@@ -10,24 +14,32 @@ interface Props {
 }
 
 export function LandingPageRenderer({ landingPage }: Props) {
-  const ThemeComponent = getThemeComponent(landingPage.theme_type);
-
   return (
     <>
       <TrackingScripts tracking={landingPage.tracking} />
-      <ThemeComponent landingPage={landingPage} />
+      {renderTheme(landingPage)}
     </>
   );
 }
 
-function getThemeComponent(themeType: string) {
-  switch (themeType) {
+function renderTheme(landingPage: LandingPageWithProducts) {
+  switch (landingPage.theme_type) {
     case "ecommerce":
-      return EcommerceTheme;
+      return <EcommerceTheme landingPage={landingPage} />;
     case "beacons":
-      return BeaconsTheme;
-    // taplink, campsite, carrd, seedprod, lnkbio all use linktree style for now
+      return <BeaconsTheme landingPage={landingPage} />;
+    case "taplink":
+      return <TaplinkTheme landingPage={landingPage} />;
+    case "campsite":
+      return <CampsiteTheme landingPage={landingPage} />;
+    case "carrd":
+      return <CarrdTheme landingPage={landingPage} />;
+    case "seedprod":
+      return <SeedprodTheme landingPage={landingPage} />;
+    case "lnkbio":
+      return <LnkbioTheme landingPage={landingPage} />;
+    case "linktree":
     default:
-      return LinktreeTheme;
+      return <LinktreeTheme landingPage={landingPage} />;
   }
 }

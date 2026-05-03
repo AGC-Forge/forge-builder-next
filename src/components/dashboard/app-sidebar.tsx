@@ -30,7 +30,17 @@ const _data = {
   ],
 };
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+interface AppSidebarUser {
+  name: string;
+  email: string;
+  avatar: string;
+}
+
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  user?: AppSidebarUser;
+}
+
+export function AppSidebar({ user, ...props }: AppSidebarProps) {
   const locale = useLocale();
 
   const { sidebarVariant, sidebarCollapsible, isSynced } = usePreferencesStore(
@@ -43,6 +53,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const variant = isSynced ? sidebarVariant : props.variant;
   const collapsible = isSynced ? sidebarCollapsible : props.collapsible;
+
+  const navUser = user ?? {
+    name: "User",
+    email: "",
+    avatar: "",
+  };
 
   return (
     <Sidebar {...props} variant={variant} collapsible={collapsible}>
@@ -63,13 +79,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSecondary items={_data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser
-          user={{
-            name: "Admin",
-            email: "admin@example.com",
-            avatar: "/logo.png",
-          }}
-        />
+        <NavUser user={navUser} />
       </SidebarFooter>
     </Sidebar>
   );

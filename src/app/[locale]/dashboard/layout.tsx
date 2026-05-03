@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { AppSidebar } from "@/components/dashboard/app-sidebar";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -14,7 +14,7 @@ import {
 } from "@/lib/preferences/layout";
 import { cn } from "@/lib/utils";
 import { getPreference } from "@/actions/server-actions";
-
+import { getCurrentProfile } from "@/actions/users";
 import { AccountSwitcher } from "@/components/dashboard/account-switcher";
 import { LayoutControls } from "@/components/dashboard/layout-controls";
 import { SearchDialog } from "@/components/dashboard/search-dialog";
@@ -26,10 +26,26 @@ export default async function Layout({
 }: Readonly<{ children: ReactNode }>) {
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get("sidebar_state")?.value !== "false";
-  const [variant, collapsible] = await Promise.all([
+
+  const [variant, collapsible, profileResult] = await Promise.all([
     getPreference("sidebar_variant", SIDEBAR_VARIANT_VALUES, "inset"),
     getPreference("sidebar_collapsible", SIDEBAR_COLLAPSIBLE_VALUES, "icon"),
+    getCurrentProfile(),
   ]);
+
+  if (!profileResult.success || !profileResult.data) {
+    redirect("/login");
+  }
+
+  const profile = profileResult.data;
+
+  const userData = {
+    id: profile.id,
+    name: profile.full_name ?? profile.email.split("@")[0],
+    email: profile.email,
+    avatar: profile.avatar_url ?? "",
+    role: profile.role,
+  };
 
   return (
     <SidebarProvider
@@ -40,7 +56,7 @@ export default async function Layout({
         } as React.CSSProperties
       }
     >
-      <AppSidebar variant={variant} collapsible={collapsible} />
+      <AppSidebar variant={variant} collapsible={collapsible} user={userData} />
       <SidebarInset
         className={cn(
           "[html[data-content-layout=centered]_&>*]:mx-auto",
@@ -52,7 +68,6 @@ export default async function Layout({
         <header
           className={cn(
             "flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12",
-            // Handle sticky navbar style with conditional classes so blur, background, z-index, and rounded corners remain consistent across all SidebarVariant layouts.
             "[html[data-navbar-style=sticky]_&]:sticky [html[data-navbar-style=sticky]_&]:top-0 [html[data-navbar-style=sticky]_&]:z-50 [html[data-navbar-style=sticky]_&]:overflow-hidden [html[data-navbar-style=sticky]_&]:rounded-t-[inherit] [html[data-navbar-style=sticky]_&]:bg-background/50 [html[data-navbar-style=sticky]_&]:backdrop-blur-md",
           )}
         >
@@ -69,15 +84,7 @@ export default async function Layout({
               <LayoutControls />
               <ThemeSwitcher />
               <LanguageSwitcher />
-              <AccountSwitcher
-                user={{
-                  id: "1",
-                  name: "Admin",
-                  email: "admin@example.com",
-                  avatar: "/logo.png",
-                  role: "admin",
-                }}
-              />
+              <AccountSwitcher user={userData} />
             </div>
           </div>
         </header>
