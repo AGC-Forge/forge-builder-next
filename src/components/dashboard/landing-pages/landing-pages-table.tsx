@@ -15,7 +15,10 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { deleteLandingPage, setLandingPagePublished } from "@/actions/landing-pages";
+import {
+  deleteLandingPage,
+  setLandingPagePublished,
+} from "@/actions/landing-pages";
 import type { LandingPage, ThemeType } from "@/types/database";
 
 import { Button } from "@/components/ui/button";
@@ -115,7 +118,7 @@ export function LandingPagesTable({ data, total, page, pageCount }: Props) {
       <Card>
         <CardHeader className="pb-3">
           <div className="flex flex-wrap items-center gap-2">
-            <div className="relative min-w-[200px] flex-1">
+            <div className="relative min-w-50 flex-1">
               <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Search pages…"
@@ -133,7 +136,7 @@ export function LandingPagesTable({ data, total, page, pageCount }: Props) {
                 updateParams({ theme: v === "all" ? undefined : v })
               }
             >
-              <SelectTrigger className="w-[150px]">
+              <SelectTrigger className="w-37.5">
                 <SelectValue placeholder="Theme" />
               </SelectTrigger>
               <SelectContent>
@@ -152,7 +155,7 @@ export function LandingPagesTable({ data, total, page, pageCount }: Props) {
                 updateParams({ status: v === "all" ? undefined : v })
               }
             >
-              <SelectTrigger className="w-[140px]">
+              <SelectTrigger className="w-35">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -198,7 +201,9 @@ export function LandingPagesTable({ data, total, page, pageCount }: Props) {
                     <TableCell>
                       <div>
                         <p className="font-medium text-sm">{lp.title}</p>
-                        <p className="text-muted-foreground text-xs">/{lp.slug}</p>
+                        <p className="text-muted-foreground text-xs">
+                          /{lp.slug}
+                        </p>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -226,7 +231,11 @@ export function LandingPagesTable({ data, total, page, pageCount }: Props) {
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="size-8">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8"
+                          >
                             <MoreHorizontal className="size-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -238,13 +247,17 @@ export function LandingPagesTable({ data, total, page, pageCount }: Props) {
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>
-                            <Link href={`/dashboard/landing-page/${lp.id}/builder`}>
+                            <Link
+                              href={`/dashboard/landing-page/${lp.id}/builder`}
+                            >
                               <Paintbrush className="mr-2 size-4" />
                               Open Builder
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>
-                            <Link href={`/dashboard/landing-page/${lp.id}/edit`}>
+                            <Link
+                              href={`/dashboard/landing-page/${lp.id}/edit`}
+                            >
                               <Pencil className="mr-2 size-4" />
                               Settings
                             </Link>

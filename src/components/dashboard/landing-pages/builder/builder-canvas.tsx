@@ -2,13 +2,7 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import {
-  GripVertical,
-  Eye,
-  EyeOff,
-  Trash2,
-  ChevronRight,
-} from "lucide-react";
+import { GripVertical, Eye, EyeOff, Trash2, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { LandingBlock, ThemeConfig, Product } from "@/types/database";
 
@@ -131,17 +125,11 @@ function SortableBlockItem({
       </button>
 
       {/* Block info */}
-      <button
-        type="button"
-        className="flex-1 text-left"
-        onClick={onSelect}
-      >
+      <button type="button" className="flex-1 text-left" onClick={onSelect}>
         <p className="font-medium text-sm">
           {BLOCK_LABELS[block.type] ?? block.type}
         </p>
-        <p className="text-muted-foreground text-xs capitalize">
-          {block.type}
-        </p>
+        <p className="text-muted-foreground text-xs capitalize">{block.type}</p>
       </button>
 
       {/* Actions */}

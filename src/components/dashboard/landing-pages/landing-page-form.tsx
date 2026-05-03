@@ -5,9 +5,20 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { landingPageSchema, type LandingPageInput } from "@/lib/validations/landing-page";
-import { createLandingPage, updateLandingPage, assignProducts } from "@/actions/landing-pages";
-import { DEFAULT_THEME_CONFIG, type LandingPage, type Product } from "@/types/database";
+import {
+  landingPageSchema,
+  type LandingPageInput,
+} from "@/lib/validations/landing-page";
+import {
+  createLandingPage,
+  updateLandingPage,
+  assignProducts,
+} from "@/actions/landing-pages";
+import {
+  DEFAULT_THEME_CONFIG,
+  type LandingPage,
+  type Product,
+} from "@/types/database";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,14 +44,18 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const THEME_OPTIONS = [
-  { value: "linktree",  label: "Linktree",   desc: "Clean vertical link list" },
-  { value: "beacons",   label: "Beacons",    desc: "Bio page with large cards" },
-  { value: "taplink",   label: "TapLink",    desc: "Grid of rounded buttons" },
-  { value: "campsite",  label: "Campsite",   desc: "Minimal bio page style" },
-  { value: "carrd",     label: "Carrd",      desc: "Single-page portfolio" },
-  { value: "seedprod",  label: "SeedProd",   desc: "Coming-soon / sales page" },
-  { value: "lnkbio",    label: "Lnk.bio",    desc: "Micro landing page" },
-  { value: "ecommerce", label: "E-Commerce", desc: "Product-focused shop style" },
+  { value: "linktree", label: "Linktree", desc: "Clean vertical link list" },
+  { value: "beacons", label: "Beacons", desc: "Bio page with large cards" },
+  { value: "taplink", label: "TapLink", desc: "Grid of rounded buttons" },
+  { value: "campsite", label: "Campsite", desc: "Minimal bio page style" },
+  { value: "carrd", label: "Carrd", desc: "Single-page portfolio" },
+  { value: "seedprod", label: "SeedProd", desc: "Coming-soon / sales page" },
+  { value: "lnkbio", label: "Lnk.bio", desc: "Micro landing page" },
+  {
+    value: "ecommerce",
+    label: "E-Commerce",
+    desc: "Product-focused shop style",
+  },
 ] as const;
 
 interface Props {
@@ -58,26 +73,51 @@ export function LandingPageForm({
 }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [selectedProducts, setSelectedProducts] = useState<string[]>(
-    assignedProductIds,
-  );
+  const [selectedProducts, setSelectedProducts] =
+    useState<string[]>(assignedProductIds);
 
   const {
     register,
     handleSubmit,
     setValue,
     watch,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<LandingPageInput>({
+    // @@ts-expect-error - Default values are set in the schema
     resolver: zodResolver(landingPageSchema),
     defaultValues: {
       slug: landingPage?.slug ?? "",
       title: landingPage?.title ?? "",
       description: landingPage?.description ?? "",
       theme_type: landingPage?.theme_type ?? "linktree",
-      theme_config: landingPage?.theme_config ?? DEFAULT_THEME_CONFIG,
-      tracking: landingPage?.tracking ?? {},
-      seo: landingPage?.seo ?? {},
+      theme_config: landingPage?.theme_config ?? {
+        primaryColor: DEFAULT_THEME_CONFIG.primaryColor,
+        secondaryColor: DEFAULT_THEME_CONFIG.secondaryColor,
+        backgroundColor: DEFAULT_THEME_CONFIG.backgroundColor,
+        textColor: DEFAULT_THEME_CONFIG.textColor,
+        accentColor: DEFAULT_THEME_CONFIG.accentColor ?? "",
+        fontFamily: DEFAULT_THEME_CONFIG.fontFamily,
+        borderRadius: DEFAULT_THEME_CONFIG.borderRadius,
+        buttonStyle: DEFAULT_THEME_CONFIG.buttonStyle,
+        backgroundType: DEFAULT_THEME_CONFIG.backgroundType,
+        backgroundGradient: DEFAULT_THEME_CONFIG.backgroundGradient ?? "",
+        backgroundImageUrl: DEFAULT_THEME_CONFIG.backgroundImageUrl ?? "",
+        profileImageUrl: DEFAULT_THEME_CONFIG.profileImageUrl ?? "",
+        coverImageUrl: DEFAULT_THEME_CONFIG.coverImageUrl ?? "",
+        linkStyle: DEFAULT_THEME_CONFIG.linkStyle ?? null,
+        shadow: DEFAULT_THEME_CONFIG.shadow ?? null,
+      },
+      tracking: landingPage?.tracking ?? {
+        gtm_id: "",
+        fb_pixel_id: "",
+        histats_id: "",
+        ga_id: "",
+      },
+      seo: landingPage?.seo ?? {
+        title: "",
+        description: "",
+        og_image: "",
+      },
       is_published: landingPage?.is_published ?? false,
     },
   });
@@ -92,7 +132,7 @@ export function LandingPageForm({
     );
   }
 
-  function onSubmit(data: LandingPageInput) {
+  async function onSubmit(data: LandingPageInput) {
     startTransition(async () => {
       const result =
         mode === "create"
@@ -109,8 +149,7 @@ export function LandingPageForm({
         return;
       }
 
-      const pageId =
-        mode === "create" ? result.data?.id : landingPage!.id;
+      const pageId = mode === "create" ? result.data?.id : landingPage!.id;
 
       // Assign products
       if (pageId) {
@@ -241,7 +280,9 @@ export function LandingPageForm({
                       }`}
                     >
                       <p className="font-medium text-sm">{opt.label}</p>
-                      <p className="text-muted-foreground text-xs">{opt.desc}</p>
+                      <p className="text-muted-foreground text-xs">
+                        {opt.desc}
+                      </p>
                     </button>
                   ))}
                 </div>
@@ -268,7 +309,8 @@ export function LandingPageForm({
                       <input
                         type="color"
                         value={
-                          (themeConfig as Record<string, string>)[key] ?? "#000000"
+                          (themeConfig as Record<string, string>)[key] ??
+                          "#000000"
                         }
                         onChange={(e) =>
                           setValue("theme_config", {
@@ -383,8 +425,8 @@ export function LandingPageForm({
             <CardHeader>
               <CardTitle>Assign Products</CardTitle>
               <CardDescription>
-                Select products to show on this landing page. You can also assign
-                them in the builder.
+                Select products to show on this landing page. You can also
+                assign them in the builder.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -486,7 +528,9 @@ export function LandingPageForm({
                     placeholder={placeholder}
                     className="mt-1"
                     defaultValue={
-                      (landingPage?.tracking as Record<string, string>)?.[key] ?? ""
+                      (landingPage?.tracking as Record<string, string>)?.[
+                        key
+                      ] ?? ""
                     }
                     onChange={(e) =>
                       setValue("tracking", {
@@ -507,7 +551,8 @@ export function LandingPageForm({
             <CardHeader>
               <CardTitle>SEO Settings</CardTitle>
               <CardDescription>
-                Optimize how your page appears in search engines and social media.
+                Optimize how your page appears in search engines and social
+                media.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">

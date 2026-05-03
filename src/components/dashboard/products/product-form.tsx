@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/incompatible-library */
 "use client";
 
 import { useState, useTransition } from "react";
@@ -56,6 +57,7 @@ export function ProductForm({ mode, product }: Props) {
     watch,
     formState: { errors },
   } = useForm<ProductInput>({
+    // @@ts-expect-error - Default values are set in the schema
     resolver: zodResolver(productSchema),
     defaultValues: {
       title: product?.title ?? "",
@@ -100,16 +102,20 @@ export function ProductForm({ mode, product }: Props) {
     if (result.subtitle) setValue("subtitle", result.subtitle);
     if (result.description) setValue("description", result.description);
     if (result.price) setValue("price", result.price);
-    if (result.original_price) setValue("original_price", result.original_price);
-    if (result.discount_label) setValue("discount_label", result.discount_label);
+    if (result.original_price)
+      setValue("original_price", result.original_price);
+    if (result.discount_label)
+      setValue("discount_label", result.discount_label);
     if (result.shop_name) setValue("shop_name", result.shop_name);
-    if (result.product_rating) setValue("product_rating", result.product_rating);
+    if (result.product_rating)
+      setValue("product_rating", result.product_rating);
     if (result.review_count) setValue("review_count", result.review_count);
     if (result.sold_count) setValue("sold_count", result.sold_count);
     if (result.currency) setValue("currency", result.currency);
     if (result.tags?.length) setValue("tags", result.tags);
     if (result.features?.length) setValue("features", result.features);
-    if (result.specifications?.length) setValue("specifications", result.specifications);
+    if (result.specifications?.length)
+      setValue("specifications", result.specifications);
     if (result.badges?.length) setValue("badges", result.badges);
   }
 
@@ -122,7 +128,10 @@ export function ProductForm({ mode, product }: Props) {
   }
 
   function removeTag(tag: string) {
-    setValue("tags", tags.filter((t) => t !== tag));
+    setValue(
+      "tags",
+      tags.filter((t) => t !== tag),
+    );
   }
 
   function addFeature() {
@@ -134,7 +143,10 @@ export function ProductForm({ mode, product }: Props) {
   }
 
   function addBadge() {
-    setValue("badges", [...badges, { text: "", color: "#ffffff", bgColor: "#6366f1" }]);
+    setValue("badges", [
+      ...badges,
+      { text: "", color: "#ffffff", bgColor: "#6366f1" },
+    ]);
   }
 
   function onSubmit(data: ProductInput) {
@@ -211,7 +223,9 @@ export function ProductForm({ mode, product }: Props) {
           <Card>
             <CardHeader>
               <CardTitle>Basic Information</CardTitle>
-              <CardDescription>Product name, description, and category.</CardDescription>
+              <CardDescription>
+                Product name, description, and category.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -225,7 +239,9 @@ export function ProductForm({ mode, product }: Props) {
                   className="mt-1"
                 />
                 {errors.title && (
-                  <p className="mt-1 text-destructive text-xs">{errors.title.message}</p>
+                  <p className="mt-1 text-destructive text-xs">
+                    {errors.title.message}
+                  </p>
                 )}
               </div>
 
@@ -245,7 +261,7 @@ export function ProductForm({ mode, product }: Props) {
                   id="description"
                   {...register("description")}
                   placeholder="Detailed product description…"
-                  className="mt-1 min-h-[120px]"
+                  className="mt-1 min-h-30"
                 />
               </div>
 
@@ -308,7 +324,12 @@ export function ProductForm({ mode, product }: Props) {
                     }}
                     placeholder="Add tag and press Enter"
                   />
-                  <Button type="button" onClick={addTag} variant="outline" size="sm">
+                  <Button
+                    type="button"
+                    onClick={addTag}
+                    variant="outline"
+                    size="sm"
+                  >
                     Add
                   </Button>
                 </div>
@@ -353,13 +374,22 @@ export function ProductForm({ mode, product }: Props) {
             <CardHeader>
               <CardTitle>Product Images</CardTitle>
               <CardDescription>
-                Upload from file or paste image URLs. First image is the primary thumbnail.
+                Upload from file or paste image URLs. First image is the primary
+                thumbnail.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <ImageUploader
                 images={images}
-                onChange={(imgs) => setValue("images", imgs)}
+                onChange={(imgs) =>
+                  setValue(
+                    "images",
+                    imgs.map((img) => ({
+                      ...img,
+                      is_primary: img.is_primary ?? false,
+                    })),
+                  )
+                }
               />
             </CardContent>
           </Card>
@@ -431,7 +461,9 @@ export function ProductForm({ mode, product }: Props) {
           <Card>
             <CardHeader>
               <CardTitle>Specifications</CardTitle>
-              <CardDescription>Technical specs (name: value pairs).</CardDescription>
+              <CardDescription>
+                Technical specs (name: value pairs).
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {specifications.map((_, i) => (
@@ -710,7 +742,11 @@ export function ProductForm({ mode, product }: Props) {
           Cancel
         </Button>
         <Button type="submit" disabled={isPending}>
-          {isPending ? "Saving…" : mode === "create" ? "Create Product" : "Save Changes"}
+          {isPending
+            ? "Saving…"
+            : mode === "create"
+              ? "Create Product"
+              : "Save Changes"}
         </Button>
       </div>
     </form>

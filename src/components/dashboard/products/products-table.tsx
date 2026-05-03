@@ -108,7 +108,7 @@ export function ProductsTable({ data, total, page, pageCount }: Props) {
         <CardHeader className="pb-3">
           {/* Filters */}
           <div className="flex flex-wrap items-center gap-2">
-            <div className="relative min-w-[200px] flex-1">
+            <div className="relative min-w-50 flex-1">
               <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Search products…"
@@ -126,7 +126,7 @@ export function ProductsTable({ data, total, page, pageCount }: Props) {
                 updateParams({ category: v === "all" ? undefined : v })
               }
             >
-              <SelectTrigger className="w-[160px]">
+              <SelectTrigger className="w-40">
                 <Filter className="mr-2 size-4" />
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
@@ -146,7 +146,7 @@ export function ProductsTable({ data, total, page, pageCount }: Props) {
                 updateParams({ status: v === "all" ? undefined : v })
               }
             >
-              <SelectTrigger className="w-[140px]">
+              <SelectTrigger className="w-35">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -211,7 +211,7 @@ export function ProductsTable({ data, total, page, pageCount }: Props) {
                         )}
                       </TableCell>
                       <TableCell>
-                        <div className="max-w-[200px]">
+                        <div className="max-w-50">
                           <p className="truncate font-medium text-sm">
                             {product.title}
                           </p>
@@ -228,7 +228,9 @@ export function ProductsTable({ data, total, page, pageCount }: Props) {
                             {cat.emoji} {cat.label}
                           </Badge>
                         ) : (
-                          <span className="text-muted-foreground text-xs">—</span>
+                          <span className="text-muted-foreground text-xs">
+                            —
+                          </span>
                         )}
                       </TableCell>
                       <TableCell>
@@ -248,7 +250,9 @@ export function ProductsTable({ data, total, page, pageCount }: Props) {
                               )}
                           </div>
                         ) : (
-                          <span className="text-muted-foreground text-xs">—</span>
+                          <span className="text-muted-foreground text-xs">
+                            —
+                          </span>
                         )}
                       </TableCell>
                       <TableCell>
@@ -257,7 +261,9 @@ export function ProductsTable({ data, total, page, pageCount }: Props) {
                             ⭐ {product.product_rating.toFixed(1)}
                           </span>
                         ) : (
-                          <span className="text-muted-foreground text-xs">—</span>
+                          <span className="text-muted-foreground text-xs">
+                            —
+                          </span>
                         )}
                       </TableCell>
                       <TableCell>
@@ -274,7 +280,11 @@ export function ProductsTable({ data, total, page, pageCount }: Props) {
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="size-8">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="size-8"
+                            >
                               <MoreHorizontal className="size-4" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -286,7 +296,9 @@ export function ProductsTable({ data, total, page, pageCount }: Props) {
                               </Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem asChild>
-                              <Link href={`/dashboard/products/${product.id}/edit`}>
+                              <Link
+                                href={`/dashboard/products/${product.id}/edit`}
+                              >
                                 <Pencil className="mr-2 size-4" />
                                 Edit
                               </Link>
@@ -338,9 +350,7 @@ export function ProductsTable({ data, total, page, pageCount }: Props) {
                   variant="outline"
                   size="sm"
                   disabled={page <= 1}
-                  onClick={() =>
-                    updateParams({ page: String(page - 1) })
-                  }
+                  onClick={() => updateParams({ page: String(page - 1) })}
                 >
                   Previous
                 </Button>
@@ -348,9 +358,7 @@ export function ProductsTable({ data, total, page, pageCount }: Props) {
                   variant="outline"
                   size="sm"
                   disabled={page >= pageCount}
-                  onClick={() =>
-                    updateParams({ page: String(page + 1) })
-                  }
+                  onClick={() => updateParams({ page: String(page + 1) })}
                 >
                   Next
                 </Button>

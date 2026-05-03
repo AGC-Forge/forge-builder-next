@@ -43,7 +43,8 @@ export function AiAnalyzer({ title, category, images, onResult }: Props) {
           const blob = await res.blob();
           const reader = new FileReader();
           const base64 = await new Promise<string>((resolve) => {
-            reader.onload = () => resolve((reader.result as string).split(",")[1]);
+            reader.onload = () =>
+              resolve((reader.result as string).split(",")[1]);
             reader.readAsDataURL(blob);
           });
           body.imageBase64 = base64;
@@ -77,7 +78,7 @@ export function AiAnalyzer({ title, category, images, onResult }: Props) {
   }
 
   return (
-    <div className="rounded-lg border bg-gradient-to-br from-violet-50 to-indigo-50 p-4 dark:from-violet-950/30 dark:to-indigo-950/30">
+    <div className="rounded-lg border bg-linear-to-br from-violet-50 to-indigo-50 p-4 dark:from-violet-950/30 dark:to-indigo-950/30">
       <div className="mb-3 flex items-center gap-2">
         <div className="flex size-7 items-center justify-center rounded-full bg-violet-600 text-white">
           <Bot className="size-4" />

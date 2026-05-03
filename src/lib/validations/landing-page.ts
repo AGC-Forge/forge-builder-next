@@ -1,11 +1,16 @@
-import { z } from "zod";
+import * as z from "zod";
+import {
+  DEFAULT_THEME_CONFIG,
+  type LandingPage,
+  type Product,
+} from "@/types/database";
 
 const themeConfigSchema = z.object({
   primaryColor: z.string().default("#6366f1"),
   secondaryColor: z.string().default("#8b5cf6"),
   backgroundColor: z.string().default("#ffffff"),
   textColor: z.string().default("#1f2937"),
-  accentColor: z.string().optional(),
+  accentColor: z.string().optional().default(""),
   fontFamily: z.string().default("Inter"),
   borderRadius: z
     .enum(["none", "sm", "md", "lg", "full"])
@@ -14,25 +19,33 @@ const themeConfigSchema = z.object({
   backgroundType: z
     .enum(["solid", "gradient", "image"])
     .default("solid"),
-  backgroundGradient: z.string().optional(),
-  backgroundImageUrl: z.string().optional(),
-  profileImageUrl: z.string().optional(),
-  coverImageUrl: z.string().optional(),
-  linkStyle: z.enum(["card", "button", "minimal"]).optional(),
-  shadow: z.enum(["none", "sm", "md", "lg"]).optional(),
+  backgroundGradient: z.string().optional().default(""),
+  backgroundImageUrl: z.string().optional().default(""),
+  profileImageUrl: z.string().optional().default(""),
+  coverImageUrl: z.string().optional().default(""),
+  linkStyle: z
+    .enum(["card", "button", "minimal"])
+    .nullable()
+    .optional()
+    .default(null) as z.ZodType<"card" | "button" | "minimal" | null>,
+  shadow: z
+    .enum(["none", "sm", "md", "lg"])
+    .nullable()
+    .optional()
+    .default(null) as z.ZodType<"none" | "sm" | "md" | "lg" | null>,
 });
 
 const trackingSchema = z.object({
-  gtm_id: z.string().nullable().optional(),
-  fb_pixel_id: z.string().nullable().optional(),
-  histats_id: z.string().nullable().optional(),
-  ga_id: z.string().nullable().optional(),
+  gtm_id: z.string().nullable().optional().default(null),
+  fb_pixel_id: z.string().nullable().optional().default(null),
+  histats_id: z.string().nullable().optional().default(null),
+  ga_id: z.string().nullable().optional().default(null),
 });
 
 const seoSchema = z.object({
-  title: z.string().max(70).nullable().optional(),
-  description: z.string().max(160).nullable().optional(),
-  og_image: z.string().nullable().optional(),
+  title: z.string().max(70).nullable().optional().default(null),
+  description: z.string().max(160).nullable().optional().default(null),
+  og_image: z.string().nullable().optional().default(null),
 });
 
 export const landingPageSchema = z.object({
@@ -45,7 +58,7 @@ export const landingPageSchema = z.object({
       "Slug: lowercase letters, numbers, and hyphens only (no leading/trailing hyphens)",
     ),
   title: z.string().min(1, "Title required").max(200),
-  description: z.string().max(500).optional().nullable(),
+  description: z.string().max(500).optional().nullable().default(null),
   theme_type: z
     .enum([
       "linktree",
@@ -58,15 +71,15 @@ export const landingPageSchema = z.object({
       "ecommerce",
     ])
     .default("linktree"),
-  theme_config: themeConfigSchema.default({}),
-  tracking: trackingSchema.default({}),
-  seo: seoSchema.default({}),
+  theme_config: themeConfigSchema.optional().default({}),
+  tracking: trackingSchema.optional().default({}),
+  seo: seoSchema.optional().default({}),
   is_published: z.boolean().default(false),
 });
 
 export const updateBlocksSchema = z.object({
   id: z.string().uuid(),
-  blocks: z.array(z.record(z.unknown())),
+  blocks: z.array(z.record(z.string(), z.unknown())),
 });
 
 export type LandingPageInput = z.infer<typeof landingPageSchema>;
