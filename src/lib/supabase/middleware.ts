@@ -1,7 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 import type { Database } from "@/types/database.types";
-
 import { routing } from "@/i18n/routing";
 
 const PUBLIC_PATHS = [
@@ -11,36 +10,79 @@ const PUBLIC_PATHS = [
   "/forgot-password",
   "/reset-password",
   "/auth/callback",
+  "/auth/signout",
 ];
+
 const ADMIN_ONLY_PATHS = [
   "/dashboard/users",
   "/dashboard/settings/web",
+  "/dashboard/activity",
 ];
+const SYSTEM_PREFIXES = [
+  "/dashboard",
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/reset-password",
+  "/auth",
+  "/api",
+  "/_next",
+  "/unauthorized",
+];
+
 function stripLocaleFromPathname(pathname: string) {
   for (const locale of routing.locales) {
     if (pathname === `/${locale}`) {
       return { locale, pathname: "/" };
     }
     if (pathname.startsWith(`/${locale}/`)) {
-      return { locale, pathname: pathname.slice(locale.length + 1) };
+      return {
+        locale,
+        pathname: pathname.slice(locale.length + 1),
+      };
     }
   }
-
-  return { locale: undefined as (typeof routing.locales)[number] | undefined, pathname };
+  return {
+    locale: undefined as (typeof routing.locales)[number] | undefined,
+    pathname,
+  };
 }
 
-function withLocale(locale: string | undefined, pathname: string) {
-  if (!locale) return pathname;
-  if (locale === routing.defaultLocale) return pathname;
-  if (pathname === "/") return `/${locale}`;
-  return `/${locale}${pathname}`;
+function withLocale(locale: string | undefined, path: string) {
+  if (!locale || locale === routing.defaultLocale) return path;
+  return `/${locale}${path}`;
 }
 
-function buildRedirectUrl(request: NextRequest, pathname: string): URL {
-  const proto = request.headers.get("x-forwarded-proto") ?? request.nextUrl.protocol.replace(":", "");
-  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? request.nextUrl.host;
-  const url = new URL(pathname, `${proto}://${host}`);
-  return url;
+function buildRedirectUrl(request: NextRequest, path: string): URL {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+  const base = appUrl ?? request.nextUrl.origin;
+  return new URL(path, base);
+}
+/**
+ * Detect if an unlocalized pathname looks like a landing page slug.
+ * A slug path is a single-segment path like /my-product-page that doesn't
+ * match any known system prefix.
+ * Pattern: /[a-z0-9][a-z0-9-]{1,}[a-z0-9]  (single segment, no sub-paths)
+ */
+function isLandingPageSlugPath(unlocalizedPathname: string): boolean {
+  // Must be a single path segment (no nested slashes after the first /)
+  const segments = unlocalizedPathname.split("/").filter(Boolean);
+  if (segments.length !== 1) return false;
+
+  const slug = segments[0];
+
+  // Check slug format
+  if (!/^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(slug) && !/^[a-z0-9]{2,}$/.test(slug)) {
+    return false;
+  }
+
+  // Not a system path
+  const isSystem = SYSTEM_PREFIXES.some((prefix) =>
+    unlocalizedPathname.startsWith(prefix),
+  );
+  if (isSystem) return false;
+
+  return true;
 }
 
 export async function updateSession(request: NextRequest) {
@@ -61,13 +103,13 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value),
-          );
+          for (const { name, value } of cookiesToSet) {
+            request.cookies.set(name, value);
+          }
           supabaseResponse = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options),
-          );
+          for (const { name, value, options } of cookiesToSet) {
+            supabaseResponse.cookies.set(name, value, options);
+          }
         },
       },
     });
@@ -89,22 +131,40 @@ export async function updateSession(request: NextRequest) {
   const { locale: detectedLocale, pathname: unlocalizedPathname } =
     stripLocaleFromPathname(pathname);
   const locale = detectedLocale ?? routing.defaultLocale;
+
   const isPublicPath = PUBLIC_PATHS.some((p) =>
-    p === "/" ? unlocalizedPathname === "/" : unlocalizedPathname.startsWith(p),
+    p === "/"
+      ? unlocalizedPathname === "/"
+      : unlocalizedPathname.startsWith(p),
   );
   const isApiRoute = unlocalizedPathname.startsWith("/api");
 
-  if (!user && !isPublicPath) {
+  const isSlugPath = isLandingPageSlugPath(unlocalizedPathname);
+
+  if (!user && !isPublicPath && !isSlugPath) {
     if (isApiRoute) {
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     }
-    const homeUrl = buildRedirectUrl(request, withLocale(locale, "/login"));
-    homeUrl.searchParams.set("redirectTo", `${pathname}${search}`);
-    return NextResponse.redirect(homeUrl);
+    const loginUrl = buildRedirectUrl(
+      request,
+      withLocale(locale, "/login"),
+    );
+    loginUrl.searchParams.set("redirectTo", `${pathname}${search}`);
+    return NextResponse.redirect(loginUrl);
   }
 
-  if (user && isPublicPath && unlocalizedPathname !== "/auth/callback") {
-    const dashboardUrl = buildRedirectUrl(request, withLocale(locale, "/dashboard"));
+  if (
+    user &&
+    isPublicPath &&
+    !isSlugPath &&
+    unlocalizedPathname !== "/auth/callback" &&
+    unlocalizedPathname !== "/auth/signout" &&
+    unlocalizedPathname !== "/"
+  ) {
+    const dashboardUrl = buildRedirectUrl(
+      request,
+      withLocale(locale, "/dashboard"),
+    );
     return NextResponse.redirect(dashboardUrl);
   }
 
@@ -120,7 +180,10 @@ export async function updateSession(request: NextRequest) {
       .maybeSingle();
 
     if (!profile || !profile.is_active || profile.role !== "admin") {
-      const unauthorizedUrl = buildRedirectUrl(request, withLocale(locale, "/dashboard/unauthorized"));
+      const unauthorizedUrl = buildRedirectUrl(
+        request,
+        withLocale(locale, "/dashboard/unauthorized"),
+      );
       return NextResponse.redirect(unauthorizedUrl);
     }
   }

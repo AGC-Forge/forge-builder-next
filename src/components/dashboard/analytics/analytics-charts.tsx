@@ -16,7 +16,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import { format, subDays, parseISO, startOfDay } from "date-fns";
+import { subDays, startOfDay, endOfDay } from "date-fns";
 import {
   Card,
   CardContent,
@@ -47,7 +47,6 @@ function parseReferrerDomain(url: string | null | undefined): string {
   if (!url) return "Direct";
   try {
     const host = new URL(url).hostname.replace(/^www\./, "");
-    // Map known hosts to readable names
     const map: Record<string, string> = {
       "google.com": "Google",
       "l.instagram.com": "Instagram",
@@ -67,38 +66,87 @@ function parseReferrerDomain(url: string | null | undefined): string {
   }
 }
 
+/**
+ * Timezone-safe date key: always returns YYYY-MM-DD in local time.
+ * 'sv-SE' locale consistently produces YYYY-MM-DD format.
+ */
+function toLocalDateKey(isoString: string): string {
+  return new Date(isoString).toLocaleDateString("sv-SE");
+}
+
 interface Props {
   views: PageView[];
   clicks: ProductClick[];
   days?: number;
+  from?: string;
+  to?: string;
 }
 
-export function AnalyticsCharts({ views, clicks, days = 30 }: Props) {
-  // Daily area chart data
+export function AnalyticsCharts({ views, clicks, days = 30, from, to }: Props) {
+  // Build daily buckets
   const dailyData = useMemo(() => {
-    const dayList = Array.from({ length: days }, (_, i) => {
-      const date = startOfDay(subDays(new Date(), days - 1 - i));
-      return {
-        date: format(date, "dd MMM"),
-        fullDate: format(date, "yyyy-MM-dd"),
-        views: 0,
-        clicks: 0,
-      };
-    });
+    let buckets: {
+      date: string;
+      label: string;
+      views: number;
+      clicks: number;
+    }[];
 
-    for (const view of views) {
-      const key = format(parseISO(view.created_at), "yyyy-MM-dd");
-      const day = dayList.find((d) => d.fullDate === key);
-      if (day) day.views++;
-    }
-    for (const click of clicks) {
-      const key = format(parseISO(click.created_at), "yyyy-MM-dd");
-      const day = dayList.find((d) => d.fullDate === key);
-      if (day) day.clicks++;
+    if (from && to) {
+      // Custom date range
+      const start = startOfDay(new Date(from));
+      const end = endOfDay(new Date(to));
+      const diffMs = end.getTime() - start.getTime();
+      const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+      buckets = Array.from({ length: Math.min(diffDays + 1, 365) }, (_, i) => {
+        const d = new Date(start.getTime() + i * 86400000);
+        const key = d.toLocaleDateString("sv-SE");
+        return {
+          date: key,
+          label: d.toLocaleDateString("en-US", {
+            day: "numeric",
+            month: "short",
+          }),
+          views: 0,
+          clicks: 0,
+        };
+      });
+    } else {
+      // Last N days
+      buckets = Array.from({ length: days }, (_, i) => {
+        const d = subDays(new Date(), days - 1 - i);
+        const key = d.toLocaleDateString("sv-SE");
+        return {
+          date: key,
+          label: d.toLocaleDateString("en-US", {
+            day: "numeric",
+            month: "short",
+          }),
+          views: 0,
+          clicks: 0,
+        };
+      });
     }
 
-    return dayList;
-  }, [views, clicks, days]);
+    // Build index for O(1) lookup
+    const idx: Record<string, number> = {};
+    for (let i = 0; i < buckets.length; i++) {
+      idx[buckets[i].date] = i;
+    }
+
+    // Count views
+    for (const v of views) {
+      const key = toLocalDateKey(v.created_at);
+      if (idx[key] !== undefined) buckets[idx[key]].views++;
+    }
+    // Count clicks
+    for (const c of clicks) {
+      const key = toLocalDateKey(c.created_at);
+      if (idx[key] !== undefined) buckets[idx[key]].clicks++;
+    }
+
+    return buckets;
+  }, [views, clicks, days, from, to]);
 
   // Device breakdown
   const deviceData = useMemo(() => {
@@ -115,7 +163,7 @@ export function AnalyticsCharts({ views, clicks, days = 30 }: Props) {
       .sort((a, b) => b.value - a.value);
   }, [views]);
 
-  // Referrer source breakdown (top 6)
+  // Referrer sources
   const referrerData = useMemo(() => {
     const counts: Record<string, number> = {};
     for (const v of views) {
@@ -128,7 +176,7 @@ export function AnalyticsCharts({ views, clicks, days = 30 }: Props) {
       .slice(0, 6);
   }, [views]);
 
-  // Click type breakdown
+  // Click types
   const clickTypeData = useMemo(() => {
     const counts: Record<string, number> = {};
     for (const c of clicks) {
@@ -141,6 +189,11 @@ export function AnalyticsCharts({ views, clicks, days = 30 }: Props) {
   const totalViews = views.length;
   const totalClicks = clicks.length;
 
+  const periodLabel =
+    from && to
+      ? `${new Date(from).toLocaleDateString("en-US", { day: "numeric", month: "short" })} – ${new Date(to).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })}`
+      : `last ${days} days`;
+
   return (
     <div className="space-y-4">
       {/* Main area chart */}
@@ -148,7 +201,7 @@ export function AnalyticsCharts({ views, clicks, days = 30 }: Props) {
         <CardHeader>
           <CardTitle>Traffic Overview</CardTitle>
           <CardDescription>
-            Daily views and clicks — last {days} days
+            Daily views and clicks — {periodLabel}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -175,7 +228,7 @@ export function AnalyticsCharts({ views, clicks, days = 30 }: Props) {
                   stroke="hsl(var(--border))"
                 />
                 <XAxis
-                  dataKey="date"
+                  dataKey="label"
                   tick={{ fontSize: 10 }}
                   tickLine={false}
                   interval="preserveStartEnd"
@@ -217,14 +270,14 @@ export function AnalyticsCharts({ views, clicks, days = 30 }: Props) {
         </CardContent>
       </Card>
 
-      {/* 3-column breakdown row */}
+      {/* 3-col breakdown */}
       <div className="grid gap-4 md:grid-cols-3">
-        {/* Device breakdown */}
+        {/* Devices */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Devices</CardTitle>
             <CardDescription className="text-xs">
-              {totalViews} total views
+              {totalViews.toLocaleString()} total views
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -285,7 +338,7 @@ export function AnalyticsCharts({ views, clicks, days = 30 }: Props) {
           </CardContent>
         </Card>
 
-        {/* Referrer sources */}
+        {/* Traffic Sources */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Traffic Sources</CardTitle>
@@ -335,12 +388,12 @@ export function AnalyticsCharts({ views, clicks, days = 30 }: Props) {
           </CardContent>
         </Card>
 
-        {/* Click types */}
+        {/* Click Types */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Click Types</CardTitle>
             <CardDescription className="text-xs">
-              {totalClicks} total clicks
+              {totalClicks.toLocaleString()} total clicks
             </CardDescription>
           </CardHeader>
           <CardContent>

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getDashboardStats } from "@/actions/users";
-import { getAnalyticsSummary } from "@/actions/settings";
+import { getAnalyticsSummary } from "@/actions/analytics"; // ← fixed import
 import { getProducts } from "@/actions/products";
 import { MetricCards } from "@/components/dashboard/home/metric-cards";
 import { PerformanceOverview } from "@/components/dashboard/home/performance-overview";
@@ -24,14 +24,17 @@ const EMPTY_STATS: DashboardStats = {
 export default async function AdminDashboardPage() {
   const [statsRes, analyticsRes, productsRes] = await Promise.all([
     getDashboardStats(),
-    getAnalyticsSummary(30),
+    getAnalyticsSummary(30), // from @/actions/analytics — includes referrer field
     getProducts({ page: 1, pageSize: 10 }),
   ]);
 
   const stats = statsRes.success && statsRes.data ? statsRes.data : EMPTY_STATS;
-  const views = analyticsRes.success && analyticsRes.data ? analyticsRes.data.views : [];
-  const clicks = analyticsRes.success && analyticsRes.data ? analyticsRes.data.clicks : [];
-  const products = productsRes.success && productsRes.data ? productsRes.data.data : [];
+  const views =
+    analyticsRes.success && analyticsRes.data ? analyticsRes.data.views : [];
+  const clicks =
+    analyticsRes.success && analyticsRes.data ? analyticsRes.data.clicks : [];
+  const products =
+    productsRes.success && productsRes.data ? productsRes.data.data : [];
 
   return (
     <div className="@container/main flex flex-col gap-4 md:gap-6">
