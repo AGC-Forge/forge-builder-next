@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 // Public endpoint — no auth required (called from landing pages)
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient();
+    const admin = createAdminClient();
     const body = await request.json();
     const { type, landingPageId, productId, clickType } = body as {
       type: "view" | "click";
@@ -25,20 +25,16 @@ export async function POST(request: Request) {
     }
 
     if (type === "view" && landingPageId) {
-      await supabase.from("page_analytics").insert({
+      await admin.from("page_analytics").insert({
         landing_page_id: landingPageId,
         user_agent: ua ?? null,
         referrer: referer ?? null,
         device_type: deviceType,
       });
-      await supabase
-        .from("landing_pages")
-        .update({ view_count: supabase.rpc as unknown })
-        .eq("id", landingPageId);
     }
 
     if (type === "click" && productId) {
-      await supabase.from("product_clicks").insert({
+      await admin.from("product_clicks").insert({
         product_id: productId,
         landing_page_id: landingPageId ?? null,
         click_type: clickType ?? "affiliate",

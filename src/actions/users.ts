@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { Profile, PaginatedResult } from "@/types/database";
 import { getUserWithProfile } from "@/lib/supabase/profiles";
 import { cache } from "react";
@@ -154,25 +155,26 @@ export async function getDashboardStats() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { success: false, error: "Unauthorized" };
 
+    const admin = createAdminClient();
     const [products, landingPages, users, analytics, clicks] =
       await Promise.all([
-        supabase
+        admin
           .from("products")
           .select("id, is_active", { count: "exact" }),
-        supabase
+        admin
           .from("landing_pages")
           .select("id, is_published, view_count, click_count", { count: "exact" }),
-        supabase
+        admin
           .from("profiles")
           .select("id", { count: "exact" }),
-        supabase
+        admin
           .from("page_analytics")
           .select("id", { count: "exact" })
           .gte(
             "created_at",
             new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
           ),
-        supabase
+        admin
           .from("product_clicks")
           .select("id", { count: "exact" })
           .gte(

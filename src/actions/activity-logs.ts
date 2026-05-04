@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { Json } from "@/types/database.types";
 
 export interface ActivityLog {
@@ -58,12 +59,13 @@ export async function getActivityLogs(options?: {
         } = await supabase.auth.getUser();
         if (!user) return { success: false, error: "Unauthorized" };
 
+        const admin = createAdminClient();
         const page = options?.page ?? 1;
         const pageSize = options?.pageSize ?? 25;
         const from = (page - 1) * pageSize;
         const to = from + pageSize - 1;
 
-        let query = supabase
+        let query = admin
             .from("activity_logs")
             .select(
                 `*, profile:profiles(full_name, email, avatar_url)`,

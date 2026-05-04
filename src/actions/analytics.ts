@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { endOfDay, startOfDay, subDays } from "date-fns";
 
 // ── Types ────────────────────────────────────────────────────
@@ -81,30 +82,31 @@ export async function getAnalyticsSummary(
     } = await supabase.auth.getUser();
     if (!user) return { success: false, error: "Unauthorized" };
 
+    const admin = createAdminClient();
     const { since, until } = resolveDateRange(days, from, to);
 
     const [views, clicks, topPages, topProductsClicks] = await Promise.all([
-      supabase
+      admin
         .from("page_analytics")
         .select("id, created_at, device_type, country, referrer, landing_page_id")
         .gte("created_at", since)
         .lte("created_at", until)
         .order("created_at", { ascending: false }),
 
-      supabase
+      admin
         .from("product_clicks")
         .select("id, created_at, click_type, product_id")
         .gte("created_at", since)
         .lte("created_at", until)
         .order("created_at", { ascending: false }),
 
-      supabase
+      admin
         .from("landing_pages")
         .select("id, title, slug, view_count, click_count, is_published")
         .order("view_count", { ascending: false })
         .limit(10),
 
-      supabase
+      admin
         .from("product_clicks")
         .select("product_id, products(id, title, images)")
         .gte("created_at", since)
@@ -160,14 +162,15 @@ export async function exportAnalyticsCSV(
     } = await supabase.auth.getUser();
     if (!user) return { success: false, error: "Unauthorized" };
 
+    const admin = createAdminClient();
     const { since, until } = resolveDateRange(days, from, to);
 
-    const { data: topPages } = await supabase
+    const { data: topPages } = await admin
       .from("landing_pages")
       .select("id, title, slug, view_count, click_count, is_published, created_at")
       .order("view_count", { ascending: false });
 
-    const { data: views } = await supabase
+    const { data: views } = await admin
       .from("page_analytics")
       .select("created_at, device_type, country, referrer")
       .gte("created_at", since)

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import {
   landingPageSchema,
   type LandingPageInput,
@@ -96,7 +97,7 @@ export async function getLandingPageBySlug(
   slug: string,
 ): Promise<ActionResult<LandingPageWithProducts>> {
   try {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     const { data, error } = await supabase
       .from("landing_pages")
