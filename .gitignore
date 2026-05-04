@@ -47,3 +47,4 @@ ecosystem.config.js
 docs/*
 nginx/*
 scripts/deploy.sh
+supabase/.temp/*

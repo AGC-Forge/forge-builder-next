@@ -199,7 +199,7 @@ export function NavMain({ items }: NavMainProps) {
   };
 
   const handleQuickCreate = () => {
-    router.push(`${locale}/dashboard/landing-page/new`);
+    router.push(`/dashboard/landing-page/new`);
   };
 
   return (
