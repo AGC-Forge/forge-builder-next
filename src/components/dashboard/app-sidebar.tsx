@@ -65,7 +65,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <Link prefetch={false} href="/admin" locale={locale}>
+              <Link prefetch={false} href="/dashboard" locale={locale}>
                 <Command />
                 <span className="font-semibold text-base">SnapLand</span>
               </Link>

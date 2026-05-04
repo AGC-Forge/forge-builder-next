@@ -7,17 +7,13 @@ import type {
   ThemeConfig,
   LandingBlock,
 } from "@/types/database";
-import { VideoBlock } from "@/components/landing-page/video-block";
 import {
   SHADOW_MAP,
   RADIUS_MAP,
   isLight,
-  getBtnTextColor,
-  getCardColors,
   getContainerStyle,
   getInnerStyle,
   getImageStyle,
-  getProductGridStyle,
   buildBgStyle,
 } from "@/components/landing-page/theme-utils";
 
@@ -54,11 +50,8 @@ export function LinktreeTheme({ landingPage }: Props) {
 
   const radius = RADIUS_MAP[tc.borderRadius] ?? "14px";
   const shadow = SHADOW_MAP[tc.shadow ?? "md"] ?? "none";
-  const onLight = isLight(tc.backgroundColor ?? "#f8fafc");
-  const btnTextColor = isLight(tc.primaryColor) ? "#1a1a1a" : "#ffffff";
 
   const bgStyle = buildBgStyle(tc);
-  const { cardBg, cardBorder } = getCardColors(tc.backgroundColor ?? "#0f172a");
   const visibleBlocks = (landingPage.blocks ?? []).filter((b) => b.visible);
 
   return (
@@ -113,14 +106,12 @@ export function LinktreeTheme({ landingPage }: Props) {
               <BlockRenderer
                 key={block.id}
                 block={block}
-                tc={tc}
                 radius={radius}
                 shadow={shadow}
-                btnTextColor={btnTextColor}
-                onLight={onLight}
+                btnTextColor={tc.primaryColor}
+                tc={tc}
                 products={products}
-                cardBg={cardBg}
-                cardBorder={cardBorder}
+                onLight={isLight(tc.backgroundColor)}
               />
             ))}
           </div>
@@ -129,17 +120,7 @@ export function LinktreeTheme({ landingPage }: Props) {
           <div style={{ width: "100%" }}>
             {products.map(
               (p) =>
-                p && (
-                  <LinktreeProductCard
-                    key={p.id}
-                    product={p}
-                    radius={radius}
-                    shadow={shadow}
-                    btnTextColor={btnTextColor}
-                    cardBg={cardBg}
-                    cardBorder={cardBorder}
-                  />
-                ),
+                p && <LinktreeProductCard key={p.id} product={p} tc={tc} />,
             )}
           </div>
         ) : null}
@@ -166,8 +147,6 @@ function BlockRenderer({
   btnTextColor,
   onLight,
   products,
-  cardBg,
-  cardBorder,
 }: {
   block: Partial<LandingBlock>;
   tc: ThemeConfig;
@@ -176,8 +155,6 @@ function BlockRenderer({
   btnTextColor: string;
   onLight: boolean;
   products: NonNullable<ProductItem>[];
-  cardBg: string;
-  cardBorder: string;
 }) {
   const { type, content } = block;
 
@@ -523,14 +500,7 @@ function BlockRenderer({
           boxSizing: "border-box",
         }}
       >
-        <LinktreeProductCard
-          product={product}
-          radius={radius}
-          shadow={shadow}
-          btnTextColor={btnTextColor}
-          cardBg={cardBg}
-          cardBorder={cardBorder}
-        />
+        <LinktreeProductCard product={product} tc={tc} />
       </div>
     );
   }
@@ -563,14 +533,7 @@ function BlockRenderer({
               minWidth: 0,
             }}
           >
-            <LinktreeProductCard
-              product={p}
-              radius={radius}
-              shadow={shadow}
-              btnTextColor={btnTextColor}
-              cardBg={cardBg}
-              cardBorder={cardBorder}
-            />
+            <LinktreeProductCard product={p} tc={tc} />
           </div>
         ))}
       </div>
@@ -589,364 +552,13 @@ function BlockRenderer({
 
   return null;
 }
-function BlockRendererOld({
-  block,
-  tc,
-  radius,
-  shadow,
-  products,
-}: {
-  block: Partial<LandingBlock>;
-  tc: ThemeConfig;
-  radius: string;
-  shadow: string;
-  products: NonNullable<
-    LandingPageWithProducts["landing_page_products"]
-  >[0]["product"][];
-}) {
-  const { type, content } = block;
 
-  if (type === "hero") {
-    return (
-      <div
-        style={{
-          textAlign: "center",
-          padding: "2rem 1rem",
-          marginBottom: "1.5rem",
-          borderRadius: radius,
-          background: content?.backgroundImageUrl
-            ? `linear-gradient(rgba(0,0,0,.4), rgba(0,0,0,.4)), url(${content.backgroundImageUrl}) center/cover`
-            : tc.primaryColor,
-          color: "#ffffff",
-        }}
-      >
-        <h2
-          style={{ fontSize: "1.6rem", fontWeight: 800, margin: "0 0 0.5rem" }}
-        >
-          {(content?.headline as string) ?? ""}
-        </h2>
-        {content?.subheadline && (
-          <p style={{ fontSize: "1rem", opacity: 0.85, margin: "0 0 1.5rem" }}>
-            {content.subheadline as string}
-          </p>
-        )}
-        {content?.ctaText && content?.ctaUrl && (
-          <a
-            href={content.ctaUrl as string}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: "inline-block",
-              padding: "0.6rem 1.8rem",
-              background: "#ffffff",
-              color: tc.primaryColor,
-              fontWeight: 700,
-              borderRadius: radius,
-              textDecoration: "none",
-              fontSize: "0.9rem",
-            }}
-          >
-            {content.ctaText as string}
-          </a>
-        )}
-      </div>
-    );
-  }
-
-  if (type === "text") {
-    return (
-      <div style={{ marginBottom: "1rem", lineHeight: 1.6 }}>
-        {(content?.text as string) ?? ""}
-      </div>
-    );
-  }
-
-  if (type === "divider") {
-    return (
-      <hr
-        style={{
-          border: "none",
-          borderTop: `1px solid ${(content?.color as string) ?? "#e2e8f0"}`,
-          margin: "1.5rem 0",
-        }}
-      />
-    );
-  }
-
-  if (type === "spacer") {
-    return <div style={{ height: `${(content?.height as number) ?? 32}px` }} />;
-  }
-
-  if (type === "cta-button" && content?.ctaUrl) {
-    return (
-      <a
-        href={content.ctaUrl as string}
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{
-          display: "block",
-          textAlign: "center",
-          padding: "0.8rem",
-          marginBottom: "12px",
-          borderRadius: radius,
-          background: tc.primaryColor,
-          color: "#ffffff",
-          fontWeight: 600,
-          textDecoration: "none",
-          boxShadow: shadow,
-        }}
-      >
-        {(content.text as string) ?? "Click Here"}
-      </a>
-    );
-  }
-
-  if (type === "image" && content?.url) {
-    const el = (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={content.url as string}
-        alt={(content.alt as string) ?? ""}
-        style={{
-          width: "100%",
-          borderRadius: radius,
-          marginBottom: "1rem",
-          display: "block",
-        }}
-      />
-    );
-    return content.link ? (
-      <a
-        href={content.link as string}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        {el}
-      </a>
-    ) : (
-      el
-    );
-  }
-
-  if (type === "product-single" && content?.productId) {
-    const product = products.find((p) => p?.id === content.productId);
-    if (!product) return null;
-    return (
-      <ProductCard product={product} tc={tc} radius={radius} shadow={shadow} />
-    );
-  }
-
-  if (
-    (type === "product-grid" || type === "product-list") &&
-    Array.isArray(content?.productIds)
-  ) {
-    const selectedProducts = (content?.productIds as string[])
-      .map((id) => products.find((p) => p?.id === id))
-      .filter(Boolean);
-    const cols = (content.columns as number) ?? 2;
-    return (
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns:
-            type === "product-list"
-              ? "1fr"
-              : `repeat(${Math.min(cols, 2)}, 1fr)`,
-          gap: "12px",
-          marginBottom: "1.5rem",
-        }}
-      >
-        {selectedProducts.map(
-          (product) =>
-            product && (
-              <ProductCard
-                key={product.id}
-                product={product}
-                tc={tc}
-                radius={radius}
-                shadow={shadow}
-              />
-            ),
-        )}
-      </div>
-    );
-  }
-
-  if (type === "custom-html" && content?.html) {
-    return (
-      <div
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: user-provided custom HTML block
-        dangerouslySetInnerHTML={{ __html: content.html as string }}
-        style={{ marginBottom: "1rem" }}
-      />
-    );
-  }
-  if (type === "video" && content?.videoId) {
-    return <VideoBlock content={content} radius={radius} />;
-  }
-
-  return null;
-}
-function ProductCard({
-  product,
-  tc,
-  radius,
-  shadow,
-}: {
-  product: NonNullable<
-    LandingPageWithProducts["landing_page_products"]
-  >[0]["product"];
-  tc: ThemeConfig;
-  radius: string;
-  shadow: string;
-}) {
-  if (!product) return null;
-  const thumb =
-    product.images.find((i) => i.is_primary)?.url ?? product.images[0]?.url;
-  const href = product.affiliate_url ?? product.marketplace_url ?? "#";
-
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      style={{
-        display: "block",
-        borderRadius: radius,
-        overflow: "hidden",
-        boxShadow: shadow,
-        backgroundColor: "#ffffff",
-        textDecoration: "none",
-        color: tc.textColor,
-        border: "1px solid rgba(0,0,0,.06)",
-      }}
-    >
-      {thumb && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={thumb}
-          alt={product.title}
-          style={{ width: "100%", aspectRatio: "1", objectFit: "cover" }}
-        />
-      )}
-      <div style={{ padding: "10px 12px 12px" }}>
-        {product.badges.length > 0 && (
-          <div
-            style={{
-              display: "flex",
-              gap: "4px",
-              flexWrap: "wrap",
-              marginBottom: "4px",
-            }}
-          >
-            {product.badges.map((b, i) => (
-              <span
-                key={i}
-                style={{
-                  fontSize: "10px",
-                  padding: "2px 6px",
-                  borderRadius: "3px",
-                  color: b.color ?? "#fff",
-                  backgroundColor: b.bgColor ?? tc.primaryColor,
-                  fontWeight: 600,
-                }}
-              >
-                {b.text}
-              </span>
-            ))}
-          </div>
-        )}
-        <p
-          style={{
-            fontWeight: 600,
-            fontSize: "0.85rem",
-            margin: "0 0 4px",
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-            overflow: "hidden",
-          }}
-        >
-          {product.title}
-        </p>
-        {product.product_rating != null && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "3px",
-              fontSize: "11px",
-              marginBottom: "4px",
-            }}
-          >
-            <span style={{ color: "#f59e0b" }}>★</span>
-            <span>{product.product_rating.toFixed(1)}</span>
-            {product.review_count > 0 && (
-              <span style={{ opacity: 0.6 }}>
-                ({product.review_count.toLocaleString()})
-              </span>
-            )}
-          </div>
-        )}
-        {product.price != null && (
-          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-            <span
-              style={{
-                fontWeight: 700,
-                fontSize: "0.9rem",
-                color: tc.primaryColor,
-              }}
-            >
-              {formatCurrency(product.price, { currency: product.currency })}
-            </span>
-            {product.original_price &&
-              product.original_price > product.price && (
-                <span
-                  style={{
-                    fontSize: "0.75rem",
-                    opacity: 0.5,
-                    textDecoration: "line-through",
-                  }}
-                >
-                  {formatCurrency(product.original_price, {
-                    currency: product.currency,
-                  })}
-                </span>
-              )}
-          </div>
-        )}
-        <div
-          style={{
-            marginTop: "8px",
-            padding: "6px",
-            textAlign: "center",
-            borderRadius: radius,
-            backgroundColor: tc.primaryColor,
-            color: "#ffffff",
-            fontSize: "0.8rem",
-            fontWeight: 600,
-          }}
-        >
-          Buy Now
-        </div>
-      </div>
-    </a>
-  );
-}
 function LinktreeProductCard({
   product,
-  radius,
-  shadow,
-  btnTextColor,
-  cardBg,
-  cardBorder,
+  tc,
 }: {
   product: NonNullable<ProductItem>;
-  radius: string;
-  shadow: string;
-  btnTextColor: string;
-  cardBg: string;
-  cardBorder: string;
+  tc: ThemeConfig;
 }) {
   const thumb =
     product.images.find((i) => i.is_primary)?.url ?? product.images[0]?.url;
@@ -962,12 +574,12 @@ function LinktreeProductCard({
         gap: "12px",
         padding: "0.85rem 1rem",
         marginBottom: "10px",
-        backgroundColor: cardBg,
-        border: `1px solid ${cardBorder}`,
-        borderRadius: radius,
-        color: btnTextColor,
+        backgroundColor: tc.backgroundColor,
+        border: `1px solid ${tc.primaryColor}`,
+        borderRadius: tc.borderRadius,
+        color: tc.primaryColor,
         textDecoration: "none",
-        boxShadow: shadow,
+        boxShadow: tc.shadow,
         width: "100%",
         boxSizing: "border-box",
       }}
