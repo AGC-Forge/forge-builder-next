@@ -1,5 +1,6 @@
 import Image from "next/image";
-import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
+import { useTranslations, useLocale } from "next-intl";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { LanguageSwitcher } from "@/components/language-switcher";
 
@@ -8,6 +9,7 @@ export default function AuthLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = useLocale();
   const t = useTranslations("HomePage");
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10 relative">
@@ -16,8 +18,12 @@ export default function AuthLayout({
         <LanguageSwitcher />
       </div>
       <div className="flex w-full max-w-sm flex-col gap-6">
-        <a href="#" className="flex items-center gap-2 self-center font-medium">
-          <div className="flex size-6 items-center justify-center rounded-md">
+        <Link
+          href="/"
+          locale={locale}
+          className="flex items-center gap-2 self-center font-medium"
+        >
+          <div className="flex size-8 items-center justify-center rounded-md">
             <Image
               src="/logo.png"
               alt="SnapLand Logo"
@@ -27,7 +33,7 @@ export default function AuthLayout({
             />
           </div>
           {t("title")}
-        </a>
+        </Link>
         {children}
       </div>
     </div>

@@ -34,7 +34,7 @@ export function AccountSwitcher({
         ? "/auth/signout"
         : `/${locale}/auth/signout`;
 
-    const res = await fetch(signoutPath, { method: "POST" });
+    const res = await fetch("/auth/signout", { method: "POST" });
 
     if (res.redirected) {
       window.location.href = res.url;

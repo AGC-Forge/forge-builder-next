@@ -44,6 +44,13 @@ export const metadata: Metadata = {
     "custom landing pages",
     "marketing tools 2026",
   ],
+  icons: [
+    {
+      url: "/favicon.ico",
+      sizes: "16x16 32x32 48x48 128x128",
+      type: "image/x-icon",
+    },
+  ],
 };
 
 type Props = {
@@ -216,7 +223,11 @@ export default async function RootLayout({
               navbarStyle={navbar_style}
               font={font}
             >
-              <CurrentUserProvider user={currentUser} profile={currentProfile} publicSettings={publicSettings}>
+              <CurrentUserProvider
+                user={currentUser}
+                profile={currentProfile}
+                publicSettings={publicSettings}
+              >
                 {children}
                 <Toaster />
               </CurrentUserProvider>

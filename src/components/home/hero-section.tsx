@@ -40,7 +40,7 @@ export function HeroSection() {
 
       {/* Headline */}
       <h1
-        className="font-heading bg-linear-to-r font-extrabold leading-[1.05] tracking-[-0.04em] mb-6 animate-fade-up bg-clip-text text-transparent from-emerald-200 to-fuchsia-200"
+        className="font-heading font-extrabold leading-[1.05] tracking-[-0.04em] mb-6 animate-fade-up"
         style={{ fontSize: "clamp(42px, 6vw, 76px)", animationDelay: "0.1s" }}
       >
         {t("title1")}
