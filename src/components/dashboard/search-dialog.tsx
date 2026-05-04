@@ -151,7 +151,7 @@ export function SearchDialog() {
       <CommandDialog open={open} onOpenChange={handleOpenChange}>
         <Command>
           <CommandInput
-            className="outline-none ring-0 hover:ring-0 active:ring-0 focus:ring-0 border-none"
+            className="outline-none ring-0 hover:ring-0 active:ring-0 focus:ring-0 border-none bg-muted text-muted-foreground"
             placeholder="Search products, users, and more…"
             value={query}
             onValueChange={setQuery}

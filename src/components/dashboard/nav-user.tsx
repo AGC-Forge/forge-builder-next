@@ -43,10 +43,10 @@ export function NavUser({
   const handleLogout = async () => {
     const signoutPath =
       locale === routing.defaultLocale
-        ? "/auth/signout"
-        : `/${locale}/auth/signout`;
+        ? "/auth/callback/signout"
+        : `/${locale}/auth/callback/signout`;
 
-    const res = await fetch("/auth/signout", { method: "POST" });
+    const res = await fetch(signoutPath, { method: "POST" });
 
     if (res.redirected) {
       window.location.href = res.url;
