@@ -8,6 +8,33 @@ import {
   resetPasswordSchema,
 } from "@/lib/validations/auth";
 
+export async function getOAuthRedirectUrl(
+  provider: "github" | "google",
+  next = "/dashboard",
+): Promise<ActionResult<{ url: string }>> {
+  try {
+    const supabase = await createClient();
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+    if (!appUrl) return { success: false, error: "NEXT_PUBLIC_APP_URL not set" };
+
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${appUrl}/auth/callback?next=${encodeURIComponent(next)}`,
+        queryParams: { access_type: "offline", prompt: "consent" },
+        skipBrowserRedirect: true,
+      },
+    });
+
+    if (error || !data.url) {
+      return { success: false, error: error?.message ?? "Failed to get OAuth URL" };
+    }
+    return { success: true, data: { url: data.url } };
+  } catch {
+    return { success: false, error: "Failed to initiate OAuth" };
+  }
+}
+
 export async function loginAction(formData: FormData): Promise<ActionResult> {
   const raw = {
     email: formData.get("email") as string,

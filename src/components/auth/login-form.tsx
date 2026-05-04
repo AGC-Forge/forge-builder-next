@@ -1,14 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 import { toast } from "sonner";
-import { loginAction } from "@/actions/auth";
-import { createClient } from "@/lib/supabase/client";
+import { loginAction, getOAuthRedirectUrl } from "@/actions/auth";
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -43,7 +42,6 @@ export function LoginForm({
   const locale = useLocale();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
-  const supabase = createClient();
 
   const [showPassword, setShowPassword] = useState(false);
   const [isSocialLoading, setIsSocialLoading] = useState<string | null>(null);
@@ -62,28 +60,16 @@ export function LoginForm({
 
   const handleSocialLogin = async (provider: "github" | "google") => {
     setIsSocialLoading(provider);
-
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin;
-
     try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: `${appUrl}/auth/callback?next=${callbackUrl}`,
-          queryParams: {
-            access_type: "offline",
-            prompt: "consent",
-          },
-        },
-      });
-
-      if (error) {
-        toast.error(error.message);
+      const result = await getOAuthRedirectUrl(provider, callbackUrl);
+      if (result.success && result.data) {
+        window.location.replace(result.data.url);
+      } else {
+        toast.error(result.error ?? `Failed to login with ${provider}`);
+        setIsSocialLoading(null);
       }
-    } catch (error) {
+    } catch {
       toast.error(`Failed to login with ${provider}`);
-      console.error(`${provider} login error:`, error);
-    } finally {
       setIsSocialLoading(null);
     }
   };

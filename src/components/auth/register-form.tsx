@@ -7,8 +7,7 @@ import { useRouter } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 import { toast } from "sonner";
-import { registerAction } from "@/actions/auth";
-import { createClient } from "@/lib/supabase/client";
+import { registerAction, getOAuthRedirectUrl } from "@/actions/auth";
 import { registerSchema, type RegisterInput } from "@/lib/validations/auth";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -48,7 +47,6 @@ export function RegisterForm({
   ...props
 }: React.ComponentProps<"div">) {
   const router = useRouter();
-  const supabase = createClient();
   const locale = useLocale();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -72,28 +70,16 @@ export function RegisterForm({
 
   const handleSocialLogin = async (provider: "github" | "google") => {
     setIsSocialLoading(provider);
-
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin;
-
     try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: `${appUrl}/auth/callback?next=/dashboard`,
-          queryParams: {
-            access_type: "offline",
-            prompt: "consent",
-          },
-        },
-      });
-
-      if (error) {
-        toast.error(error.message);
+      const result = await getOAuthRedirectUrl(provider, "/dashboard");
+      if (result.success && result.data) {
+        window.location.href = result.data.url;
+      } else {
+        toast.error(result.error ?? `Failed to register with ${provider}`);
+        setIsSocialLoading(null);
       }
-    } catch (error) {
+    } catch {
       toast.error(`Failed to register with ${provider}`);
-      console.error(`${provider} register error:`, error);
-    } finally {
       setIsSocialLoading(null);
     }
   };
