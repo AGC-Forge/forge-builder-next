@@ -8,6 +8,18 @@ import type {
   LandingBlock,
 } from "@/types/database";
 import { VideoBlock } from "@/components/landing-page/video-block";
+import {
+  SHADOW_MAP,
+  RADIUS_MAP,
+  isLight,
+  getBtnTextColor,
+  getCardColors,
+  getContainerStyle,
+  getInnerStyle,
+  getImageStyle,
+  getProductGridStyle,
+  buildBgStyle,
+} from "@/components/landing-page/theme-utils";
 
 interface Props {
   landingPage: LandingPageWithProducts;
@@ -16,30 +28,6 @@ interface Props {
 type Product = NonNullable<
   LandingPageWithProducts["landing_page_products"]
 >[0]["product"];
-
-// ── helpers ──────────────────────────────────────────────────
-function isLight(hex: string): boolean {
-  const c = hex.replace("#", "");
-  if (c.length < 6) return true;
-  const r = parseInt(c.slice(0, 2), 16);
-  const g = parseInt(c.slice(2, 4), 16);
-  const b = parseInt(c.slice(4, 6), 16);
-  return r * 0.299 + g * 0.587 + b * 0.114 > 155;
-}
-
-const RADIUS_MAP: Record<string, string> = {
-  none: "0px",
-  sm: "6px",
-  md: "12px",
-  lg: "16px",
-  full: "9999px",
-};
-const SHADOW_MAP: Record<string, string> = {
-  none: "none",
-  sm: "0 2px 6px rgba(0,0,0,.1)",
-  md: "0 4px 14px rgba(0,0,0,.12)",
-  lg: "0 8px 24px rgba(0,0,0,.16)",
-};
 
 export function TaplinkTheme({ landingPage }: Props) {
   const cfg = landingPage.theme_config;
@@ -71,35 +59,13 @@ export function TaplinkTheme({ landingPage }: Props) {
   const onLight = isLight(tc.backgroundColor ?? "#faf5ff");
   const btnTextColor = isLight(tc.primaryColor) ? "#1a1a1a" : "#ffffff";
 
-  const bgStyle: React.CSSProperties =
-    tc.backgroundType === "gradient" && tc.backgroundGradient
-      ? { background: tc.backgroundGradient }
-      : tc.backgroundType === "image" && tc.backgroundImageUrl
-        ? {
-            backgroundImage: `url(${tc.backgroundImageUrl})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }
-        : { backgroundColor: tc.backgroundColor };
-
-  const visibleBlocks = landingPage.blocks.filter((b) => b.visible);
+  const bgStyle = buildBgStyle(tc);
+  const { cardBg, cardBorder } = getCardColors(tc.backgroundColor ?? "#0f172a");
+  const visibleBlocks = (landingPage.blocks ?? []).filter((b) => b.visible);
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        fontFamily: tc.fontFamily,
-        color: tc.textColor,
-        ...bgStyle,
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "520px",
-          margin: "0 auto",
-          padding: "2.5rem 1rem 4rem",
-        }}
-      >
+    <div style={{ ...getContainerStyle(bgStyle, tc.fontFamily, tc.textColor) }}>
+      <div style={{ ...getInnerStyle("520px", "2.5rem 1rem 4rem") }}>
         {/* Profile */}
         {tc.profileImageUrl && (
           // eslint-disable-next-line @next/next/no-img-element
@@ -144,8 +110,9 @@ export function TaplinkTheme({ landingPage }: Props) {
         )}
 
         {/* Blocks or product grid */}
-        {visibleBlocks.length > 0
-          ? visibleBlocks.map((block) => (
+        {visibleBlocks.length > 0 ? (
+          <div style={{ width: "100%" }}>
+            {visibleBlocks.map((block) => (
               <BlockRenderer
                 key={block.id}
                 block={block}
@@ -155,31 +122,29 @@ export function TaplinkTheme({ landingPage }: Props) {
                 btnTextColor={btnTextColor}
                 onLight={onLight}
                 products={products}
+                cardBg={cardBg}
+                cardBorder={cardBorder}
               />
-            ))
-          : products.length > 0 && (
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "12px",
-                }}
-              >
-                {products.map(
-                  (p) =>
-                    p && (
-                      <TaplinkProductBtn
-                        key={p.id}
-                        product={p}
-                        tc={tc}
-                        radius={radius}
-                        shadow={shadow}
-                        btnTextColor={btnTextColor}
-                      />
-                    ),
-                )}
-              </div>
+            ))}
+          </div>
+        ) : products.length > 0 ? (
+          <div style={{ width: "100%" }}>
+            {products.map((p) =>
+              p ? (
+                <TaplinkProductBtn
+                  key={p.id}
+                  product={p}
+                  tc={tc}
+                  radius={radius}
+                  shadow={shadow}
+                  btnTextColor={btnTextColor}
+                  cardBg={cardBg}
+                  cardBorder={cardBorder}
+                />
+              ) : null,
             )}
+          </div>
+        ) : null}
 
         <p
           style={{
@@ -195,8 +160,6 @@ export function TaplinkTheme({ landingPage }: Props) {
     </div>
   );
 }
-
-// ── Block Renderer ───────────────────────────────────────────
 function BlockRenderer({
   block,
   tc,
@@ -205,6 +168,8 @@ function BlockRenderer({
   btnTextColor,
   onLight,
   products,
+  cardBg,
+  cardBorder,
 }: {
   block: Partial<LandingBlock>;
   tc: ThemeConfig;
@@ -213,6 +178,8 @@ function BlockRenderer({
   btnTextColor: string;
   onLight: boolean;
   products: NonNullable<Product>[];
+  cardBg: string;
+  cardBorder: string;
 }) {
   const { type, content } = block;
 
@@ -229,6 +196,8 @@ function BlockRenderer({
             : `linear-gradient(135deg, ${tc.primaryColor}, ${tc.secondaryColor ?? tc.primaryColor})`,
           color: "#fff",
           boxShadow: shadow,
+          width: "100%",
+          boxSizing: "border-box",
         }}
       >
         <h2
@@ -274,6 +243,8 @@ function BlockRenderer({
           lineHeight: 1.7,
           fontSize: "0.9rem",
           opacity: 0.85,
+          width: "100%",
+          boxSizing: "border-box",
         }}
       >
         {(content?.text as string) ?? ""}
@@ -288,13 +259,23 @@ function BlockRenderer({
           border: "none",
           borderTop: `1px solid ${onLight ? "rgba(0,0,0,.1)" : "rgba(255,255,255,.12)"}`,
           margin: "1.25rem 0",
+          width: "100%",
+          boxSizing: "border-box",
         }}
       />
     );
   }
 
   if (type === "spacer") {
-    return <div style={{ height: `${(content?.height as number) ?? 24}px` }} />;
+    return (
+      <div
+        style={{
+          height: `${(content?.height as number) ?? 24}px`,
+          width: "100%",
+          boxSizing: "border-box",
+        }}
+      />
+    );
   }
 
   if (type === "cta-button" && content?.ctaUrl) {
@@ -314,6 +295,8 @@ function BlockRenderer({
           fontWeight: 700,
           textDecoration: "none",
           boxShadow: shadow,
+          width: "100%",
+          boxSizing: "border-box",
           fontSize: "0.95rem",
         }}
       >
@@ -329,10 +312,11 @@ function BlockRenderer({
         src={content.url as string}
         alt={(content.alt as string) ?? ""}
         style={{
-          width: "100%",
-          borderRadius: radius,
-          marginBottom: "1rem",
-          display: "block",
+          ...getImageStyle({
+            borderRadius: radius,
+            marginBottom: "1rem",
+            boxShadow: shadow,
+          }),
         }}
       />
     );
@@ -353,14 +337,18 @@ function BlockRenderer({
     const product = products.find((p) => p.id === content.productId);
     if (!product) return null;
     return (
-      <div style={{ marginBottom: "1rem" }}>
+      <div
+        style={{ marginBottom: "1rem", width: "100%", boxSizing: "border-box" }}
+      >
         <TaplinkProductBtn
           product={product}
           tc={tc}
           radius={radius}
           shadow={shadow}
           btnTextColor={btnTextColor}
-          wide
+          wide={true}
+          cardBg={cardBg}
+          cardBorder={cardBorder}
         />
       </div>
     );
@@ -377,9 +365,7 @@ function BlockRenderer({
     return (
       <div
         style={{
-          display: "grid",
-          gridTemplateColumns: `repeat(${cols}, 1fr)`,
-          gap: "10px",
+          ...getProductGridStyle(Math.min(cols, 2)),
           marginBottom: "1rem",
         }}
       >
@@ -392,6 +378,8 @@ function BlockRenderer({
             shadow={shadow}
             btnTextColor={btnTextColor}
             wide={cols === 1}
+            cardBg={cardBg}
+            cardBorder={cardBorder}
           />
         ))}
       </div>
@@ -407,6 +395,8 @@ function BlockRenderer({
           gap: "10px",
           marginBottom: "1rem",
           flexWrap: "wrap",
+          width: "100%",
+          boxSizing: "border-box",
         }}
       >
         {(content.links as { platform: string; url: string; label: string }[])
@@ -442,6 +432,8 @@ function BlockRenderer({
           flexDirection: "column",
           gap: "10px",
           marginBottom: "1.25rem",
+          width: "100%",
+          boxSizing: "border-box",
         }}
       >
         {(
@@ -484,6 +476,8 @@ function BlockRenderer({
           flexDirection: "column",
           gap: "6px",
           marginBottom: "1.25rem",
+          width: "100%",
+          boxSizing: "border-box",
         }}
       >
         {(content.items as { question: string; answer: string }[]).map(
@@ -536,7 +530,7 @@ function BlockRenderer({
       // biome-ignore lint/security/noDangerouslySetInnerHtml: user HTML
       <div
         dangerouslySetInnerHTML={{ __html: content.html as string }}
-        style={{ marginBottom: "1rem" }}
+        style={{ marginBottom: "1rem", width: "100%", boxSizing: "border-box" }}
       />
     );
   }
@@ -547,8 +541,6 @@ function BlockRenderer({
 
   return null;
 }
-
-// ── TapLink Product Button ───────────────────────────────────
 function TaplinkProductBtn({
   product,
   tc,
@@ -556,6 +548,8 @@ function TaplinkProductBtn({
   shadow,
   btnTextColor,
   wide = false,
+  cardBg,
+  cardBorder,
 }: {
   product: NonNullable<Product>;
   tc: ThemeConfig;
@@ -563,6 +557,8 @@ function TaplinkProductBtn({
   shadow: string;
   btnTextColor: string;
   wide?: boolean;
+  cardBg: string;
+  cardBorder: string;
 }) {
   const thumb =
     product.images.find((i) => i.is_primary)?.url ?? product.images[0]?.url;
@@ -580,7 +576,8 @@ function TaplinkProductBtn({
         gap: wide ? "12px" : "0",
         borderRadius: radius,
         overflow: "hidden",
-        background: tc.primaryColor,
+        background: cardBg,
+        border: `1px solid ${cardBorder}`,
         color: btnTextColor,
         textDecoration: "none",
         boxShadow: shadow,
@@ -632,8 +629,6 @@ function TaplinkProductBtn({
     </a>
   );
 }
-
-// ── Countdown Block ──────────────────────────────────────────
 function CountdownBlock({
   targetDate,
   label,
@@ -664,7 +659,14 @@ function CountdownBlock({
   const secs = Math.floor((diff % 60000) / 1000);
 
   const unit = (n: number, u: string) => (
-    <div style={{ textAlign: "center", minWidth: "52px" }}>
+    <div
+      style={{
+        textAlign: "center",
+        minWidth: "52px",
+        boxSizing: "border-box",
+        width: "100%",
+      }}
+    >
       <div style={{ fontSize: "1.8rem", fontWeight: 800, lineHeight: 1 }}>
         {String(n).padStart(2, "0")}
       </div>

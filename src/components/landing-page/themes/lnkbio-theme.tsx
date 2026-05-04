@@ -8,6 +8,17 @@ import type {
   LandingBlock,
 } from "@/types/database";
 import { VideoBlock } from "@/components/landing-page/video-block";
+import {
+  SHADOW_MAP,
+  RADIUS_MAP,
+  isLight,
+  getCardColors,
+  getContainerStyle,
+  getInnerStyle,
+  getImageStyle,
+  getProductGridStyle,
+  buildBgStyle,
+} from "@/components/landing-page/theme-utils";
 
 interface Props {
   landingPage: LandingPageWithProducts;
@@ -16,29 +27,6 @@ interface Props {
 type Product = NonNullable<
   LandingPageWithProducts["landing_page_products"]
 >[0]["product"];
-
-function isLight(hex: string): boolean {
-  const c = hex.replace("#", "");
-  if (c.length < 6) return true;
-  const r = parseInt(c.slice(0, 2), 16);
-  const g = parseInt(c.slice(2, 4), 16);
-  const b = parseInt(c.slice(4, 6), 16);
-  return r * 0.299 + g * 0.587 + b * 0.114 > 155;
-}
-
-const RADIUS_MAP: Record<string, string> = {
-  none: "0px",
-  sm: "6px",
-  md: "10px",
-  lg: "16px",
-  full: "9999px",
-};
-const SHADOW_MAP: Record<string, string> = {
-  none: "none",
-  sm: "0 1px 4px rgba(0,0,0,.08)",
-  md: "0 3px 12px rgba(0,0,0,.1)",
-  lg: "0 6px 22px rgba(0,0,0,.14)",
-};
 
 export function LnkbioTheme({ landingPage }: Props) {
   const cfg = landingPage.theme_config;
@@ -68,39 +56,15 @@ export function LnkbioTheme({ landingPage }: Props) {
   const radius = RADIUS_MAP[tc.borderRadius] ?? "16px";
   const shadow = SHADOW_MAP[tc.shadow ?? "sm"] ?? "none";
   const onLight = isLight(tc.backgroundColor ?? "#18181b");
-  const cardBg = onLight ? "rgba(0,0,0,.05)" : "rgba(255,255,255,.08)";
-  const cardBorder = onLight ? "rgba(0,0,0,.08)" : "rgba(255,255,255,.1)";
   const btnTextColor = isLight(tc.primaryColor) ? "#18181b" : "#ffffff";
 
-  const bgStyle: React.CSSProperties =
-    tc.backgroundType === "gradient" && tc.backgroundGradient
-      ? { background: tc.backgroundGradient }
-      : tc.backgroundType === "image" && tc.backgroundImageUrl
-        ? {
-            backgroundImage: `url(${tc.backgroundImageUrl})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }
-        : { backgroundColor: tc.backgroundColor };
-
-  const visibleBlocks = landingPage.blocks.filter((b) => b.visible);
+  const bgStyle = buildBgStyle(tc);
+  const { cardBg, cardBorder } = getCardColors(tc.backgroundColor ?? "#0f172a");
+  const visibleBlocks = (landingPage.blocks ?? []).filter((b) => b.visible);
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        fontFamily: tc.fontFamily,
-        color: tc.textColor,
-        ...bgStyle,
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "440px",
-          margin: "0 auto",
-          padding: "2rem 1rem 4rem",
-        }}
-      >
+    <div style={{ ...getContainerStyle(bgStyle, tc.fontFamily, tc.textColor) }}>
+      <div style={{ ...getInnerStyle("440px", "2rem 1rem 4rem") }}>
         {/* Avatar + identity compact */}
         <div
           style={{
@@ -108,6 +72,7 @@ export function LnkbioTheme({ landingPage }: Props) {
             alignItems: "center",
             gap: "14px",
             marginBottom: "1.5rem",
+            width: "100%",
           }}
         >
           {tc.profileImageUrl ? (
@@ -180,8 +145,9 @@ export function LnkbioTheme({ landingPage }: Props) {
         />
 
         {/* Blocks */}
-        {visibleBlocks.length > 0
-          ? visibleBlocks.map((block) => (
+        {visibleBlocks.length > 0 ? (
+          <div style={{ width: "100%" }}>
+            {visibleBlocks.map((block) => (
               <BlockRenderer
                 key={block.id}
                 block={block}
@@ -194,23 +160,26 @@ export function LnkbioTheme({ landingPage }: Props) {
                 onLight={onLight}
                 products={products}
               />
-            ))
-          : products.length > 0 &&
-            products.map(
-              (p) =>
-                p && (
-                  <LnkbioLink
-                    key={p.id}
-                    product={p}
-                    tc={tc}
-                    radius={radius}
-                    shadow={shadow}
-                    cardBg={cardBg}
-                    cardBorder={cardBorder}
-                    btnTextColor={btnTextColor}
-                  />
-                ),
+            ))}
+          </div>
+        ) : products.length > 0 ? (
+          <div style={{ width: "100%" }}>
+            {products.map((p) =>
+              p ? (
+                <LnkbioLink
+                  key={p.id}
+                  product={p}
+                  tc={tc}
+                  radius={radius}
+                  shadow={shadow}
+                  cardBg={cardBg}
+                  cardBorder={cardBorder}
+                  btnTextColor={btnTextColor}
+                />
+              ) : null,
             )}
+          </div>
+        ) : null}
 
         <p
           style={{
@@ -227,7 +196,6 @@ export function LnkbioTheme({ landingPage }: Props) {
   );
 }
 
-// ── Block Renderer ───────────────────────────────────────────
 function BlockRenderer({
   block,
   tc,
@@ -314,6 +282,8 @@ function BlockRenderer({
           lineHeight: 1.65,
           fontSize: "0.85rem",
           opacity: 0.75,
+          width: "100%",
+          boxSizing: "border-box",
         }}
       >
         {(content?.text as string) ?? ""}
@@ -328,13 +298,23 @@ function BlockRenderer({
           border: "none",
           borderTop: `1px solid ${cardBorder}`,
           margin: "0.75rem 0",
+          width: "100%",
+          boxSizing: "border-box",
         }}
       />
     );
   }
 
   if (type === "spacer") {
-    return <div style={{ height: `${(content?.height as number) ?? 16}px` }} />;
+    return (
+      <div
+        style={{
+          height: `${(content?.height as number) ?? 32}px`,
+          width: "100%",
+          boxSizing: "border-box",
+        }}
+      />
+    );
   }
 
   if (type === "cta-button" && content?.ctaUrl) {
@@ -356,6 +336,8 @@ function BlockRenderer({
           textDecoration: "none",
           fontSize: "0.88rem",
           boxShadow: shadow,
+          width: "100%",
+          boxSizing: "border-box",
         }}
       >
         <span>{(content.text as string) ?? "Click Here"}</span>
@@ -371,10 +353,11 @@ function BlockRenderer({
         src={content.url as string}
         alt={(content.alt as string) ?? ""}
         style={{
-          width: "100%",
-          borderRadius: radius,
-          marginBottom: "10px",
-          display: "block",
+          ...getImageStyle({
+            borderRadius: radius,
+            marginBottom: "10px",
+            boxShadow: shadow,
+          }),
         }}
       />
     );
@@ -395,15 +378,23 @@ function BlockRenderer({
     const product = products.find((p) => p.id === content.productId);
     if (!product) return null;
     return (
-      <LnkbioLink
-        product={product}
-        tc={tc}
-        radius={radius}
-        shadow={shadow}
-        cardBg={cardBg}
-        cardBorder={cardBorder}
-        btnTextColor={btnTextColor}
-      />
+      <div
+        style={{
+          marginBottom: "1.25rem",
+          width: "100%",
+          boxSizing: "border-box",
+        }}
+      >
+        <LnkbioLink
+          product={product}
+          tc={tc}
+          radius={radius}
+          shadow={shadow}
+          cardBg={cardBg}
+          cardBorder={cardBorder}
+          btnTextColor={btnTextColor}
+        />
+      </div>
     );
   }
 
@@ -411,15 +402,16 @@ function BlockRenderer({
     (type === "product-grid" || type === "product-list") &&
     Array.isArray(content?.productIds)
   ) {
+    const cols =
+      type === "product-list" ? 1 : ((content?.columns as number) ?? 2);
     const selected = (content.productIds as string[])
       .map((id) => products.find((p) => p.id === id))
       .filter(Boolean) as NonNullable<Product>[];
     return (
       <div
         style={{
-          display: "flex",
+          ...getProductGridStyle(Math.min(cols, 2)),
           flexDirection: "column",
-          gap: "10px",
           marginBottom: "10px",
         }}
       >
@@ -448,6 +440,8 @@ function BlockRenderer({
           gap: "8px",
           marginBottom: "12px",
           flexWrap: "wrap",
+          width: "100%",
+          boxSizing: "border-box",
         }}
       >
         {(content.links as { platform: string; url: string; label: string }[])
@@ -478,7 +472,13 @@ function BlockRenderer({
 
   if (type === "testimonials" && Array.isArray(content?.items)) {
     return (
-      <div style={{ marginBottom: "12px" }}>
+      <div
+        style={{
+          marginBottom: "12px",
+          width: "100%",
+          boxSizing: "border-box",
+        }}
+      >
         {(
           content.items as { name: string; text: string; rating: number }[]
         ).map((item, i) => (
@@ -521,7 +521,13 @@ function BlockRenderer({
 
   if (type === "faq" && Array.isArray(content?.items)) {
     return (
-      <div style={{ marginBottom: "12px" }}>
+      <div
+        style={{
+          marginBottom: "12px",
+          width: "100%",
+          boxSizing: "border-box",
+        }}
+      >
         {(content.items as { question: string; answer: string }[]).map(
           (item, i) => (
             <details
@@ -573,7 +579,11 @@ function BlockRenderer({
     return (
       <div
         dangerouslySetInnerHTML={{ __html: content.html as string }}
-        style={{ marginBottom: "10px" }}
+        style={{
+          marginBottom: "10px",
+          width: "100%",
+          boxSizing: "border-box",
+        }}
       />
     );
   }
@@ -584,7 +594,6 @@ function BlockRenderer({
   return null;
 }
 
-// ── Lnk.bio link row ─────────────────────────────────────────
 function LnkbioLink({
   product,
   tc,
@@ -717,6 +726,8 @@ function CountdownBlock({
         border: `1px solid ${cardBorder}`,
         borderRadius: radius,
         textAlign: "center",
+        width: "100%",
+        boxSizing: "border-box",
       }}
     >
       <p

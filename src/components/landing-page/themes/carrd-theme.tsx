@@ -8,6 +8,16 @@ import type {
   LandingBlock,
 } from "@/types/database";
 import { VideoBlock } from "@/components/landing-page/video-block";
+import {
+  SHADOW_MAP,
+  RADIUS_MAP,
+  isLight,
+  getCardColors,
+  getContainerStyle,
+  getImageStyle,
+  getProductGridStyle,
+  buildBgStyle,
+} from "@/components/landing-page/theme-utils";
 
 interface Props {
   landingPage: LandingPageWithProducts;
@@ -16,29 +26,6 @@ interface Props {
 type Product = NonNullable<
   LandingPageWithProducts["landing_page_products"]
 >[0]["product"];
-
-function isLight(hex: string): boolean {
-  const c = hex.replace("#", "");
-  if (c.length < 6) return true;
-  const r = parseInt(c.slice(0, 2), 16);
-  const g = parseInt(c.slice(2, 4), 16);
-  const b = parseInt(c.slice(4, 6), 16);
-  return r * 0.299 + g * 0.587 + b * 0.114 > 155;
-}
-
-const RADIUS_MAP: Record<string, string> = {
-  none: "0px",
-  sm: "4px",
-  md: "8px",
-  lg: "14px",
-  full: "9999px",
-};
-const SHADOW_MAP: Record<string, string> = {
-  none: "none",
-  sm: "0 2px 8px rgba(0,0,0,.08)",
-  md: "0 6px 20px rgba(0,0,0,.12)",
-  lg: "0 12px 36px rgba(0,0,0,.18)",
-};
 
 export function CarrdTheme({ landingPage }: Props) {
   const cfg = landingPage.theme_config;
@@ -69,32 +56,13 @@ export function CarrdTheme({ landingPage }: Props) {
   const radius = RADIUS_MAP[tc.borderRadius] ?? "8px";
   const shadow = SHADOW_MAP[tc.shadow ?? "md"] ?? "none";
   const onLight = isLight(tc.backgroundColor ?? "#0d1117");
-  const cardBg = onLight ? "rgba(0,0,0,.05)" : "rgba(255,255,255,.06)";
-  const cardBorder = onLight ? "rgba(0,0,0,.1)" : "rgba(255,255,255,.1)";
   const btnTextColor = isLight(tc.primaryColor) ? "#0d1117" : "#ffffff";
-
-  const bgStyle: React.CSSProperties =
-    tc.backgroundType === "gradient" && tc.backgroundGradient
-      ? { background: tc.backgroundGradient }
-      : tc.backgroundType === "image" && tc.backgroundImageUrl
-        ? {
-            backgroundImage: `url(${tc.backgroundImageUrl})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }
-        : { backgroundColor: tc.backgroundColor };
-
+  const bgStyle = buildBgStyle(tc);
+  const { cardBg, cardBorder } = getCardColors(tc.backgroundColor ?? "#0f172a");
   const visibleBlocks = landingPage.blocks.filter((b) => b.visible);
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        fontFamily: tc.fontFamily,
-        color: tc.textColor,
-        ...bgStyle,
-      }}
-    >
+    <div style={{ ...getContainerStyle(bgStyle, tc.fontFamily, tc.textColor) }}>
       {/* ── Hero Header Section ── */}
       <section
         style={{
@@ -174,8 +142,9 @@ export function CarrdTheme({ landingPage }: Props) {
           padding: "0 1.5rem 6rem",
         }}
       >
-        {visibleBlocks.length > 0
-          ? visibleBlocks.map((block) => (
+        {visibleBlocks.length > 0 ? (
+          <div style={{ width: "100%" }}>
+            {visibleBlocks.map((block) => (
               <BlockRenderer
                 key={block.id}
                 block={block}
@@ -188,45 +157,45 @@ export function CarrdTheme({ landingPage }: Props) {
                 onLight={onLight}
                 products={products}
               />
-            ))
-          : products.length > 0 && (
-              <section style={{ padding: "3rem 0" }}>
-                <h2
-                  style={{
-                    fontSize: "1.5rem",
-                    fontWeight: 700,
-                    margin: "0 0 1.5rem",
-                    opacity: 0.9,
-                  }}
-                >
-                  Products
-                </h2>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns:
-                      "repeat(auto-fill, minmax(220px, 1fr))",
-                    gap: "16px",
-                  }}
-                >
-                  {products.map(
-                    (p) =>
-                      p && (
-                        <CarrdProductCard
-                          key={p.id}
-                          product={p}
-                          tc={tc}
-                          radius={radius}
-                          shadow={shadow}
-                          cardBg={cardBg}
-                          cardBorder={cardBorder}
-                          btnTextColor={btnTextColor}
-                        />
-                      ),
-                  )}
-                </div>
-              </section>
-            )}
+            ))}
+          </div>
+        ) : products.length > 0 ? (
+          <section style={{ padding: "3rem 0" }}>
+            <h2
+              style={{
+                fontSize: "1.5rem",
+                fontWeight: 700,
+                margin: "0 0 1.5rem",
+                opacity: 0.9,
+              }}
+            >
+              Products
+            </h2>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+                gap: "16px",
+              }}
+            >
+              {products.map(
+                (p) =>
+                  p && (
+                    <CarrdProductCard
+                      key={p.id}
+                      product={p}
+                      tc={tc}
+                      radius={radius}
+                      shadow={shadow}
+                      cardBg={cardBg}
+                      cardBorder={cardBorder}
+                      btnTextColor={btnTextColor}
+                    />
+                  ),
+              )}
+            </div>
+          </section>
+        ) : null}
       </div>
 
       <footer
@@ -242,8 +211,6 @@ export function CarrdTheme({ landingPage }: Props) {
     </div>
   );
 }
-
-// ── Block Renderer ───────────────────────────────────────────
 function BlockRenderer({
   block,
   tc,
@@ -269,7 +236,14 @@ function BlockRenderer({
 
   if (type === "hero") {
     return (
-      <section style={{ padding: "4rem 0", textAlign: "center" }}>
+      <section
+        style={{
+          padding: "4rem 0",
+          textAlign: "center",
+          width: "100%",
+          boxSizing: "border-box",
+        }}
+      >
         {content?.backgroundImageUrl && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -332,7 +306,13 @@ function BlockRenderer({
 
   if (type === "text") {
     return (
-      <section style={{ padding: "2rem 0" }}>
+      <section
+        style={{
+          padding: "2rem 0",
+          width: "100%",
+          boxSizing: "border-box",
+        }}
+      >
         <p style={{ lineHeight: 1.8, opacity: 0.75, fontSize: "0.97rem" }}>
           {(content?.text as string) ?? ""}
         </p>
@@ -347,18 +327,35 @@ function BlockRenderer({
           border: "none",
           borderTop: `1px solid ${cardBorder}`,
           margin: "1.5rem 0",
+          width: "100%",
+          boxSizing: "border-box",
         }}
       />
     );
   }
 
   if (type === "spacer") {
-    return <div style={{ height: `${(content?.height as number) ?? 32}px` }} />;
+    return (
+      <div
+        style={{
+          height: `${(content?.height as number) ?? 32}px`,
+          width: "100%",
+          boxSizing: "border-box",
+        }}
+      />
+    );
   }
 
   if (type === "cta-button" && content?.ctaUrl) {
     return (
-      <section style={{ padding: "1rem 0", textAlign: "center" }}>
+      <section
+        style={{
+          padding: "1rem 0",
+          textAlign: "center",
+          width: "100%",
+          boxSizing: "border-box",
+        }}
+      >
         <a
           href={content.ctaUrl as string}
           target="_blank"
@@ -388,11 +385,11 @@ function BlockRenderer({
         src={content.url as string}
         alt={(content.alt as string) ?? ""}
         style={{
-          width: "100%",
-          borderRadius: radius,
-          marginBottom: "0.5rem",
-          display: "block",
-          boxShadow: shadow,
+          ...getImageStyle({
+            borderRadius: radius,
+            marginBottom: "1.25rem",
+            boxShadow: shadow,
+          }),
         }}
       />
     );
@@ -417,7 +414,14 @@ function BlockRenderer({
     const product = products.find((p) => p.id === content.productId);
     if (!product) return null;
     return (
-      <section style={{ padding: "2rem 0" }}>
+      <section
+        style={{
+          padding: "2rem 0",
+          width: "100%",
+          boxSizing: "border-box",
+          marginBottom: "1.25rem",
+        }}
+      >
         <CarrdProductCard
           product={product}
           tc={tc}
@@ -441,12 +445,17 @@ function BlockRenderer({
       .map((id) => products.find((p) => p.id === id))
       .filter(Boolean) as NonNullable<Product>[];
     return (
-      <section style={{ padding: "2rem 0" }}>
+      <section
+        style={{
+          padding: "2rem 0",
+          width: "100%",
+          boxSizing: "border-box",
+        }}
+      >
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: `repeat(${Math.min(cols, 3)}, 1fr)`,
-            gap: "16px",
+            ...getProductGridStyle(Math.min(cols, 3)),
+            marginBottom: "1.5rem",
           }}
         >
           {selected.map((p) => (
@@ -475,6 +484,8 @@ function BlockRenderer({
           justifyContent: "center",
           gap: "12px",
           flexWrap: "wrap",
+          width: "100%",
+          boxSizing: "border-box",
         }}
       >
         {(content.links as { platform: string; url: string; label: string }[])
@@ -504,7 +515,13 @@ function BlockRenderer({
 
   if (type === "testimonials" && Array.isArray(content?.items)) {
     return (
-      <section style={{ padding: "2rem 0" }}>
+      <section
+        style={{
+          padding: "2rem 0",
+          width: "100%",
+          boxSizing: "border-box",
+        }}
+      >
         <div
           style={{
             display: "grid",
@@ -522,6 +539,8 @@ function BlockRenderer({
                 background: cardBg,
                 border: `1px solid ${cardBorder}`,
                 borderRadius: radius,
+                width: "100%",
+                boxSizing: "border-box",
               }}
             >
               <p
@@ -554,7 +573,13 @@ function BlockRenderer({
 
   if (type === "faq" && Array.isArray(content?.items)) {
     return (
-      <section style={{ padding: "2rem 0" }}>
+      <section
+        style={{
+          padding: "2rem 0",
+          width: "100%",
+          boxSizing: "border-box",
+        }}
+      >
         {(content.items as { question: string; answer: string }[]).map(
           (item, i) => (
             <details
@@ -604,7 +629,13 @@ function BlockRenderer({
   if (type === "custom-html" && content?.html) {
     // biome-ignore lint/security/noDangerouslySetInnerHtml: user HTML
     return (
-      <section style={{ padding: "1rem 0" }}>
+      <section
+        style={{
+          padding: "1rem 0",
+          width: "100%",
+          boxSizing: "border-box",
+        }}
+      >
         <div dangerouslySetInnerHTML={{ __html: content.html as string }} />
       </section>
     );
@@ -765,7 +796,14 @@ export function CountdownBlock({
   }, [targetDate, now]);
 
   return (
-    <section style={{ padding: "2rem 0", textAlign: "center" }}>
+    <section
+      style={{
+        padding: "2rem 0",
+        textAlign: "center",
+        width: "100%",
+        boxSizing: "border-box",
+      }}
+    >
       <p
         style={{
           fontWeight: 600,

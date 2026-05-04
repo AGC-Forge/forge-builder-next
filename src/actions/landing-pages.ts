@@ -15,7 +15,6 @@ import type {
   PaginatedResult,
 } from "@/types/database";
 
-// ── List ────────────────────────────────────────────────────
 export async function getLandingPages(opts: {
   page?: number;
   pageSize?: number;
@@ -59,8 +58,6 @@ export async function getLandingPages(opts: {
     return { success: false, error: "Failed to fetch landing pages" };
   }
 }
-
-// ── Single ──────────────────────────────────────────────────
 export async function getLandingPage(
   id: string,
 ): Promise<ActionResult<LandingPageWithProducts>> {
@@ -74,7 +71,7 @@ export async function getLandingPage(
       .select(`
         *,
         landing_page_products (
-          id, sort_order,
+          id, sort_order, product_id,
           product:products (
             id, title, subtitle, price, original_price, currency,
             images, affiliate_url, marketplace_url, product_rating,
@@ -92,7 +89,6 @@ export async function getLandingPage(
   }
 }
 
-// ── Public: get by slug (no auth required) ─────────────────
 export async function getLandingPageBySlug(
   slug: string,
 ): Promise<ActionResult<LandingPageWithProducts>> {
@@ -104,12 +100,12 @@ export async function getLandingPageBySlug(
       .select(`
         *,
         landing_page_products (
-          id, sort_order,
+          id, sort_order, product_id,
           product:products (
             id, title, subtitle, price, original_price, currency,
             images, affiliate_url, marketplace_url, product_rating,
             review_count, sold_count, badges, is_active, description,
-            features, shop_name, discount_label
+            features, specifications, tags, shop_name, discount_label
           )
         )
       `)
@@ -124,7 +120,7 @@ export async function getLandingPageBySlug(
       .from("landing_pages")
       .update({ view_count: (data.view_count ?? 0) + 1 })
       .eq("id", data.id)
-      .then(() => {});
+      .then(() => { });
 
     return { success: true, data: data as unknown as LandingPageWithProducts };
   } catch {
@@ -132,7 +128,6 @@ export async function getLandingPageBySlug(
   }
 }
 
-// ── Create ──────────────────────────────────────────────────
 export async function createLandingPage(
   input: LandingPageInput,
 ): Promise<ActionResult<LandingPage>> {

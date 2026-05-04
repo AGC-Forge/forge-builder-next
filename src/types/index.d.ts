@@ -96,6 +96,7 @@ declare global {
     btnTextColor?: string;
     textColor?: string;
     borderRadius?: string;
+    background?: string;
   }
 }
 

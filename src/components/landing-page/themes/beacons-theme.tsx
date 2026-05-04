@@ -1,4 +1,4 @@
-import { ExternalLink } from "lucide-react";
+import { useState, useEffect } from "react";
 import { formatCurrency } from "@/lib/utils";
 import type {
   LandingPageWithProducts,
@@ -6,87 +6,59 @@ import type {
   LandingBlock,
 } from "@/types/database";
 import { VideoBlock } from "@/components/landing-page/video-block";
+import {
+  getBtnTextColor,
+  getCardColors,
+  getContainerStyle,
+  getInnerStyle,
+  getImageStyle,
+  getProductGridStyle,
+  buildBgStyle,
+  RADIUS_MAP,
+  SHADOW_MAP,
+} from "@/components/landing-page/theme-utils";
 
 interface Props {
   landingPage: LandingPageWithProducts;
 }
+type ProductItem = NonNullable<
+  LandingPageWithProducts["landing_page_products"]
+>[0]["product"];
 
 export function BeaconsTheme({ landingPage }: Props) {
+  const cfg = landingPage.theme_config;
+
   const tc: ThemeConfig = {
-    primaryColor: "#0ea5e9",
-    secondaryColor: "#38bdf8",
-    backgroundColor: "#0f172a",
-    textColor: "#f1f5f9",
-    fontFamily: "Inter",
-    borderRadius: "lg",
-    buttonStyle: "filled",
-    backgroundType: "solid",
-    linkStyle: "card",
-    shadow: "lg",
-    accentColor: landingPage.theme_config.primaryColor,
-    backgroundGradient: landingPage.theme_config.backgroundGradient,
-    backgroundImageUrl: landingPage.theme_config.backgroundImageUrl,
-    profileImageUrl: landingPage.theme_config.profileImageUrl,
-    coverImageUrl: landingPage.theme_config.coverImageUrl,
+    primaryColor: cfg.primaryColor ?? "#0ea5e9",
+    secondaryColor: cfg.secondaryColor ?? "#38bdf8",
+    backgroundColor: cfg.backgroundColor ?? "#0f172a",
+    textColor: cfg.textColor ?? "#f1f5f9",
+    fontFamily: cfg.fontFamily ?? "Inter",
+    borderRadius: cfg.borderRadius ?? "lg",
+    buttonStyle: cfg.buttonStyle ?? "filled",
+    backgroundType: cfg.backgroundType ?? "solid",
+    backgroundGradient: cfg.backgroundGradient,
+    backgroundImageUrl: cfg.backgroundImageUrl,
+    profileImageUrl: cfg.profileImageUrl,
+    coverImageUrl: cfg.coverImageUrl,
+    linkStyle: cfg.linkStyle ?? "card",
+    shadow: cfg.shadow ?? "lg",
   };
 
   const products = (landingPage.landing_page_products ?? [])
     .sort((a, b) => a.sort_order - b.sort_order)
     .map((lpp) => lpp.product)
-    .filter(Boolean);
+    .filter(Boolean) as NonNullable<ProductItem>[];
 
-  const radiusMap: Record<string, string> = {
-    none: "0px",
-    sm: "6px",
-    md: "10px",
-    lg: "16px",
-    full: "9999px",
-  };
-  const shadowMap: Record<string, string> = {
-    none: "none",
-    sm: "0 1px 4px rgba(0,0,0,.3)",
-    md: "0 4px 16px rgba(0,0,0,.3)",
-    lg: "0 8px 32px rgba(0,0,0,.4)",
-  };
-  const radius = radiusMap[tc.borderRadius] ?? "16px";
-  const shadow = shadowMap[tc.shadow ?? "lg"] ?? "none";
-
-  const bgStyle =
-    tc.backgroundType === "gradient" && tc.backgroundGradient
-      ? { background: tc.backgroundGradient }
-      : tc.backgroundType === "image" && tc.backgroundImageUrl
-        ? {
-            backgroundImage: `url(${tc.backgroundImageUrl})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }
-        : { backgroundColor: tc.backgroundColor };
-
-  const cardBg = isLight(tc.backgroundColor ?? "#0f172a")
-    ? "rgba(0,0,0,.06)"
-    : "rgba(255,255,255,.08)";
-  const cardBorder = isLight(tc.backgroundColor ?? "#0f172a")
-    ? "rgba(0,0,0,.1)"
-    : "rgba(255,255,255,.12)";
-
-  const visibleBlocks = landingPage.blocks.filter((b) => b.visible);
+  const radius = RADIUS_MAP[tc.borderRadius] ?? "14px";
+  const shadow = SHADOW_MAP[tc.shadow ?? "lg"] ?? "none";
+  const bgStyle = buildBgStyle(tc);
+  const { cardBg, cardBorder } = getCardColors(tc.backgroundColor ?? "#0f172a");
+  const visibleBlocks = (landingPage.blocks ?? []).filter((b) => b.visible);
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        fontFamily: tc.fontFamily,
-        color: tc.textColor,
-        ...bgStyle,
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "520px",
-          margin: "0 auto",
-          padding: "3rem 1.25rem 4rem",
-        }}
-      >
+    <div style={{ ...getContainerStyle(bgStyle, tc.fontFamily, tc.textColor) }}>
+      <div style={{ ...getInnerStyle("520px", "3rem 1.25rem 4rem") }}>
         {/* Avatar */}
         {tc.profileImageUrl && (
           // eslint-disable-next-line @next/next/no-img-element
@@ -111,7 +83,7 @@ export function BeaconsTheme({ landingPage }: Props) {
             textAlign: "center",
             fontWeight: 800,
             fontSize: "1.5rem",
-            marginBottom: "0.5rem",
+            margin: "0 0 0.5rem",
             letterSpacing: "-0.02em",
           }}
         >
@@ -124,7 +96,7 @@ export function BeaconsTheme({ landingPage }: Props) {
               textAlign: "center",
               fontSize: "0.9rem",
               opacity: 0.65,
-              marginBottom: "2.5rem",
+              margin: "0 0 2.5rem",
               lineHeight: 1.6,
             }}
           >
@@ -132,103 +104,38 @@ export function BeaconsTheme({ landingPage }: Props) {
           </p>
         )}
 
-        {/* Blocks */}
-        {visibleBlocks.length > 0 &&
-          visibleBlocks.map((block) => (
-            <BlockRenderer
-              key={block.id}
-              block={block as LandingBlock}
-              tc={tc}
-              radius={radius}
-              shadow={shadow}
-              cardBg={cardBg}
-              cardBorder={cardBorder}
-              products={
-                products.filter(Boolean) as NonNullable<(typeof products)[0]>[]
-              }
-            />
-          ))}
-
-        {/* Product fallback */}
-        {products.length > 0 && visibleBlocks.length === 0 && (
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "12px" }}
-          >
-            {products.map((product) => {
-              if (!product) return null;
-              const thumb =
-                product.images.find((i) => i.is_primary)?.url ??
-                product.images[0]?.url;
-              const href =
-                product.affiliate_url ?? product.marketplace_url ?? "#";
-              return (
-                <a
-                  key={product.id}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
-                    padding: "14px",
-                    borderRadius: radius,
-                    backgroundColor: cardBg,
-                    border: `1px solid ${cardBorder}`,
-                    textDecoration: "none",
-                    color: tc.textColor,
-                    backdropFilter: "blur(8px)",
-                    boxShadow: shadow,
-                  }}
-                >
-                  {thumb && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={thumb}
-                      alt={product.title}
-                      style={{
-                        width: "52px",
-                        height: "52px",
-                        borderRadius: "8px",
-                        objectFit: "cover",
-                        flexShrink: 0,
-                      }}
-                    />
-                  )}
-                  <div style={{ flex: 1 }}>
-                    <p
-                      style={{ fontWeight: 600, fontSize: "0.9rem", margin: 0 }}
-                    >
-                      {product.title}
-                    </p>
-                    {product.price != null && (
-                      <p
-                        style={{
-                          fontSize: "0.8rem",
-                          color: tc.primaryColor,
-                          margin: "2px 0 0",
-                          fontWeight: 600,
-                        }}
-                      >
-                        {formatCurrency(product.price, {
-                          currency: product.currency,
-                        })}
-                      </p>
-                    )}
-                  </div>
-                  <ExternalLink
-                    style={{
-                      width: 16,
-                      height: 16,
-                      opacity: 0.5,
-                      flexShrink: 0,
-                    }}
-                  />
-                </a>
-              );
-            })}
+        {visibleBlocks.length > 0 ? (
+          <div style={{ width: "100%" }}>
+            {visibleBlocks.map((block) => (
+              <BlockRenderer
+                key={block.id}
+                block={block as LandingBlock}
+                tc={tc}
+                radius={radius}
+                shadow={shadow}
+                cardBg={cardBg}
+                cardBorder={cardBorder}
+                products={products}
+              />
+            ))}
           </div>
-        )}
+        ) : products.length > 0 ? (
+          <div style={{ width: "100%" }}>
+            {products.map((p) =>
+              p ? (
+                <BeaconsProductCard
+                  key={p.id}
+                  product={p}
+                  tc={tc}
+                  radius={radius}
+                  shadow={shadow}
+                  cardBg={cardBg}
+                  cardBorder={cardBorder}
+                />
+              ) : null,
+            )}
+          </div>
+        ) : null}
 
         <p
           style={{
@@ -243,15 +150,6 @@ export function BeaconsTheme({ landingPage }: Props) {
       </div>
     </div>
   );
-}
-
-function isLight(hex: string): boolean {
-  const c = hex.replace("#", "");
-  if (c.length < 6) return true;
-  const r = parseInt(c.slice(0, 2), 16);
-  const g = parseInt(c.slice(2, 4), 16);
-  const b = parseInt(c.slice(4, 6), 16);
-  return (r * 299 + g * 587 + b * 114) / 1000 > 128;
 }
 
 function BlockRenderer({
@@ -269,9 +167,7 @@ function BlockRenderer({
   shadow: string;
   cardBg: string;
   cardBorder: string;
-  products: NonNullable<
-    LandingPageWithProducts["landing_page_products"]
-  >[0]["product"][];
+  products: NonNullable<ProductItem>[];
 }) {
   const { type, content } = block;
 
@@ -282,18 +178,19 @@ function BlockRenderer({
           borderRadius: radius,
           overflow: "hidden",
           marginBottom: "1.5rem",
+          width: "100%",
+          boxSizing: "border-box",
           background: content?.backgroundImageUrl
-            ? `linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.5)), url(${content.backgroundImageUrl}) center/cover`
-            : `linear-gradient(135deg, ${tc.primaryColor}cc, ${tc.secondaryColor ?? tc.primaryColor}cc)`,
+            ? `linear-gradient(rgba(0,0,0,.5),rgba(0,0,0,.5)),url(${content.backgroundImageUrl as string}) center/cover`
+            : `linear-gradient(135deg,${tc.primaryColor}cc,${tc.secondaryColor ?? tc.primaryColor}cc)`,
           padding: "2.5rem 1.5rem",
           textAlign: "center",
-          backdropFilter: "blur(4px)",
           boxShadow: shadow,
         }}
       >
         <h2
           style={{
-            fontSize: "1.8rem",
+            fontSize: "clamp(1.4rem,4vw,1.8rem)",
             fontWeight: 800,
             margin: "0 0 0.5rem",
             color: "#fff",
@@ -310,7 +207,7 @@ function BlockRenderer({
               color: "#fff",
             }}
           >
-            {content?.subheadline as string}
+            {content.subheadline as string}
           </p>
         )}
         {content?.ctaText && content?.ctaUrl && (
@@ -344,6 +241,8 @@ function BlockRenderer({
           lineHeight: 1.7,
           fontSize: "0.9rem",
           opacity: 0.85,
+          width: "100%",
+          boxSizing: "border-box",
         }}
       >
         {(content?.text as string) ?? ""}
@@ -358,13 +257,23 @@ function BlockRenderer({
           border: "none",
           borderTop: `1px solid ${cardBorder}`,
           margin: "1.5rem 0",
+          width: "100%",
+          boxSizing: "border-box",
         }}
       />
     );
   }
 
   if (type === "spacer") {
-    return <div style={{ height: `${(content?.height as number) ?? 32}px` }} />;
+    return (
+      <div
+        style={{
+          height: `${(content?.height as number) ?? 32}px`,
+          width: "100%",
+          boxSizing: "border-box",
+        }}
+      />
+    );
   }
 
   if (type === "cta-button" && content?.ctaUrl) {
@@ -379,13 +288,14 @@ function BlockRenderer({
           padding: "0.9rem",
           marginBottom: "12px",
           borderRadius: radius,
-          background: `linear-gradient(135deg, ${tc.primaryColor}, ${tc.secondaryColor ?? tc.primaryColor})`,
+          width: "100%",
+          boxSizing: "border-box",
+          background: `linear-gradient(135deg,${tc.primaryColor},${tc.secondaryColor ?? tc.primaryColor})`,
           color: "#ffffff",
           fontWeight: 700,
           textDecoration: "none",
           boxShadow: `0 4px 16px ${tc.primaryColor}66`,
           fontSize: "0.95rem",
-          letterSpacing: "0.01em",
         }}
       >
         {(content.text as string) ?? "Click Here"}
@@ -400,11 +310,11 @@ function BlockRenderer({
         src={content.url as string}
         alt={(content.alt as string) ?? ""}
         style={{
-          width: "100%",
-          borderRadius: radius,
-          marginBottom: "1.25rem",
-          display: "block",
-          boxShadow: shadow,
+          ...getImageStyle({
+            borderRadius: radius,
+            marginBottom: "1.25rem",
+            boxShadow: shadow,
+          }),
         }}
       />
     );
@@ -421,11 +331,152 @@ function BlockRenderer({
     );
   }
 
+  if (type === "video" && content?.videoId) {
+    return <VideoBlock content={content} radius={radius} />;
+  }
+
+  if (type === "social-links" && Array.isArray(content?.links)) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          gap: "8px",
+          marginBottom: "1rem",
+          flexWrap: "wrap",
+          width: "100%",
+        }}
+      >
+        {(content.links as { platform: string; url: string; label: string }[])
+          .filter((l) => l.url)
+          .map((link) => (
+            <a
+              key={link.platform}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                padding: "0.45rem 1rem",
+                borderRadius: radius,
+                background: tc.primaryColor,
+                color: getBtnTextColor(tc.primaryColor),
+                fontWeight: 600,
+                fontSize: "0.82rem",
+                textDecoration: "none",
+              }}
+            >
+              {link.label}
+            </a>
+          ))}
+      </div>
+    );
+  }
+
+  if (type === "testimonials" && Array.isArray(content?.items)) {
+    return (
+      <div style={{ marginBottom: "1.25rem", width: "100%" }}>
+        {(
+          content.items as { name: string; text: string; rating: number }[]
+        ).map((item, i) => (
+          <div
+            key={i}
+            style={{
+              padding: "1rem",
+              marginBottom: "8px",
+              borderRadius: radius,
+              background: cardBg,
+              border: `1px solid ${cardBorder}`,
+              width: "100%",
+              boxSizing: "border-box",
+            }}
+          >
+            <p
+              style={{
+                margin: "0 0 0.4rem",
+                fontStyle: "italic",
+                fontSize: "0.88rem",
+                lineHeight: 1.6,
+              }}
+            >
+              &quot;{item.text}&quot;
+            </p>
+            <p
+              style={{
+                margin: 0,
+                fontWeight: 600,
+                fontSize: "0.78rem",
+                opacity: 0.6,
+              }}
+            >
+              — {item.name} {"⭐".repeat(Math.min(item.rating ?? 5, 5))}
+            </p>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (type === "faq" && Array.isArray(content?.items)) {
+    return (
+      <div style={{ marginBottom: "1.25rem", width: "100%" }}>
+        {(content.items as { question: string; answer: string }[]).map(
+          (item, i) => (
+            <details
+              key={i}
+              style={{
+                padding: "0.75rem 1rem",
+                marginBottom: "6px",
+                borderRadius: radius,
+                background: cardBg,
+                border: `1px solid ${cardBorder}`,
+                cursor: "pointer",
+                boxSizing: "border-box",
+                width: "100%",
+              }}
+            >
+              <summary style={{ fontWeight: 600, fontSize: "0.9rem" }}>
+                {item.question}
+              </summary>
+              <p
+                style={{
+                  margin: "0.5rem 0 0",
+                  fontSize: "0.85rem",
+                  opacity: 0.75,
+                  lineHeight: 1.65,
+                }}
+              >
+                {item.answer}
+              </p>
+            </details>
+          ),
+        )}
+      </div>
+    );
+  }
+
+  if (type === "countdown" && content?.targetDate) {
+    return (
+      <CountdownBlock
+        targetDate={content.targetDate as string}
+        borderRadius={radius}
+        background={cardBg}
+        cardBorder={cardBorder}
+        primaryColor={tc.primaryColor}
+      />
+    );
+  }
+
   if (type === "product-single" && content?.productId) {
     const product = products.find((p) => p?.id === content.productId);
     if (!product) return null;
     return (
-      <div style={{ marginBottom: "1.25rem" }}>
+      <div
+        style={{
+          marginBottom: "1.25rem",
+          width: "100%",
+          boxSizing: "border-box",
+        }}
+      >
         <BeaconsProductCard
           product={product}
           tc={tc}
@@ -442,36 +493,29 @@ function BlockRenderer({
     (type === "product-grid" || type === "product-list") &&
     Array.isArray(content?.productIds)
   ) {
-    const cols = (content?.columns as number) ?? 2;
-    const selectedProducts = (content.productIds as string[])
+    const cols =
+      type === "product-list" ? 1 : ((content?.columns as number) ?? 2);
+    const selected = (content.productIds as string[])
       .map((id) => products.find((p) => p?.id === id))
-      .filter(Boolean);
+      .filter(Boolean) as NonNullable<ProductItem>[];
     return (
       <div
         style={{
-          display: "grid",
-          gridTemplateColumns:
-            type === "product-list"
-              ? "1fr"
-              : `repeat(${Math.min(cols, 2)}, 1fr)`,
-          gap: "12px",
+          ...getProductGridStyle(Math.min(cols, 2)),
           marginBottom: "1.5rem",
         }}
       >
-        {selectedProducts.map(
-          (product) =>
-            product && (
-              <BeaconsProductCard
-                key={product.id}
-                product={product}
-                tc={tc}
-                radius={radius}
-                shadow={shadow}
-                cardBg={cardBg}
-                cardBorder={cardBorder}
-              />
-            ),
-        )}
+        {selected.map((product) => (
+          <BeaconsProductCard
+            key={product.id}
+            product={product}
+            tc={tc}
+            radius={radius}
+            shadow={shadow}
+            cardBg={cardBg}
+            cardBorder={cardBorder}
+          />
+        ))}
       </div>
     );
   }
@@ -479,14 +523,11 @@ function BlockRenderer({
   if (type === "custom-html" && content?.html) {
     return (
       <div
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: user-provided custom HTML block
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: user-provided HTML
         dangerouslySetInnerHTML={{ __html: content.html as string }}
-        style={{ marginBottom: "1rem" }}
+        style={{ marginBottom: "1rem", width: "100%", boxSizing: "border-box" }}
       />
     );
-  }
-  if (type === "video" && content?.videoId) {
-    return <VideoBlock content={content} radius={radius} />;
   }
 
   return null;
@@ -500,16 +541,13 @@ function BeaconsProductCard({
   cardBg,
   cardBorder,
 }: {
-  product: NonNullable<
-    LandingPageWithProducts["landing_page_products"]
-  >[0]["product"];
+  product: NonNullable<ProductItem>;
   tc: ThemeConfig;
   radius: string;
   shadow: string;
   cardBg: string;
   cardBorder: string;
 }) {
-  if (!product) return null;
   const thumb =
     product.images.find((i) => i.is_primary)?.url ?? product.images[0]?.url;
   const href = product.affiliate_url ?? product.marketplace_url ?? "#";
@@ -527,8 +565,10 @@ function BeaconsProductCard({
         border: `1px solid ${cardBorder}`,
         textDecoration: "none",
         color: tc.textColor,
-        backdropFilter: "blur(8px)",
         boxShadow: shadow,
+        marginBottom: "1rem",
+        width: "100%",
+        boxSizing: "border-box",
       }}
     >
       {thumb && (
@@ -538,7 +578,7 @@ function BeaconsProductCard({
           alt={product.title}
           style={{
             width: "100%",
-            aspectRatio: "1",
+            aspectRatio: "16/9",
             objectFit: "cover",
             display: "block",
           }}
@@ -574,7 +614,7 @@ function BeaconsProductCard({
         <p
           style={{
             fontWeight: 600,
-            fontSize: "0.85rem",
+            fontSize: "0.88rem",
             margin: "0 0 6px",
             display: "-webkit-box",
             WebkitLineClamp: 2,
@@ -619,6 +659,7 @@ function BeaconsProductCard({
                 color: tc.primaryColor,
               }}
             >
+              {/* ── FIX: formatCurrency correct object signature ── */}
               {formatCurrency(product.price, { currency: product.currency })}
             </span>
             {product.original_price != null &&
@@ -642,9 +683,9 @@ function BeaconsProductCard({
             padding: "7px",
             textAlign: "center",
             borderRadius: radius,
-            background: `linear-gradient(135deg, ${tc.primaryColor}, ${tc.secondaryColor ?? tc.primaryColor})`,
-            color: "#ffffff",
-            fontSize: "0.8rem",
+            background: `linear-gradient(135deg,${tc.primaryColor},${tc.secondaryColor ?? tc.primaryColor})`,
+            color: getBtnTextColor(tc.primaryColor),
+            fontSize: "0.82rem",
             fontWeight: 700,
             boxShadow: `0 4px 12px ${tc.primaryColor}55`,
           }}
@@ -653,5 +694,62 @@ function BeaconsProductCard({
         </div>
       </div>
     </a>
+  );
+}
+function CountdownBlock({
+  targetDate,
+  label = "Offer ends in:",
+  borderRadius,
+  background,
+  cardBorder,
+  primaryColor,
+}: CountdownBlockProps) {
+  const [diff, setDiff] = useState(() =>
+    Math.max(0, new Date(targetDate).getTime() - Date.now()),
+  );
+
+  useEffect(() => {
+    const calculateDiff = () => {
+      setDiff(Math.max(0, new Date(targetDate).getTime() - Date.now()));
+    };
+
+    calculateDiff();
+
+    const timer = setInterval(calculateDiff, 1000);
+
+    return () => clearInterval(timer);
+  }, [targetDate]);
+
+  const pad = (n: number) => String(Math.floor(n)).padStart(2, "0");
+
+  return (
+    <div
+      style={{
+        padding: "1rem",
+        marginBottom: "1rem",
+        borderRadius: borderRadius,
+        background: background,
+        border: `1px solid ${cardBorder}`,
+        textAlign: "center",
+        width: "100%",
+        boxSizing: "border-box",
+      }}
+    >
+      <p style={{ margin: "0 0 0.5rem", fontWeight: 600, fontSize: "0.82rem" }}>
+        {label}
+      </p>
+      <p
+        style={{
+          margin: 0,
+          fontSize: "1.75rem",
+          fontWeight: 800,
+          color: primaryColor,
+          fontVariantNumeric: "tabular-nums",
+        }}
+      >
+        {pad(diff / 86400000)}:{pad((diff % 86400000) / 3600000)}:
+        {pad((diff % 3600000) / 60000)}:{pad((diff % 60000) / 1000)}
+      </p>
+    </div>
   );
 }

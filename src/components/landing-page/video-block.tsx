@@ -38,7 +38,13 @@ export function VideoBlock({
   if (!embedUrl) return null;
 
   return (
-    <div style={{ marginBottom: "1.25rem" }}>
+    <div
+      style={{
+        marginBottom: "1.25rem",
+        width: "100%",
+        boxSizing: "border-box",
+      }}
+    >
       <div
         style={{
           position: "relative",

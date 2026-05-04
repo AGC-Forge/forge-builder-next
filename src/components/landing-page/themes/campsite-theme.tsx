@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { formatCurrency } from "@/lib/utils";
 import type {
   LandingPageWithProducts,
@@ -8,37 +8,25 @@ import type {
   LandingBlock,
 } from "@/types/database";
 import { VideoBlock } from "@/components/landing-page/video-block";
+import {
+  SHADOW_MAP,
+  RADIUS_MAP,
+  isLight,
+  getCardColors,
+  getContainerStyle,
+  getInnerStyle,
+  getImageStyle,
+  getProductGridStyle,
+  buildBgStyle,
+} from "@/components/landing-page/theme-utils";
 
 interface Props {
   landingPage: LandingPageWithProducts;
 }
 
-type Product = NonNullable<
+type ProductItem = NonNullable<
   LandingPageWithProducts["landing_page_products"]
 >[0]["product"];
-
-function isLight(hex: string): boolean {
-  const c = hex.replace("#", "");
-  if (c.length < 6) return true;
-  const r = parseInt(c.slice(0, 2), 16);
-  const g = parseInt(c.slice(2, 4), 16);
-  const b = parseInt(c.slice(4, 6), 16);
-  return r * 0.299 + g * 0.587 + b * 0.114 > 155;
-}
-
-const RADIUS_MAP: Record<string, string> = {
-  none: "0px",
-  sm: "4px",
-  md: "8px",
-  lg: "12px",
-  full: "9999px",
-};
-const SHADOW_MAP: Record<string, string> = {
-  none: "none",
-  sm: "0 1px 4px rgba(0,0,0,.07)",
-  md: "0 3px 10px rgba(0,0,0,.09)",
-  lg: "0 6px 20px rgba(0,0,0,.12)",
-};
 
 export function CampsiteTheme({ landingPage }: Props) {
   const cfg = landingPage.theme_config;
@@ -63,42 +51,19 @@ export function CampsiteTheme({ landingPage }: Props) {
   const products = (landingPage.landing_page_products ?? [])
     .sort((a, b) => a.sort_order - b.sort_order)
     .map((lpp) => lpp.product)
-    .filter(Boolean) as NonNullable<Product>[];
+    .filter(Boolean) as NonNullable<ProductItem>[];
 
   const radius = RADIUS_MAP[tc.borderRadius] ?? "8px";
   const shadow = SHADOW_MAP[tc.shadow ?? "sm"] ?? "none";
   const onLight = isLight(tc.backgroundColor ?? "#ffffff");
   const borderColor = onLight ? "rgba(0,0,0,.1)" : "rgba(255,255,255,.12)";
-
-  const bgStyle: React.CSSProperties =
-    tc.backgroundType === "gradient" && tc.backgroundGradient
-      ? { background: tc.backgroundGradient }
-      : tc.backgroundType === "image" && tc.backgroundImageUrl
-        ? {
-            backgroundImage: `url(${tc.backgroundImageUrl})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }
-        : { backgroundColor: tc.backgroundColor };
-
-  const visibleBlocks = landingPage.blocks.filter((b) => b.visible);
+  const bgStyle = buildBgStyle(tc);
+  const { cardBg, cardBorder } = getCardColors(tc.backgroundColor ?? "#0f172a");
+  const visibleBlocks = (landingPage.blocks ?? []).filter((b) => b.visible);
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        fontFamily: tc.fontFamily,
-        color: tc.textColor,
-        ...bgStyle,
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "600px",
-          margin: "0 auto",
-          padding: "3rem 1.5rem 5rem",
-        }}
-      >
+    <div style={{ ...getContainerStyle(bgStyle, tc.fontFamily, tc.textColor) }}>
+      <div style={{ ...getInnerStyle("600px", "3rem 1.5rem 5rem") }}>
         {/* Cover image */}
         {tc.coverImageUrl && (
           // eslint-disable-next-line @next/next/no-img-element
@@ -170,8 +135,9 @@ export function CampsiteTheme({ landingPage }: Props) {
         />
 
         {/* Content */}
-        {visibleBlocks.length > 0
-          ? visibleBlocks.map((block) => (
+        {visibleBlocks.length > 0 ? (
+          <div style={{ width: "100%" }}>
+            {visibleBlocks.map((block) => (
               <BlockRenderer
                 key={block.id}
                 block={block}
@@ -179,23 +145,28 @@ export function CampsiteTheme({ landingPage }: Props) {
                 radius={radius}
                 shadow={shadow}
                 borderColor={borderColor}
-                onLight={onLight}
+                cardBg={cardBg}
+                cardBorder={cardBorder}
                 products={products}
               />
-            ))
-          : products.length > 0 &&
-            products.map(
-              (p) =>
-                p && (
-                  <CampsiteProductRow
-                    key={p.id}
-                    product={p}
-                    tc={tc}
-                    radius={radius}
-                    borderColor={borderColor}
-                  />
-                ),
+            ))}
+          </div>
+        ) : products.length > 0 ? (
+          <div style={{ width: "100%" }}>
+            {products.map((p) =>
+              p ? (
+                <CampsiteProductRow
+                  key={p.id}
+                  product={p}
+                  tc={tc}
+                  radius={radius}
+                  cardBg={cardBg}
+                  cardBorder={cardBorder}
+                />
+              ) : null,
             )}
+          </div>
+        ) : null}
 
         <p
           style={{
@@ -211,15 +182,14 @@ export function CampsiteTheme({ landingPage }: Props) {
     </div>
   );
 }
-
-// ── Block Renderer ───────────────────────────────────────────
 function BlockRenderer({
   block,
   tc,
   radius,
   shadow,
   borderColor,
-  onLight,
+  cardBg,
+  cardBorder,
   products,
 }: {
   block: Partial<LandingBlock>;
@@ -227,14 +197,21 @@ function BlockRenderer({
   radius: string;
   shadow: string;
   borderColor: string;
-  onLight: boolean;
-  products: NonNullable<Product>[];
+  cardBg: string;
+  cardBorder: string;
+  products: NonNullable<ProductItem>[];
 }) {
   const { type, content } = block;
 
   if (type === "hero") {
     return (
-      <div style={{ marginBottom: "2rem" }}>
+      <div
+        style={{
+          marginBottom: "2rem",
+          width: "100%",
+          boxSizing: "border-box",
+        }}
+      >
         <h2
           style={{
             fontSize: "1.5rem",
@@ -281,6 +258,8 @@ function BlockRenderer({
           lineHeight: 1.75,
           fontSize: "0.93rem",
           opacity: 0.8,
+          width: "100%",
+          boxSizing: "border-box",
         }}
       >
         {(content?.text as string) ?? ""}
@@ -295,13 +274,23 @@ function BlockRenderer({
           border: "none",
           borderTop: `1px solid ${borderColor}`,
           margin: "1.5rem 0",
+          width: "100%",
+          boxSizing: "border-box",
         }}
       />
     );
   }
 
   if (type === "spacer") {
-    return <div style={{ height: `${(content?.height as number) ?? 24}px` }} />;
+    return (
+      <div
+        style={{
+          height: `${(content?.height as number) ?? 24}px`,
+          width: "100%",
+          boxSizing: "border-box",
+        }}
+      />
+    );
   }
 
   if (type === "cta-button" && content?.ctaUrl) {
@@ -320,6 +309,8 @@ function BlockRenderer({
           borderRadius: radius,
           textDecoration: "none",
           fontSize: "0.9rem",
+          width: "100%",
+          boxSizing: "border-box",
         }}
       >
         {(content.text as string) ?? "Learn More"}
@@ -334,11 +325,11 @@ function BlockRenderer({
         src={content.url as string}
         alt={(content.alt as string) ?? ""}
         style={{
-          width: "100%",
-          borderRadius: radius,
-          marginBottom: "1.25rem",
-          display: "block",
-          boxShadow: shadow,
+          ...getImageStyle({
+            borderRadius: radius,
+            marginBottom: "1.25rem",
+            boxShadow: shadow,
+          }),
         }}
       />
     );
@@ -359,12 +350,21 @@ function BlockRenderer({
     const product = products.find((p) => p.id === content.productId);
     if (!product) return null;
     return (
-      <CampsiteProductRow
-        product={product}
-        tc={tc}
-        radius={radius}
-        borderColor={borderColor}
-      />
+      <div
+        style={{
+          marginBottom: "1.25rem",
+          width: "100%",
+          boxSizing: "border-box",
+        }}
+      >
+        <CampsiteProductRow
+          product={product}
+          tc={tc}
+          radius={radius}
+          cardBg={cardBg}
+          cardBorder={cardBorder}
+        />
+      </div>
     );
   }
 
@@ -372,21 +372,38 @@ function BlockRenderer({
     (type === "product-grid" || type === "product-list") &&
     Array.isArray(content?.productIds)
   ) {
+    const cols =
+      type === "product-list" ? 1 : ((content?.columns as number) ?? 2);
     const selected = (content.productIds as string[])
-      .map((id) => products.find((p) => p.id === id))
-      .filter(Boolean) as NonNullable<Product>[];
+      .map((id) => products.find((p) => p?.id === id))
+      .filter(Boolean) as NonNullable<ProductItem>[];
     return (
-      <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
-        {selected.map((p) => (
-          <CampsiteProductRow
-            key={p.id}
-            product={p}
-            tc={tc}
-            radius={radius}
-            borderColor={borderColor}
-          />
-        ))}
-      </div>
+      <section
+        style={{
+          padding: "2rem 0",
+          width: "100%",
+          boxSizing: "border-box",
+        }}
+      >
+        <div
+          style={{
+            ...getProductGridStyle(Math.min(cols, 2)),
+            marginBottom: "1.5rem",
+            flexDirection: "column",
+          }}
+        >
+          {selected.map((p) => (
+            <CampsiteProductRow
+              key={p.id}
+              product={p}
+              tc={tc}
+              radius={radius}
+              cardBg={cardBg}
+              cardBorder={cardBorder}
+            />
+          ))}
+        </div>
+      </section>
     );
   }
 
@@ -398,6 +415,8 @@ function BlockRenderer({
           gap: "1rem",
           marginBottom: "1.5rem",
           flexWrap: "wrap",
+          width: "100%",
+          boxSizing: "border-box",
         }}
       >
         {(content.links as { platform: string; url: string; label: string }[])
@@ -424,7 +443,13 @@ function BlockRenderer({
 
   if (type === "testimonials" && Array.isArray(content?.items)) {
     return (
-      <div style={{ marginBottom: "1.5rem" }}>
+      <div
+        style={{
+          marginBottom: "1.5rem",
+          width: "100%",
+          boxSizing: "border-box",
+        }}
+      >
         {(
           content.items as { name: string; text: string; rating: number }[]
         ).map((item, i) => (
@@ -465,7 +490,13 @@ function BlockRenderer({
 
   if (type === "faq" && Array.isArray(content?.items)) {
     return (
-      <div style={{ marginBottom: "1.5rem" }}>
+      <div
+        style={{
+          marginBottom: "1.5rem",
+          width: "100%",
+          boxSizing: "border-box",
+        }}
+      >
         {(content.items as { question: string; answer: string }[]).map(
           (item, i) => (
             <details
@@ -516,7 +547,11 @@ function BlockRenderer({
     return (
       <div
         dangerouslySetInnerHTML={{ __html: content.html as string }}
-        style={{ marginBottom: "1rem" }}
+        style={{
+          marginBottom: "1rem",
+          width: "100%",
+          boxSizing: "border-box",
+        }}
       />
     );
   }
@@ -531,12 +566,14 @@ function CampsiteProductRow({
   product,
   tc,
   radius,
-  borderColor,
+  cardBg,
+  cardBorder,
 }: {
-  product: NonNullable<Product>;
+  product: NonNullable<ProductItem>;
   tc: ThemeConfig;
   radius: string;
-  borderColor: string;
+  cardBg: string;
+  cardBorder: string;
 }) {
   const thumb =
     product.images.find((i) => i.is_primary)?.url ?? product.images[0]?.url;
@@ -552,7 +589,9 @@ function CampsiteProductRow({
         alignItems: "center",
         gap: "16px",
         padding: "1rem 0",
-        borderBottom: `1px solid ${borderColor}`,
+        backgroundColor: cardBg,
+        border: `1px solid ${cardBorder}`,
+        borderRadius: radius,
         textDecoration: "none",
         color: tc.textColor,
       }}
@@ -638,7 +677,13 @@ function CountdownBlock({
   const pad = (n: number) => String(Math.floor(n)).padStart(2, "0");
 
   return (
-    <div style={{ marginBottom: "1.5rem" }}>
+    <div
+      style={{
+        marginBottom: "1.5rem",
+        width: "100%",
+        boxSizing: "border-box",
+      }}
+    >
       <p
         style={{
           fontWeight: 600,
