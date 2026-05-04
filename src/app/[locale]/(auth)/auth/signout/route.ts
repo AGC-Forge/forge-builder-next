@@ -1,7 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { type NextRequest, NextResponse } from "next/server";
-import { routing } from "@/i18n/routing";
 
 export async function POST(
   req: NextRequest,
@@ -15,6 +14,5 @@ export async function POST(
   }
   revalidatePath("/", "layout");
 
-  const loginPath = locale === routing.defaultLocale ? "/login" : `/${locale}/login`;
-  return NextResponse.redirect(new URL(loginPath, req.url), { status: 302 });
+  return NextResponse.redirect(new URL(`/${locale}/login`, req.url), { status: 302 });
 }

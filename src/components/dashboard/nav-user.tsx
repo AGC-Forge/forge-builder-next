@@ -24,7 +24,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { routing } from "@/i18n/routing";
 import { getInitials } from "@/lib/utils";
 import { useLocale } from "next-intl";
 
@@ -41,20 +40,8 @@ export function NavUser({
   const locale = useLocale();
 
   const handleLogout = async () => {
-    const signoutPath =
-      locale === routing.defaultLocale
-        ? "/auth/callback/signout"
-        : `/${locale}/auth/callback/signout`;
-
-    const res = await fetch(signoutPath, { method: "POST" });
-
-    if (res.redirected) {
-      window.location.href = res.url;
-      return;
-    }
-
-    window.location.href =
-      locale === routing.defaultLocale ? "/login" : `/${locale}/login`;
+    const res = await fetch(`/${locale}/auth/signout`, { method: "POST" });
+    window.location.href = res.redirected ? res.url : `/${locale}/login`;
   };
 
   return (

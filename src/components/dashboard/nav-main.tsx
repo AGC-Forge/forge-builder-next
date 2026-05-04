@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/router";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 import { usePathname } from "next/navigation";
@@ -181,6 +182,7 @@ const NavItemCollapsed = ({
 };
 
 export function NavMain({ items }: NavMainProps) {
+  const router = useRouter();
   const path = usePathname();
   const locale = useLocale();
   const { state, isMobile } = useSidebar();
@@ -196,6 +198,10 @@ export function NavMain({ items }: NavMainProps) {
     return subItems?.some((sub) => path.startsWith(sub.url)) ?? false;
   };
 
+  const handleQuickCreate = () => {
+    router.push(`${locale}/dashboard/landing-page/new`);
+  };
+
   return (
     <>
       <SidebarGroup>
@@ -205,6 +211,7 @@ export function NavMain({ items }: NavMainProps) {
               <SidebarMenuButton
                 tooltip="Quick Create"
                 className="min-w-8 bg-primary text-primary-foreground duration-200 ease-linear hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground"
+                onClick={handleQuickCreate}
               >
                 <PlusCircleIcon />
                 <span>Quick Create</span>
