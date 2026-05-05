@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { getAllMemberships, PLAN_CONFIG } from "@/actions/memberships";
-import type { PlanType } from "@/actions/memberships";
+import { getAllMemberships } from "@/actions/memberships";
+import type { PlanType } from "@/lib/memberships/plans";
 import { MembershipsTable } from "@/components/dashboard/memberships/memberships-table";
 
 export const metadata: Metadata = { title: "Memberships" };

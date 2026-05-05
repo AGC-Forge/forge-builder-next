@@ -1,7 +1,8 @@
 import { Crown, Zap, AlertTriangle } from "lucide-react";
 import { isPast, formatDistanceToNow } from "date-fns";
 import Link from "next/link";
-import { getMyMembership, PLAN_CONFIG } from "@/actions/memberships";
+import { getMyMembership } from "@/actions/memberships";
+import { PLAN_CONFIG } from "@/lib/memberships/plans";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

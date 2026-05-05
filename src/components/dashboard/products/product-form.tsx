@@ -286,10 +286,10 @@ export function ProductForm({ mode, product }: Props) {
                       setValue("subcategory", "");
                     }}
                   >
-                    <SelectTrigger className="mt-1">
+                    <SelectTrigger className="mt-1 w-full">
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="w-full">
                       {Object.entries(PRODUCT_CATEGORIES).map(([key, cat]) => (
                         <SelectItem key={key} value={key}>
                           {cat.emoji} {cat.label}
@@ -306,10 +306,10 @@ export function ProductForm({ mode, product }: Props) {
                     onValueChange={(v) => setValue("subcategory", v)}
                     disabled={!selectedCategory}
                   >
-                    <SelectTrigger className="mt-1">
+                    <SelectTrigger className="mt-1 w-full">
                       <SelectValue placeholder="Select subcategory" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="w-full">
                       {(selectedCategory?.subcategories ?? []).map((sub) => (
                         <SelectItem key={sub.value} value={sub.value}>
                           {sub.label}
@@ -678,10 +678,10 @@ export function ProductForm({ mode, product }: Props) {
                     value={watch("currency")}
                     onValueChange={(v) => setValue("currency", v)}
                   >
-                    <SelectTrigger className="mt-1">
+                    <SelectTrigger className="mt-1 w-full">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="w-full">
                       {["IDR", "USD", "SGD", "MYR", "PHP", "THB"].map((c) => (
                         <SelectItem key={c} value={c}>
                           {c}

@@ -247,9 +247,7 @@ export function LandingPagesTable({ data, total, page, pageCount }: Props) {
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>
-                            <Link
-                              href={`/dashboard/landing-page/${lp.id}/builder`}
-                            >
+                            <Link href={`/builder/${lp.id}`}>
                               <Paintbrush className="mr-2 size-4" />
                               Open Builder
                             </Link>

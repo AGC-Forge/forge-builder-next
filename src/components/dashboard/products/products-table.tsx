@@ -126,11 +126,11 @@ export function ProductsTable({ data, total, page, pageCount }: Props) {
                 updateParams({ category: v === "all" ? undefined : v })
               }
             >
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-40 ">
                 <Filter className="mr-2 size-4" />
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="w-full">
                 <SelectItem value="all">All Categories</SelectItem>
                 {Object.entries(PRODUCT_CATEGORIES).map(([key, cat]) => (
                   <SelectItem key={key} value={key}>

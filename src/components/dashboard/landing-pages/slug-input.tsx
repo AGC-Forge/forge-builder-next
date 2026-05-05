@@ -39,16 +39,31 @@ export function SlugInput({
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevSlug = useRef<string>("");
+  const lastGeneratedSlug = useRef<string>("");
+  const userEditedSlug = useRef(Boolean(value));
 
-  // Auto-generate slug from title (only when slug is empty and title changes)
+  // Keep slug synced with title until the user edits the slug manually.
   useEffect(() => {
-    if (!titleValue || value) return;
+    if (!titleValue) return;
     const generated = toSlug(titleValue);
-    if (generated && generated !== value) {
+    if (!generated) return;
+
+    const canAutoFill =
+      !userEditedSlug.current ||
+      !value ||
+      value === lastGeneratedSlug.current;
+
+    if (canAutoFill && generated !== value) {
+      lastGeneratedSlug.current = generated;
       onChange(generated);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [titleValue]);
+  }, [titleValue, value, onChange]);
+
+  function handleChange(nextValue: string) {
+    const nextSlug = nextValue.toLowerCase().replace(/[^a-z0-9-]/g, "");
+    userEditedSlug.current = Boolean(nextSlug);
+    onChange(nextSlug);
+  }
 
   // Real-time availability check with debounce
   useEffect(() => {
@@ -130,9 +145,7 @@ export function SlugInput({
           <Input
             id="slug"
             value={value}
-            onChange={(e) =>
-              onChange(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))
-            }
+            onChange={(e) => handleChange(e.target.value)}
             placeholder="my-product-page"
             className={cn(
               "font-mono pr-9",

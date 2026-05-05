@@ -88,21 +88,21 @@ export function BuilderRightPanel({ availableProducts, landingPageId }: Props) {
         }
         className="flex flex-1 flex-col overflow-hidden"
       >
-        <TabsList className="grid grid-cols-5 rounded-none border-b h-9 px-1">
-          <TabsTrigger value="content" className="text-[10px] px-0">
-            <Settings className="size-3" />
+        <TabsList className="grid grid-cols-5 rounded-none border-b h-9 px-1 gap-4">
+          <TabsTrigger value="content" className="text-sm px-0">
+            <Settings className="size-6" />
           </TabsTrigger>
-          <TabsTrigger value="style" className="text-[10px] px-0">
-            <Palette className="size-3" />
+          <TabsTrigger value="style" className="text-sm px-0">
+            <Palette className="size-6" />
           </TabsTrigger>
-          <TabsTrigger value="layout" className="text-[10px] px-0">
-            <Layout className="size-3" />
+          <TabsTrigger value="layout" className="text-sm px-0">
+            <Layout className="size-6" />
           </TabsTrigger>
-          <TabsTrigger value="animation" className="text-[10px] px-0">
-            <Wand2 className="size-3" />
+          <TabsTrigger value="animation" className="text-sm px-0">
+            <Wand2 className="size-6" />
           </TabsTrigger>
-          <TabsTrigger value="advanced" className="text-[10px] px-0">
-            <Code2 className="size-3" />
+          <TabsTrigger value="advanced" className="text-sm px-0">
+            <Code2 className="size-6" />
           </TabsTrigger>
         </TabsList>
 
@@ -261,10 +261,10 @@ function StylePanel({
               onUpdateLayout({ shadow: v as BlockLayout["shadow"] })
             }
           >
-            <SelectTrigger className="h-8 text-xs">
+            <SelectTrigger className="h-8 text-xs w-full">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="w-full">
               {["none", "sm", "md", "lg", "xl"].map((s) => (
                 <SelectItem key={s} value={s} className="text-xs">
                   {s}
@@ -282,10 +282,10 @@ function StylePanel({
               onUpdateLayout({ borderRadius: v as BlockLayout["borderRadius"] })
             }
           >
-            <SelectTrigger className="h-8 text-xs">
+            <SelectTrigger className="h-8 text-xs w-full">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="w-full">
               {["none", "sm", "md", "lg", "xl", "full"].map((r) => (
                 <SelectItem key={r} value={r} className="text-xs">
                   {r}
@@ -331,10 +331,10 @@ function LayoutPanel({
               value={layout.paddingY ?? "md"}
               onValueChange={(v) => onUpdate({ paddingY: v as SpacingSize })}
             >
-              <SelectTrigger className="h-8 text-xs">
+              <SelectTrigger className="h-8 text-xs w-full">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="w-full">
                 {spacings.map((s) => (
                   <SelectItem key={s} value={s} className="text-xs">
                     {s} ({TW_PADDING_Y[s]})
@@ -349,10 +349,10 @@ function LayoutPanel({
               value={layout.paddingX ?? "md"}
               onValueChange={(v) => onUpdate({ paddingX: v as SpacingSize })}
             >
-              <SelectTrigger className="h-8 text-xs">
+              <SelectTrigger className="h-8 text-xs w-full">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="w-full">
                 {spacings.map((s) => (
                   <SelectItem key={s} value={s} className="text-xs">
                     {s} ({TW_PADDING_X[s]})
@@ -371,10 +371,10 @@ function LayoutPanel({
             value={layout.maxWidth ?? "lg"}
             onValueChange={(v) => onUpdate({ maxWidth: v as LayoutWidth })}
           >
-            <SelectTrigger className="h-8 text-xs">
+            <SelectTrigger className="h-8 text-xs w-full">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="w-full">
               {widths.map((w) => (
                 <SelectItem key={w} value={w} className="text-xs">
                   {w} ({TW_MAX_WIDTH[w]})
@@ -439,10 +439,10 @@ function AnimationPanel({
             value={animation.type ?? "none"}
             onValueChange={(v) => onUpdate({ type: v as AnimationType })}
           >
-            <SelectTrigger className="h-8 text-xs">
+            <SelectTrigger className="h-8 text-xs w-full">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="w-full">
               {types.map((t) => (
                 <SelectItem key={t} value={t} className="text-xs capitalize">
                   {t.replace(/-/g, " ")}
@@ -462,10 +462,10 @@ function AnimationPanel({
                   onUpdate({ trigger: v as AnimationTrigger })
                 }
               >
-                <SelectTrigger className="h-8 text-xs">
+                <SelectTrigger className="h-8 text-xs w-full">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="w-full">
                   {triggers.map((t) => (
                     <SelectItem
                       key={t}

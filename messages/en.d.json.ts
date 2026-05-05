@@ -3,9 +3,11 @@
 
 declare const messages: {
   "HomePage": {
-    "title": "SnapLand!",
+    "title": "SnapLand",
     "tagline": "AI Landing Page Builder: Create High-Converting Pages in Seconds",
-    "description": "Build professional, high-converting landing pages with SnapLand. No coding required. Use our AI-powered builder to grow your business and boost conversions instantly."
+    "description": "Build professional, high-converting landing pages with SnapLand. No coding required. Use our AI-powered builder to grow your business and boost conversions instantly.",
+    "ogImage": "/logo.png",
+    "keywords": "landing page builder, high-converting pages, AI-powered builder, no coding required, grow business, boost conversions"
   },
   "NotFoundPage": {
     "title": "404 Not Found",

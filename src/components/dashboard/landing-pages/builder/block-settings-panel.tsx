@@ -157,10 +157,10 @@ export function BlockSettingsPanel({
               value={block.settings.padding ?? "md"}
               onValueChange={(v) => setSetting("padding", v)}
             >
-              <SelectTrigger className="mt-1 h-7 text-xs">
+              <SelectTrigger className="mt-1 h-7 text-xs w-full">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="w-full">
                 {["none", "sm", "md", "lg", "xl"].map((v) => (
                   <SelectItem key={v} value={v} className="text-xs">
                     {v}
@@ -176,10 +176,10 @@ export function BlockSettingsPanel({
               value={block.settings.alignment ?? "center"}
               onValueChange={(v) => setSetting("alignment", v)}
             >
-              <SelectTrigger className="mt-1 h-7 text-xs">
+              <SelectTrigger className="mt-1 h-7 text-xs w-full">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="w-full">
                 <SelectItem value="left" className="text-xs">
                   Left
                 </SelectItem>
@@ -298,10 +298,10 @@ function ProductSingleSettings({
           value={(content.productId as string) ?? ""}
           onValueChange={(v) => setContent("productId", v)}
         >
-          <SelectTrigger className="mt-1 h-7 text-xs">
+          <SelectTrigger className="mt-1 h-7 text-xs w-full">
             <SelectValue placeholder="Select product" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="w-full">
             {availableProducts.map((p) => (
               <SelectItem key={p.id} value={p.id} className="text-xs">
                 {p.title}
@@ -361,10 +361,10 @@ function ProductGridSettings({
           value={String(content.columns ?? "2")}
           onValueChange={(v) => setContent("columns", Number(v))}
         >
-          <SelectTrigger className="mt-1 h-7 text-xs">
+          <SelectTrigger className="mt-1 h-7 text-xs w-full">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="w-full">
             {["1", "2", "3", "4"].map((v) => (
               <SelectItem key={v} value={v} className="text-xs">
                 {v} column{v !== "1" ? "s" : ""}
@@ -478,10 +478,10 @@ function CtaSettings({
           value={(content.style as string) ?? "filled"}
           onValueChange={(v) => setContent("style", v)}
         >
-          <SelectTrigger className="mt-1 h-7 text-xs">
+          <SelectTrigger className="mt-1 h-7 text-xs w-full">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="w-full">
             <SelectItem value="filled" className="text-xs">
               Filled
             </SelectItem>
@@ -598,10 +598,10 @@ function VideoSettings({
           value={platform}
           onValueChange={(v) => setContent("platform", v)}
         >
-          <SelectTrigger className="mt-1 h-7 text-xs">
+          <SelectTrigger className="mt-1 h-7 text-xs w-full">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="w-full">
             <SelectItem value="youtube" className="text-xs">
               YouTube
             </SelectItem>
@@ -727,7 +727,7 @@ function TestimonialsSettings({
               value={String(item.rating ?? 5)}
               onValueChange={(v) => updateItem(idx, "rating", Number(v))}
             >
-              <SelectTrigger className="h-7 text-xs w-20">
+              <SelectTrigger className="h-7 text-xs w-20 ">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -876,10 +876,10 @@ function SocialLinksSettings({
               value={link.platform}
               onValueChange={(v) => onPlatformChange(idx, v)}
             >
-              <SelectTrigger className="h-7 text-xs flex-1">
+              <SelectTrigger className="h-7 text-xs flex-1 w-full">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="w-full">
                 {SOCIAL_PLATFORMS.map((p) => (
                   <SelectItem key={p.value} value={p.value} className="text-xs">
                     {p.label}

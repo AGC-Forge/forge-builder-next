@@ -14,16 +14,13 @@ import {
   Filter,
 } from "lucide-react";
 import { toast } from "sonner";
-import {
-  assignMembership,
-  downgradeMembership,
-  PLAN_CONFIG,
-} from "@/actions/memberships";
+import { assignMembership, downgradeMembership } from "@/actions/memberships";
 import type {
   Membership,
   PlanType,
   BillingPeriod,
-} from "@/actions/memberships";
+} from "@/lib/memberships/plans";
+import { PLAN_CONFIG } from "@/lib/memberships/plans";
 import { getInitials, cn } from "@/lib/utils";
 import { formatCurrency } from "@/lib/utils";
 
@@ -355,10 +352,10 @@ function AssignPlanDialog({
               value={planType}
               onValueChange={(v) => setPlanType(v as PlanType)}
             >
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="w-full">
                 {(["free", "starter", "pro", "enterprise"] as PlanType[]).map(
                   (p) => (
                     <SelectItem key={p} value={p}>

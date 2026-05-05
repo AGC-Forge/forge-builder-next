@@ -356,7 +356,7 @@ export function RecentProductsTable({ data }: { data: RecentProductRow[] }) {
             >
               <SelectTrigger
                 size="sm"
-                className="w-20"
+                className="w-20 "
                 id="recent-customers-rows-per-page"
               >
                 <SelectValue

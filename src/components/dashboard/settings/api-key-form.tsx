@@ -179,10 +179,10 @@ export function ApiKeyForm({ existing }: Props) {
           <div>
             <Label>Default AI Model</Label>
             <Select value={modelId} onValueChange={setModelId}>
-              <SelectTrigger className="mt-1">
+              <SelectTrigger className="mt-1 w-full">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="w-full">
                 {allModels.map((m) => (
                   <SelectItem key={m.value} value={m.value}>
                     {m.label}

@@ -1,8 +1,10 @@
 {
   "HomePage": {
-    "title": "SnapLand!",
+    "title": "SnapLand",
     "tagline": "Pembuat Landing Page AI: Buat Halaman Landing yang Tinggi Konversi Dalam Detik",
-    "description": "Buat landing page profesional dan berkonversi tinggi dengan SnapLand. Tidak perlu coding. Gunakan builder berbasis AI kami untuk mengembangkan bisnis Anda dan meningkatkan konversi secara instan."
+    "description": "Buat landing page profesional dan berkonversi tinggi dengan SnapLand. Tidak perlu coding. Gunakan builder berbasis AI kami untuk mengembangkan bisnis Anda dan meningkatkan konversi secara instan.",
+    "ogImage": "/logo.png",
+    "keywords": "landing page builder, high-converting pages, AI-powered builder, no coding required, grow business, boost conversions"
   },
   "NotFoundPage": {
     "title": "404 Tidak Ditemukan",

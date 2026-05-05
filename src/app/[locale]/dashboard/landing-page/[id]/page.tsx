@@ -50,7 +50,7 @@ export default async function LandingPageDetailPage({
             </Link>
           </Button>
           <Button size="sm" asChild>
-            <Link href={`/dashboard/landing-page/${id}/builder`}>
+            <Link href={`/builder/${id}`}>
               <Paintbrush className="size-4" />
               Open Builder
             </Link>

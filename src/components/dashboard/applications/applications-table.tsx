@@ -404,10 +404,10 @@ function CreateApplicationDialog({
                 setConfig({});
               }}
             >
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="w-full">
                 {APP_TYPES.map((t) => (
                   <SelectItem key={t.value} value={t.value}>
                     {t.emoji} {t.label}
@@ -546,10 +546,10 @@ function AppConfigEditor({
             value={(config.mode as string) ?? "round-robin"}
             onValueChange={(v) => set("mode", v)}
           >
-            <SelectTrigger className="h-8">
+            <SelectTrigger className="h-8 w-full">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="w-full">
               <SelectItem value="round-robin">Round Robin</SelectItem>
               <SelectItem value="random">Random</SelectItem>
             </SelectContent>
@@ -657,10 +657,10 @@ function AppConfigEditor({
             value={(config.type as string) ?? "bank"}
             onValueChange={(v) => set("type", v)}
           >
-            <SelectTrigger className="h-8">
+            <SelectTrigger className="h-8 w-full">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="w-full">
               {[
                 "bank",
                 "gopay",
@@ -763,10 +763,10 @@ function AppConfigEditor({
             value={(config.trigger as string) ?? "order_created"}
             onValueChange={(v) => set("trigger", v)}
           >
-            <SelectTrigger className="h-8 text-xs">
+            <SelectTrigger className="h-8 text-xs w-full">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="w-full">
               <SelectItem value="order_created">Order Created</SelectItem>
               <SelectItem value="order_completed">Order Completed</SelectItem>
               <SelectItem value="form_submitted">Form Submitted</SelectItem>
@@ -795,10 +795,10 @@ function AppConfigEditor({
             value={(config.provider as string) ?? "jne"}
             onValueChange={(v) => set("provider", v)}
           >
-            <SelectTrigger className="h-8 text-xs">
+            <SelectTrigger className="h-8 text-xs w-full">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="w-full">
               {[
                 "JNE",
                 "JNT",
@@ -867,10 +867,10 @@ function AppConfigEditor({
             value={(config.period as string) ?? "month"}
             onValueChange={(v) => set("period", v)}
           >
-            <SelectTrigger className="h-8 text-xs">
+            <SelectTrigger className="h-8 text-xs w-full">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="w-full">
               <SelectItem value="month">per month</SelectItem>
               <SelectItem value="year">per year</SelectItem>
               <SelectItem value="one-time">one-time</SelectItem>
@@ -929,10 +929,10 @@ function AppConfigEditor({
             value={(config.inject_position as string) ?? "body"}
             onValueChange={(v) => set("inject_position", v)}
           >
-            <SelectTrigger className="h-8 text-xs">
+            <SelectTrigger className="h-8 text-xs w-full">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="w-full">
               <SelectItem value="head">{"<head>"}</SelectItem>
               <SelectItem value="body">{"<body> start"}</SelectItem>
               <SelectItem value="footer">{"</body> end"}</SelectItem>

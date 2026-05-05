@@ -106,10 +106,10 @@ function FieldSelect({
         value={(props[k] as string) ?? options[0]?.value}
         onValueChange={(v) => set(k, v)}
       >
-        <SelectTrigger className="h-8 text-xs">
+        <SelectTrigger className="h-8 text-xs w-full">
           <SelectValue />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="w-full">
           {options.map((o) => (
             <SelectItem key={o.value} value={o.value} className="text-xs">
               {o.label}
@@ -181,10 +181,10 @@ function ProductPicker({
         value={(props[k] as string) ?? ""}
         onValueChange={(v) => set(k, v === "none" ? null : v)}
       >
-        <SelectTrigger className="h-8 text-xs">
+        <SelectTrigger className="h-8 text-xs w-full">
           <SelectValue placeholder="Select product..." />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="w-full">
           <SelectItem value="none" className="text-xs text-muted-foreground">
             No product
           </SelectItem>
@@ -1307,10 +1307,10 @@ function TestimonialItemsEditor({
             value={String(item.rating)}
             onValueChange={(v) => update(i, "rating", Number(v))}
           >
-            <SelectTrigger className="h-7 text-xs">
+            <SelectTrigger className="h-7 text-xs w-full">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="w-full">
               {[5, 4, 3, 2, 1].map((r) => (
                 <SelectItem key={r} value={String(r)} className="text-xs">
                   {"⭐".repeat(r)}
@@ -1441,10 +1441,10 @@ function SocialLinksEditor({
               value={l.platform}
               onValueChange={(v) => update(i, "platform", v)}
             >
-              <SelectTrigger className="h-7 text-xs flex-1">
+              <SelectTrigger className="h-7 text-xs flex-1 w-full">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="w-full">
                 {SOCIAL_PLATFORMS.map((p) => (
                   <SelectItem key={p} value={p} className="text-xs capitalize">
                     {p}

@@ -45,6 +45,10 @@ interface BlockProps {
   ctx: RenderContext;
 }
 
+function stripScriptTags(html: string): string {
+  return html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+}
+
 // ── Layout helper ──────────────────────────────────────────────
 function buildWrapperStyle(layout: BlockLayout): React.CSSProperties {
   const style: React.CSSProperties = {};
@@ -441,7 +445,7 @@ function ColumnsBlock({ props, classes, ctx }: BlockProps) {
           <div
             className="text-sm leading-relaxed"
             // biome-ignore lint/security/noDangerouslySetInnerHtml: user content
-            dangerouslySetInnerHTML={{ __html: item.content }}
+            dangerouslySetInnerHTML={{ __html: stripScriptTags(item.content) }}
           />
         </div>
       ))}
@@ -523,7 +527,9 @@ function TextBlock({ props, classes }: BlockProps) {
         classes.wrapper,
       )}
       // biome-ignore lint/security/noDangerouslySetInnerHtml: user content
-      dangerouslySetInnerHTML={{ __html: (props.html as string) || "" }}
+      dangerouslySetInnerHTML={{
+        __html: stripScriptTags((props.html as string) || ""),
+      }}
     />
   );
 }
@@ -2098,7 +2104,9 @@ function PopupBlock({ props, classes, ctx }: BlockProps) {
         )}
         <div
           className="text-sm"
-          dangerouslySetInnerHTML={{ __html: (props.content as string) || "" }}
+          dangerouslySetInnerHTML={{
+            __html: stripScriptTags((props.content as string) || ""),
+          }}
         />
         {props.ctaUrl && props.ctaText && (
           <a
@@ -2216,7 +2224,9 @@ function TabBlock({ props, classes, ctx }: BlockProps) {
         <div
           className={cn("text-sm leading-relaxed", classes.text)}
           // biome-ignore lint/security/noDangerouslySetInnerHtml: user content
-          dangerouslySetInnerHTML={{ __html: tabs[active].content }}
+          dangerouslySetInnerHTML={{
+            __html: stripScriptTags(tabs[active].content),
+          }}
         />
       )}
     </div>
@@ -2337,7 +2347,11 @@ function CustomHtmlBlock({ props }: { props: Record<string, any> }) {
   if (!props.html) return null;
   return (
     // biome-ignore lint/security/noDangerouslySetInnerHtml: user custom HTML
-    <div dangerouslySetInnerHTML={{ __html: props.html as string }} />
+    <div
+      dangerouslySetInnerHTML={{
+        __html: stripScriptTags(props.html as string),
+      }}
+    />
   );
 }
 

@@ -136,10 +136,10 @@ export function LayoutControls() {
             <div className="space-y-1">
               <Label className="font-medium text-xs">Theme Preset</Label>
               <Select value={themePreset} onValueChange={onThemePresetChange}>
-                <SelectTrigger size="sm" className="w-full text-xs">
+                <SelectTrigger size="sm" className="w-full text-xs ">
                   <SelectValue placeholder="Preset" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="w-full">
                   <SelectGroup>
                     {THEME_PRESET_OPTIONS.map((preset) => (
                       <SelectItem
@@ -170,7 +170,7 @@ export function LayoutControls() {
                 <SelectTrigger size="sm" className="w-full text-xs">
                   <SelectValue placeholder="Select font" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="w-full">
                   <SelectGroup>
                     {fontOptions.map((font) => (
                       <SelectItem

@@ -4,7 +4,6 @@ import createNextIntlPlugin from 'next-intl/plugin';
 const withNextIntl = createNextIntlPlugin({
   experimental: {
     createMessagesDeclaration: './messages/en.json',
-    // instrumentationHook: true,
   }
 });
 
@@ -33,7 +32,8 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "50mb",
     },
     optimizePackageImports: ["lucide-react", "recharts", "date-fns"],
-    optimizeCss: true,
+    optimizeCss: false,
+    // instrumentationHook: true,
   },
   async headers() {
     return [

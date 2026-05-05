@@ -10,12 +10,7 @@ import type { LandingPageWithProducts } from "@/types/database";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
 export function LandingPageDetail({
@@ -153,13 +148,9 @@ export function LandingPageDetail({
         {/* Blocks */}
         <Card>
           <CardHeader className="flex-row items-center justify-between">
-            <CardTitle>
-              Builder Blocks ({landingPage.blocks.length})
-            </CardTitle>
+            <CardTitle>Builder Blocks ({landingPage.blocks.length})</CardTitle>
             <Button asChild size="sm">
-              <Link
-                href={`/dashboard/landing-page/${landingPage.id}/builder`}
-              >
+              <Link href={`/builder/${landingPage.id}`}>
                 <Paintbrush className="size-4" />
                 Open Builder
               </Link>
@@ -207,9 +198,7 @@ export function LandingPageDetail({
               <p className="text-muted-foreground text-xs">Status</p>
               <div className="mt-1 flex items-center justify-between">
                 <Badge
-                  variant={
-                    landingPage.is_published ? "default" : "secondary"
-                  }
+                  variant={landingPage.is_published ? "default" : "secondary"}
                 >
                   {landingPage.is_published ? "Published" : "Draft"}
                 </Badge>
@@ -234,15 +223,11 @@ export function LandingPageDetail({
             </div>
             <div>
               <p className="text-muted-foreground text-xs">Created</p>
-              <p>
-                {format(new Date(landingPage.created_at), "dd MMM yyyy")}
-              </p>
+              <p>{format(new Date(landingPage.created_at), "dd MMM yyyy")}</p>
             </div>
             <div>
               <p className="text-muted-foreground text-xs">Last Updated</p>
-              <p>
-                {format(new Date(landingPage.updated_at), "dd MMM yyyy")}
-              </p>
+              <p>{format(new Date(landingPage.updated_at), "dd MMM yyyy")}</p>
             </div>
           </CardContent>
         </Card>

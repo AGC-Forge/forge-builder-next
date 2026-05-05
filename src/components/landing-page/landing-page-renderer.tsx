@@ -12,7 +12,7 @@ import { SeedprodTheme } from "./themes/seedprod-theme";
 import { LnkbioTheme } from "./themes/lnkbio-theme";
 
 // V2 renderer
-import { LandingPageV2Renderer } from "./v2/lp-v2-renderer";
+import LandingPageV2Renderer from "./v2/lp-v2-renderer";
 
 interface Props {
   landingPage: LandingPageWithProducts;

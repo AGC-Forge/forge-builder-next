@@ -27,7 +27,7 @@ export async function getSettings(
   }
 }
 
-export const getPublicSettings = cache(
+const getCachedPublicSettings = cache(
   async (): Promise<ActionResult<Record<string, string | null>>> => {
     try {
       const supabase = await createClient();
@@ -45,6 +45,12 @@ export const getPublicSettings = cache(
     }
   },
 );
+
+export async function getPublicSettings(): Promise<
+  ActionResult<Record<string, string | null>>
+> {
+  return getCachedPublicSettings();
+}
 
 export async function updateSetting(
   key: string,

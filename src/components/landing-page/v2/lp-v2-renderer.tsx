@@ -16,7 +16,7 @@ interface Props {
   landingPage: LandingPageWithProducts;
 }
 
-export function LandingPageV2Renderer({ landingPage }: Props) {
+export default function LandingPageV2Renderer({ landingPage }: Props) {
   const blocks = (landingPage.blocks ?? []) as unknown as BlockV2[];
   const cfg = landingPage.theme_config;
 
