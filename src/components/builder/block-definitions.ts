@@ -47,7 +47,7 @@ import {
   Megaphone,
   Globe,
 } from "lucide-react";
-import type { BlockType } from "@/types/database";
+import type { BlockType } from "@/types/builder";
 
 export const BLOCK_ICON_MAP: Partial<Record<BlockType, LucideIcon>> = {
   "block-hero": Layout,
@@ -90,7 +90,7 @@ export const BLOCK_ICON_MAP: Partial<Record<BlockType, LucideIcon>> = {
   "block-countdown": Timer,
   "block-form": Mail,
   "block-popup": Layers2,
-  "block-chatbot": MessageCircle,
+  "block-chat-bot": MessageCircle,
   "block-tab": PanelRightClose,
   "block-floating-content": PanelBottom,
 
@@ -145,7 +145,7 @@ export const BLOCK_LABEL_MAP: Partial<Record<BlockType, string>> = {
   "block-countdown": "Countdown",
   "block-form": "Form",
   "block-popup": "Popup",
-  "block-chatbot": "Chat Bot",
+  "block-chat-bot": "Chat Bot",
   "block-tab": "Tabs",
   "block-floating-content": "Float Content",
 

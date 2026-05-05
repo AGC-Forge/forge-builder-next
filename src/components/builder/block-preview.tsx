@@ -1,14 +1,14 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import type { LandingBlock } from "@/types/database";
+import type { BlockV2 } from "@/types/builder";
 import {
   BLOCK_LABEL_MAP,
   BLOCK_ICON_MAP,
-} from "../dashboard/landing-pages/builder/block-definitions";
+} from "@/components/builder/block-definitions";
 
 interface Props {
-  block: LandingBlock;
+  block: BlockV2;
   isSelected: boolean;
 }
 
@@ -17,8 +17,8 @@ interface Props {
  * This is NOT the public LP renderer — it's a preview-only component.
  */
 export function BlockPreview({ block, isSelected }: Props) {
-  const props = (block.props ?? block.content ?? {}) as Record<string, any>;
-  const style = block.style ?? {};
+  const props = block.props ?? {};
+  const style = block.layout ?? {};
 
   // Build wrapper classes from style config
   const wrapperCn = cn(
@@ -28,9 +28,7 @@ export function BlockPreview({ block, isSelected }: Props) {
     style.bgColor,
     style.textAlign ?? "text-left",
     style.borderRadius,
-    style.border,
     style.shadow,
-    style.customClass,
   );
 
   const innerCn = cn("mx-auto w-full", style.maxWidth ?? "max-w-5xl");
@@ -46,7 +44,7 @@ export function BlockPreview({ block, isSelected }: Props) {
             "relative overflow-hidden",
           )}
         >
-          {style.bgImageUrl && <div className="absolute inset-0 bg-black/40" />}
+          {style.bgImage && <div className="absolute inset-0 bg-black/40" />}
           <div className={cn(innerCn, "relative z-10 text-center")}>
             <h1 className="text-2xl font-bold text-white mb-2">
               {(props.headline as string) || "Your Headline Here"}

@@ -146,6 +146,7 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
   setIsDirty: (dirty) => set({ isDirty: dirty }),
   setIsSaving: (saving) => set({ isSaving: saving }),
   setIsPublished: (published) => set({ isPublished: published }),
+  markSaved: () => set({ isDirty: false }),
 
   // ── History ───────────────────────────────────────────────
   pushHistory: (label) => {

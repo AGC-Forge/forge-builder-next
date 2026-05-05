@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import type { Database, Json } from "@/types/database.types";
 
 export type OrderStatus = "pending" | "processing" | "shipped" | "completed" | "cancelled";
 export type PaymentStatus = "unpaid" | "paid" | "refunded";
@@ -151,24 +152,26 @@ export async function createOrder(input: CreateOrderInput & { user_id: string })
     if (!input.customer_phone?.trim()) return { success: false, error: "Phone is required." };
     if (!input.items?.length) return { success: false, error: "Order items required." };
 
+    const orderPayload: Database["public"]["Tables"]["orders"]["Insert"] = {
+      user_id: input.user_id,
+      landing_page_id: input.landing_page_id ?? null,
+      customer_name: input.customer_name.trim(),
+      customer_phone: input.customer_phone.trim(),
+      customer_email: input.customer_email?.trim() ?? null,
+      shipping_address: input.shipping_address as unknown as Json,
+      items: input.items as unknown as Json,
+      subtotal: input.subtotal,
+      shipping_cost: input.shipping_cost ?? 0,
+      total_amount: input.total_amount,
+      payment_method: input.payment_method ?? null,
+      notes: input.notes?.trim() ?? null,
+      status: "pending",
+      payment_status: "unpaid",
+    };
+
     const { data, error } = await supabase
       .from("orders")
-      .insert({
-        user_id: input.user_id,
-        landing_page_id: input.landing_page_id ?? null,
-        customer_name: input.customer_name.trim(),
-        customer_phone: input.customer_phone.trim(),
-        customer_email: input.customer_email?.trim() ?? null,
-        shipping_address: input.shipping_address,
-        items: input.items,
-        subtotal: input.subtotal,
-        shipping_cost: input.shipping_cost ?? 0,
-        total_amount: input.total_amount,
-        payment_method: input.payment_method ?? null,
-        notes: input.notes?.trim() ?? null,
-        status: "pending",
-        payment_status: "unpaid",
-      })
+      .insert(orderPayload)
       .select()
       .single();
 

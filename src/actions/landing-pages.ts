@@ -14,6 +14,7 @@ import type {
   LandingPageWithProducts,
   PaginatedResult,
 } from "@/types/database";
+import type { BlockV2 } from "@/types/builder";
 
 export async function getLandingPages(opts: {
   page?: number;
@@ -242,7 +243,7 @@ export async function updateLandingPage(
 // ── Update blocks (builder save) ────────────────────────────
 export async function updateLandingPageBlocks(
   id: string,
-  blocks: LandingBlock[],
+  blocks: LandingBlock[] | BlockV2[],
 ): Promise<ActionResult> {
   try {
     const supabase = await createClient();

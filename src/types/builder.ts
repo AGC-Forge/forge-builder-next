@@ -339,6 +339,7 @@ export interface BuilderState {
   setIsDirty: (dirty: boolean) => void;
   setIsSaving: (saving: boolean) => void;
   setIsPublished: (published: boolean) => void;
+  markSaved: () => void;
 
   // History
   pushHistory: (label?: string) => void;
