@@ -7,6 +7,7 @@ import {
   forgotPasswordSchema,
   resetPasswordSchema,
 } from "@/lib/validations/auth";
+import { getPublicUrl } from "@/lib/url/public-url";
 
 export async function getOAuthRedirectUrl(
   provider: "github" | "google",
@@ -14,13 +15,14 @@ export async function getOAuthRedirectUrl(
 ): Promise<ActionResult<{ url: string }>> {
   try {
     const supabase = await createClient();
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL;
-    if (!appUrl) return { success: false, error: "NEXT_PUBLIC_APP_URL not set" };
+    const callbackUrl = getPublicUrl(
+      `/auth/callback?next=${encodeURIComponent(next)}`,
+    );
 
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${appUrl}/auth/callback?next=${encodeURIComponent(next)}`,
+        redirectTo: callbackUrl.toString(),
         queryParams: { access_type: "offline", prompt: "consent" },
         skipBrowserRedirect: true,
       },

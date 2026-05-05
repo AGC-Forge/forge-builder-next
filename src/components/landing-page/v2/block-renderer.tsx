@@ -46,7 +46,10 @@ interface BlockProps {
 }
 
 function stripScriptTags(html: string): string {
-  return html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+  return html.replace(
+    /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+    "",
+  );
 }
 
 // ── Layout helper ──────────────────────────────────────────────

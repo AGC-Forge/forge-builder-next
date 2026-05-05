@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 import type { Database } from "@/types/database.types";
 import { routing } from "@/i18n/routing";
+import { getPublicUrl } from "@/lib/url/public-url";
 
 const PUBLIC_PATHS = [
   "/",
@@ -54,9 +55,7 @@ function withLocale(locale: string | undefined, path: string) {
 }
 
 function buildRedirectUrl(request: NextRequest, path: string): URL {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
-  const base = appUrl ?? request.nextUrl.origin;
-  return new URL(path, base);
+  return getPublicUrl(path, request.headers);
 }
 /**
  * Detect if an unlocalized pathname looks like a landing page slug.

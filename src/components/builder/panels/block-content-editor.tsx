@@ -13,11 +13,14 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectGroup,
+  SelectLabel,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { PROMPT_TEMPLATES_BUILDER } from "../promtp-templates";
 import { Plus, Trash2, Wand2, Loader2, RefreshCw } from "lucide-react";
 
 interface Props {
@@ -1468,6 +1471,7 @@ function CustomHtmlEditor({
 }) {
   const [activeTab, setActiveTab] = useState<"code" | "ai">("code");
   const [prompt, setPrompt] = useState((props.aiPrompt as string) ?? "");
+  const [selectedTemplate, setSelectedTemplate] = useState("");
   const [isGenerating, startGenerate] = useTransition();
 
   function handleGenerate() {
@@ -1508,6 +1512,11 @@ function CustomHtmlEditor({
 
   const currentHtml = (props.html as string) ?? "";
   const hasHtml = currentHtml.trim().length > 0;
+
+  function handleTemplateChange(v: string) {
+    setSelectedTemplate(v);
+    setPrompt(v);
+  }
 
   return (
     <div className="space-y-2">
@@ -1555,6 +1564,29 @@ function CustomHtmlEditor({
               Describe the component and AI will generate HTML with Tailwind
               CSS. Requires OpenRouter API key in Settings.
             </p>
+          </div>
+
+          {/* Prompt templates */}
+          <div className="space-y-1.5">
+            <Label className="text-xs">Prompt (Optional)</Label>
+            <Select
+              value={selectedTemplate}
+              onValueChange={handleTemplateChange}
+            >
+              <SelectTrigger className="h-8 text-sm flex-1 w-full">
+                <SelectValue placeholder="Select a template" />
+              </SelectTrigger>
+              <SelectContent className="w-full">
+                <SelectGroup>
+                  <SelectLabel>Builder Templates</SelectLabel>
+                  {PROMPT_TEMPLATES_BUILDER.map((template) => (
+                    <SelectItem key={template.value} value={template.value}>
+                      {template.name}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Prompt input */}

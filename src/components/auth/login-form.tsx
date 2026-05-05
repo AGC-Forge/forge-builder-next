@@ -41,7 +41,10 @@ export function LoginForm({
   const router = useRouter();
   const locale = useLocale();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  const callbackUrl =
+    searchParams.get("callbackUrl") ??
+    searchParams.get("redirectTo") ??
+    "/dashboard";
 
   const [showPassword, setShowPassword] = useState(false);
   const [isSocialLoading, setIsSocialLoading] = useState<string | null>(null);

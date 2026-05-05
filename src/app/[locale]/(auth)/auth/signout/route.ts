@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getPublicUrl } from "@/lib/url/public-url";
 import { revalidatePath } from "next/cache";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -14,5 +15,7 @@ export async function POST(
   }
   revalidatePath("/", "layout");
 
-  return NextResponse.redirect(new URL(`/${locale}/login`, req.url), { status: 302 });
+  return NextResponse.redirect(getPublicUrl(`/${locale}/login`, req.headers), {
+    status: 302,
+  });
 }

@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getPublicUrl } from "@/lib/url/public-url";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -8,11 +9,6 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get("type");
   const next = searchParams.get("next") ?? "/dashboard";
 
-  // Always use the public app URL to avoid leaking the internal port
-  const appUrl =
-    process.env.NEXT_PUBLIC_APP_URL ??
-    `${request.headers.get("x-forwarded-proto") ?? "https"}://${request.headers.get("x-forwarded-host") ?? request.headers.get("host")}`;
-
   const supabase = await createClient();
 
   if (token_hash && type === "recovery") {
@@ -21,10 +17,10 @@ export async function GET(request: NextRequest) {
       type: "recovery",
     });
     if (!error) {
-      return NextResponse.redirect(`${appUrl}/reset-password`);
+      return NextResponse.redirect(getPublicUrl("/reset-password", request.headers));
     }
     return NextResponse.redirect(
-      `${appUrl}/forgot-password?error=link_expired`,
+      getPublicUrl("/forgot-password?error=link_expired", request.headers),
     );
   }
 
@@ -34,16 +30,18 @@ export async function GET(request: NextRequest) {
       type: "email",
     });
     if (!error) {
-      return NextResponse.redirect(`${appUrl}${next}`);
+      return NextResponse.redirect(getPublicUrl(next, request.headers));
     }
   }
 
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      return NextResponse.redirect(`${appUrl}${next}`);
+      return NextResponse.redirect(getPublicUrl(next, request.headers));
     }
   }
 
-  return NextResponse.redirect(`${appUrl}/login?error=auth_callback_failed`);
+  return NextResponse.redirect(
+    getPublicUrl("/login?error=auth_callback_failed", request.headers),
+  );
 }
