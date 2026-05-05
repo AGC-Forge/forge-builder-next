@@ -13,6 +13,11 @@ import {
 
 const WebSocketContext = createContext<WSContextType | null>(null);
 
+function getWebSocketUrl() {
+  const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+  return `${protocol}//${window.location.host}/api/ws`;
+}
+
 export function WebSocketProvider({
   children,
   userId,
@@ -31,7 +36,7 @@ export function WebSocketProvider({
   const connect = useCallback(() => {
     if (typeof window === "undefined") return;
 
-    const ws = new WebSocket(`ws://${window.location.host}/api/ws`);
+    const ws = new WebSocket(getWebSocketUrl());
 
     ws.addEventListener("open", () => {
       console.log("WebSocket connected");
