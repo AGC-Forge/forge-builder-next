@@ -15,6 +15,7 @@ import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { getCurrentProfile } from "@/actions/users";
 import { getPublicSettings } from "@/actions/settings";
+import { SupportWebSocketProvider } from "@/lib/websocket/support-websocket-provider";
 import {
   CurrentUserProvider,
   type CurrentUser,
@@ -223,14 +224,16 @@ export default async function RootLayout({
               navbarStyle={navbar_style}
               font={font}
             >
-              <CurrentUserProvider
-                user={currentUser}
-                profile={currentProfile}
-                publicSettings={publicSettings}
-              >
-                {children}
-                <Toaster />
-              </CurrentUserProvider>
+              <SupportWebSocketProvider userId={currentUser?.id}>
+                <CurrentUserProvider
+                  user={currentUser}
+                  profile={currentProfile}
+                  publicSettings={publicSettings}
+                >
+                  {children}
+                  <Toaster />
+                </CurrentUserProvider>
+              </SupportWebSocketProvider>
             </PreferencesStoreProvider>
           </TooltipProvider>
         </NextIntlClientProvider>

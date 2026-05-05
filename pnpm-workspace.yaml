@@ -5,4 +5,5 @@ onlyBuiltDependencies:
   - '@openrouter/sdk'
   - '@parcel/watcher'
   - '@swc/core'
+  - esbuild
   - msw

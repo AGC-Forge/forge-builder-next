@@ -1,5 +1,3 @@
-// Database table types — mirrors supabase/schema.sql exactly
-
 export type UserRole = 'admin' | 'member';
 export type InputMode = 'manual' | 'auto';
 export type DeviceType = 'mobile' | 'tablet' | 'desktop' | 'unknown';

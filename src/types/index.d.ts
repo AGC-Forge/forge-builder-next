@@ -15,6 +15,23 @@ declare global {
     fieldErrors?: Record<string, string[]>;
   }
 
+  interface ChatMessage {
+    id: string;
+    type: 'user_message' | 'ai_message' | 'system' | 'typing';
+    content: string;
+    timestamp: string;
+    userId?: string;
+  }
+
+  interface WSContextType {
+    socket: WebSocket | null;
+    isConnected: boolean;
+    isAuthenticated: boolean;
+    messages: ChatMessage[];
+    sendMessage: (content: string) => void;
+    authenticate: (userId: string, sessionId: string) => void;
+  }
+
   type AIModelType =
     | "CLAUDE"
     | "OPENAI"
