@@ -7,7 +7,24 @@ import {
   forgotPasswordSchema,
   resetPasswordSchema,
 } from "@/lib/validations/auth";
-import { getPublicUrl } from "@/lib/url/public-url";
+import { getConfiguredPublicBaseUrl, getPublicUrl } from "@/lib/url/public-url";
+
+function getAuthCallbackUrl(next = "/dashboard") {
+  const baseUrl = getConfiguredPublicBaseUrl();
+  if (!baseUrl) {
+    throw new Error("NEXT_PUBLIC_APP_URL must be set to the public HTTPS URL");
+  }
+
+  return getPublicUrl(
+    `/auth/callback?next=${encodeURIComponent(next)}`,
+  ).toString();
+}
+
+function forceOAuthRedirectTo(url: string, redirectTo: string) {
+  const authUrl = new URL(url);
+  authUrl.searchParams.set("redirect_to", redirectTo);
+  return authUrl.toString();
+}
 
 export async function getOAuthRedirectUrl(
   provider: "github" | "google",
@@ -15,14 +32,12 @@ export async function getOAuthRedirectUrl(
 ): Promise<ActionResult<{ url: string }>> {
   try {
     const supabase = await createClient();
-    const callbackUrl = getPublicUrl(
-      `/auth/callback?next=${encodeURIComponent(next)}`,
-    );
+    const callbackUrl = getAuthCallbackUrl(next);
 
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: callbackUrl.toString(),
+        redirectTo: callbackUrl,
         queryParams: { access_type: "offline", prompt: "consent" },
         skipBrowserRedirect: true,
       },
@@ -31,9 +46,15 @@ export async function getOAuthRedirectUrl(
     if (error || !data.url) {
       return { success: false, error: error?.message ?? "Failed to get OAuth URL" };
     }
-    return { success: true, data: { url: data.url } };
-  } catch {
-    return { success: false, error: "Failed to initiate OAuth" };
+    return {
+      success: true,
+      data: { url: forceOAuthRedirectTo(data.url, callbackUrl) },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to initiate OAuth",
+    };
   }
 }
 
@@ -110,6 +131,7 @@ export async function registerAction(
       email: raw.email,
       password: raw.password,
       options: {
+        emailRedirectTo: getAuthCallbackUrl("/dashboard"),
         data: {
           name: raw.name,
         },
@@ -157,7 +179,9 @@ export async function forgotAction(formData: FormData): Promise<ActionResult> {
   try {
     const supabase = await createClient();
     const { error: forgotPasswordError } =
-      await supabase.auth.resetPasswordForEmail(raw.email);
+      await supabase.auth.resetPasswordForEmail(raw.email, {
+        redirectTo: getAuthCallbackUrl("/reset-password"),
+      });
     if (forgotPasswordError) {
       return {
         success: false,

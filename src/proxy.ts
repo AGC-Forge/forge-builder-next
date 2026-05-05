@@ -3,21 +3,9 @@ import createIntlMiddleware from "next-intl/middleware";
 
 import { routing } from "@/i18n/routing";
 import { updateSession } from "@/lib/supabase/middleware";
+import { getPublicBaseUrlFromHeaders } from "@/lib/url/public-url";
 
 const intlMiddleware = createIntlMiddleware(routing);
-
-// Use NEXT_PUBLIC_APP_URL as the canonical base so redirects and rewrites
-// never contain the internal host (localhost:PORT) or wrong scheme.
-function getPublicBase(request: NextRequest): string {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
-  if (appUrl) return appUrl;
-  const proto = request.headers.get("x-forwarded-proto") ?? "https";
-  const host =
-    request.headers.get("x-forwarded-host") ??
-    request.headers.get("host") ??
-    request.nextUrl.host;
-  return `${proto}://${host}`;
-}
 
 // Rewrite internal https://localhost/127.0.0.1 URLs to http:// so Next.js
 // doesn't try to open an SSL connection to the plain-HTTP app server.
@@ -49,7 +37,7 @@ export async function proxy(request: NextRequest) {
 
   const location = intlResponse.headers.get("location");
   if (location) {
-    const publicBase = getPublicBase(request);
+    const publicBase = getPublicBaseUrlFromHeaders(request.headers);
     const response = NextResponse.redirect(new URL(location, publicBase), {
       status: intlResponse.status,
     });
