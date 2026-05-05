@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useTransition } from "react";
 import type { BlockV2 } from "@/types/builder";
 import type { Product } from "@/types/database";
 import { Input } from "@/components/ui/input";
@@ -15,7 +16,9 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "sonner";
+import { Plus, Trash2, Wand2, Loader2, RefreshCw } from "lucide-react";
 
 interface Props {
   block: BlockV2;
@@ -923,40 +926,7 @@ export function BlockContentEditor({
     );
 
   if (type === "block-custom-html")
-    return (
-      <div className="space-y-3">
-        <div className="space-y-1.5">
-          <Label className="text-xs">HTML Code</Label>
-          <Textarea
-            value={(props.html as string) ?? ""}
-            onChange={(e) => set("html", e.target.value)}
-            className="text-xs font-mono min-h-40"
-            rows={8}
-            placeholder="<!-- Your HTML here -->"
-          />
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-xs">AI Prompt (optional)</Label>
-          <div className="flex gap-2">
-            <Textarea
-              value={(props.aiPrompt as string) ?? ""}
-              onChange={(e) => set("aiPrompt", e.target.value)}
-              className="text-xs min-h-14"
-              rows={2}
-              placeholder="Describe what you want AI to build..."
-            />
-          </div>
-          <Button
-            size="sm"
-            variant="outline"
-            className="w-full text-xs gap-1.5"
-            disabled
-          >
-            Generate with AI (coming soon)
-          </Button>
-        </div>
-      </div>
-    );
+    return <CustomHtmlEditor props={props} set={set} />;
 
   if (type === "block-social-links")
     return (
@@ -1485,6 +1455,169 @@ function SocialLinksEditor({
       >
         <Plus className="size-3" /> Add Link
       </Button>
+    </div>
+  );
+}
+
+function CustomHtmlEditor({
+  props,
+  set,
+}: {
+  props: Record<string, unknown>;
+  set: (key: string, val: unknown) => void;
+}) {
+  const [activeTab, setActiveTab] = useState<"code" | "ai">("code");
+  const [prompt, setPrompt] = useState((props.aiPrompt as string) ?? "");
+  const [isGenerating, startGenerate] = useTransition();
+
+  function handleGenerate() {
+    if (!prompt.trim()) {
+      toast.error("Please describe what you want to build.");
+      return;
+    }
+
+    startGenerate(async () => {
+      try {
+        const res = await fetch("/api/ai/html-builder", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            prompt,
+            currentHtml: (props.html as string) ?? "",
+          }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || data.error) {
+          toast.error(
+            data.error ?? "AI generation failed. Check your API key.",
+          );
+          return;
+        }
+
+        set("html", data.html);
+        set("aiPrompt", prompt);
+        toast.success("HTML generated! Review the code tab.");
+        setActiveTab("code");
+      } catch {
+        toast.error("Network error. Please try again.");
+      }
+    });
+  }
+
+  const currentHtml = (props.html as string) ?? "";
+  const hasHtml = currentHtml.trim().length > 0;
+
+  return (
+    <div className="space-y-2">
+      <Tabs
+        value={activeTab}
+        onValueChange={(v) => setActiveTab(v as "code" | "ai")}
+      >
+        <TabsList className="w-full h-8 grid grid-cols-2">
+          <TabsTrigger value="code" className="text-xs">
+            Code Editor
+          </TabsTrigger>
+          <TabsTrigger value="ai" className="text-xs gap-1">
+            <Wand2 className="size-3" />
+            AI Builder
+          </TabsTrigger>
+        </TabsList>
+
+        {/* ── Code tab ─────────────────────────────────────── */}
+        <TabsContent value="code" className="mt-2 space-y-1.5">
+          <Label className="text-xs">HTML Code</Label>
+          <Textarea
+            value={currentHtml}
+            onChange={(e) => set("html", e.target.value)}
+            className="text-xs font-mono min-h-45 resize-y"
+            rows={10}
+            placeholder={
+              '<!-- Your custom HTML here -->\n<div class="text-center py-8">\n  <h2 class="text-2xl font-bold">Hello!</h2>\n</div>'
+            }
+            spellCheck={false}
+          />
+          <p className="text-[10px] text-muted-foreground">
+            Tailwind CSS classes available. Use standard HTML.
+          </p>
+        </TabsContent>
+
+        {/* ── AI tab ───────────────────────────────────────── */}
+        <TabsContent value="ai" className="mt-2 space-y-3">
+          {/* Info box */}
+          <div className="rounded-lg border border-primary/20 bg-primary/5 px-3 py-2">
+            <p className="flex items-center gap-1.5 text-xs font-semibold text-primary">
+              <Wand2 className="size-3" />
+              AI HTML Builder
+            </p>
+            <p className="mt-0.5 text-[10px] text-muted-foreground">
+              Describe the component and AI will generate HTML with Tailwind
+              CSS. Requires OpenRouter API key in Settings.
+            </p>
+          </div>
+
+          {/* Prompt input */}
+          <div className="space-y-1.5">
+            <Label className="text-xs">Describe what you want</Label>
+            <Textarea
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              className="text-xs min-h-20"
+              rows={3}
+              placeholder="e.g. A pricing card with a title, price, list of features, and a CTA button. Use a gradient border and dark background."
+            />
+          </div>
+
+          {/* Generate button */}
+          <Button
+            type="button"
+            size="sm"
+            className="w-full gap-1.5"
+            onClick={handleGenerate}
+            disabled={isGenerating || !prompt.trim()}
+          >
+            {isGenerating ? (
+              <>
+                <Loader2 className="size-3.5 animate-spin" />
+                Generating...
+              </>
+            ) : hasHtml ? (
+              <>
+                <RefreshCw className="size-3.5" />
+                Regenerate HTML
+              </>
+            ) : (
+              <>
+                <Wand2 className="size-3.5" />
+                Generate HTML
+              </>
+            )}
+          </Button>
+
+          {/* Preview of current HTML */}
+          {hasHtml && (
+            <div className="space-y-1">
+              <Label className="text-[10px] text-muted-foreground">
+                Current HTML ({currentHtml.length} chars)
+              </Label>
+              <div className="max-h-20 overflow-y-auto rounded-md bg-muted/50 p-2 font-mono text-[10px] leading-relaxed text-muted-foreground">
+                {currentHtml.slice(0, 300)}
+                {currentHtml.length > 300 && "..."}
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-6 w-full text-[10px]"
+                onClick={() => setActiveTab("code")}
+              >
+                View & Edit Full Code
+              </Button>
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

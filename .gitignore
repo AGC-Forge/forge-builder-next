@@ -48,3 +48,6 @@ docs/*
 nginx/*
 scripts/deploy.sh
 supabase/.temp/*
+
+# Sentry Config File
+.env.sentry-build-plugin
