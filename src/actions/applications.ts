@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { logActivity } from "@/actions/activity-logs";
 import type { Application, AppType } from "@/types/builder";
 
 export interface ApplicationInput {
@@ -97,6 +98,13 @@ export async function createApplication(input: ApplicationInput): Promise<Action
     if (error) return { success: false, error: error.message };
 
     revalidatePath("/dashboard/applications");
+
+    await logActivity("application.created", {
+      resource: "application",
+      resourceId: data.id,
+      metadata: { app_type: input.app_type, name: input.name },
+    });
+
     return { success: true, data: data as Application, message: "Application created." };
   } catch {
     return { success: false, error: "Failed to create application" };
@@ -134,6 +142,12 @@ export async function updateApplication(
     if (error) return { success: false, error: error.message };
 
     revalidatePath("/dashboard/applications");
+
+    await logActivity("application.updated", {
+      resource: "application",
+      resourceId: id,
+    });
+
     return { success: true, data: data as Application, message: "Application updated." };
   } catch {
     return { success: false, error: "Failed to update application" };
@@ -160,6 +174,12 @@ export async function deleteApplication(id: string): Promise<ActionResult> {
     if (error) return { success: false, error: error.message };
 
     revalidatePath("/dashboard/applications");
+
+    await logActivity("application.deleted", {
+      resource: "application",
+      resourceId: id,
+    });
+
     return { success: true, message: "Application deleted." };
   } catch {
     return { success: false, error: "Failed to delete application" };

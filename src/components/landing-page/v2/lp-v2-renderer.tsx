@@ -1,19 +1,46 @@
 "use client";
 
-/**
- * LP V2 Renderer
- * Path: src/components/landing-page/v2/lp-v2-renderer.tsx
- *
- * Renders a landing page built with Builder V2 (BlockV2 format).
- * Applies global page styles (font, bg color) and renders each block.
- */
-
+import { useEffect } from "react";
 import type { LandingPageWithProducts } from "@/types/database";
 import type { BlockV2 } from "@/types/builder";
 import { BlockRenderer, type RenderContext } from "./block-renderer";
 
 interface Props {
   landingPage: LandingPageWithProducts;
+}
+
+async function trackView(landingPageId: string) {
+  try {
+    await fetch("/api/analytics/track", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "view", landingPageId }),
+      keepalive: true, // don't cancel on page unload
+    });
+  } catch {
+    // silent — analytics failure never breaks the page
+  }
+}
+export async function trackProductClick(
+  productId: string,
+  landingPageId: string | null,
+  clickType: "affiliate" | "marketplace" | "detail" = "affiliate",
+) {
+  try {
+    await fetch("/api/analytics/track", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "click",
+        productId,
+        landingPageId,
+        clickType,
+      }),
+      keepalive: true,
+    });
+  } catch {
+    // silent
+  }
 }
 
 export default function LandingPageV2Renderer({ landingPage }: Props) {
@@ -29,11 +56,17 @@ export default function LandingPageV2Renderer({ landingPage }: Props) {
     textColor: cfg.textColor ?? "#111827",
     fontFamily: cfg.fontFamily ?? "Inter",
     appUrl: process.env.NEXT_PUBLIC_APP_URL ?? "",
+    landingPageId: landingPage.id, // pass LP id to ctx for click tracking
+    onProductClick: (productId, clickType) =>
+      trackProductClick(productId, landingPage.id, clickType),
   };
+
+  useEffect(() => {
+    trackView(landingPage.id);
+  }, [landingPage.id]);
 
   const visibleBlocks = blocks.filter((b) => b.visible);
 
-  // Page-level styles
   const pageStyle: React.CSSProperties = {
     fontFamily: ctx.fontFamily,
     color: ctx.textColor,
@@ -46,19 +79,12 @@ export default function LandingPageV2Renderer({ landingPage }: Props) {
 
   return (
     <div style={pageStyle}>
-      {/* Inject Google Font if non-system font */}
       {ctx.fontFamily !== "Inter" && ctx.fontFamily !== "System" && (
-        <style>
-          {`@import url('https://fonts.googleapis.com/css2?family=${ctx.fontFamily.replace(/ /g, "+")}:wght@400;500;600;700;800;900&display=swap');`}
-        </style>
+        <style>{`@import url('https://fonts.googleapis.com/css2?family=${ctx.fontFamily.replace(/ /g, "+")}:wght@400;500;600;700;800;900&display=swap');`}</style>
       )}
-
-      {/* Render each visible block */}
       {visibleBlocks.map((block) => (
         <BlockRenderer key={block.id} block={block} ctx={ctx} />
       ))}
-
-      {/* Powered by SnapLand (if no footer block) */}
       {!visibleBlocks.some((b) => b.type === "block-footer") && (
         <div className="text-center py-6 text-xs text-muted-foreground/40">
           Powered by SnapLand

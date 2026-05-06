@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { logActivity } from "@/actions/activity-logs";
 import type { Database, Json } from "@/types/database.types";
 
 export type OrderStatus = "pending" | "processing" | "shipped" | "completed" | "cancelled";
@@ -217,6 +218,13 @@ export async function updateOrderStatus(
 
     revalidatePath("/dashboard/orders");
     revalidatePath(`/dashboard/orders/${id}`);
+
+    await logActivity(`order.${status}`, {
+      resource: "order",
+      resourceId: id,
+      metadata: { order_number: data.order_number, status },
+    });
+
     return { success: true, data: data as Order, message: `Order ${status}.` };
   } catch {
     return { success: false, error: "Failed to update order" };
@@ -253,6 +261,12 @@ export async function confirmOrderPayment(
     if (error) return { success: false, error: error.message };
 
     revalidatePath("/dashboard/orders");
+
+    await logActivity("order.payment_confirmed", {
+      resource: "order",
+      resourceId: id,
+    });
+
     return { success: true, data: data as Order, message: "Payment confirmed." };
   } catch {
     return { success: false, error: "Failed to confirm payment" };

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   Settings,
   Palette,
@@ -19,8 +20,10 @@ import type {
   AlignType,
   AnimationType,
   AnimationTrigger,
+  Application,
 } from "@/types/builder";
 import type { Product } from "@/types/database";
+import { getApplications } from "@/actions/applications";
 import { BLOCK_CATALOG } from "@/lib/builder/block-catalog";
 import { TW_PADDING_Y, TW_PADDING_X, TW_MAX_WIDTH } from "@/types/builder";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -49,6 +52,13 @@ interface Props {
 export function BuilderRightPanel({ availableProducts, landingPageId }: Props) {
   const store = useBuilderStore();
   const selectedBlock = useSelectedBlock();
+  const [apps, setApps] = useState<Application[]>([]);
+
+  useEffect(() => {
+    getApplications({ is_active: true }).then((result) => {
+      if (result.success) setApps(result.data ?? []);
+    });
+  }, []);
 
   if (!selectedBlock) {
     return (
@@ -113,6 +123,7 @@ export function BuilderRightPanel({ availableProducts, landingPageId }: Props) {
               <BlockContentEditor
                 block={selectedBlock}
                 availableProducts={availableProducts}
+                availableApps={apps}
                 onUpdateProps={(props) =>
                   store.updateBlockProps(selectedBlock.id, props)
                 }

@@ -77,7 +77,8 @@ export async function inviteUser(
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { success: false, error: "Unauthorized" };
 
-    const { error } = await supabase.auth.admin.inviteUserByEmail(email, {
+    const adminClient = createAdminClient();
+    const { error } = await adminClient.auth.admin.inviteUserByEmail(email, {
       data: { role },
     });
 
@@ -104,7 +105,8 @@ export async function updateUser(
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { success: false, error: "Unauthorized" };
 
-    const { data: updated, error } = await supabase
+    const adminClient = createAdminClient();
+    const { data: updated, error } = await adminClient
       .from("profiles")
       .update(data)
       .eq("id", id)
@@ -125,7 +127,8 @@ export async function deleteUser(id: string): Promise<ActionResult> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { success: false, error: "Unauthorized" };
 
-    const { error } = await supabase.auth.admin.deleteUser(id);
+    const adminClient = createAdminClient();
+    const { error } = await adminClient.auth.admin.deleteUser(id);
     if (error) return { success: false, error: error.message };
 
     revalidatePath("/dashboard/users");

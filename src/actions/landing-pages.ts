@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { logActivity } from "@/actions/activity-logs";
 import {
   landingPageSchema,
   type LandingPageInput,
@@ -59,6 +60,7 @@ export async function getLandingPages(opts: {
     return { success: false, error: "Failed to fetch landing pages" };
   }
 }
+
 export async function getLandingPage(
   id: string,
 ): Promise<ActionResult<LandingPageWithProducts>> {
@@ -186,17 +188,19 @@ export async function createLandingPage(
     if (error) return { success: false, error: error.message };
 
     revalidatePath("/dashboard/landing-page");
-    return {
-      success: true,
-      data: data as unknown as LandingPage,
-      message: "Landing page created.",
-    };
+
+    await logActivity("landing_page.created", {
+      resource: "landing_page",
+      resourceId: data.id,
+      metadata: { title: data.title, slug: data.slug },
+    });
+
+    return { success: true, data: data as unknown as LandingPage, message: "Landing page created." };
   } catch {
     return { success: false, error: "Failed to create landing page" };
   }
 }
 
-// ── Update settings ─────────────────────────────────────────
 export async function updateLandingPage(
   id: string,
   input: Partial<LandingPageInput>,
@@ -234,13 +238,19 @@ export async function updateLandingPage(
 
     revalidatePath("/dashboard/landing-page");
     revalidatePath(`/dashboard/landing-page/${id}`);
+
+    await logActivity("landing_page.updated", {
+      resource: "landing_page",
+      resourceId: id,
+      metadata: { updated_fields: Object.keys(input) },
+    });
+
     return { success: true, data: data as unknown as LandingPage, message: "Saved." };
   } catch {
     return { success: false, error: "Failed to update landing page" };
   }
 }
 
-// ── Update blocks (builder save) ────────────────────────────
 export async function updateLandingPageBlocks(
   id: string,
   blocks: LandingBlock[] | BlockV2[],
@@ -266,7 +276,6 @@ export async function updateLandingPageBlocks(
   }
 }
 
-// ── Publish / unpublish ─────────────────────────────────────
 export async function setLandingPagePublished(
   id: string,
   published: boolean,
@@ -285,6 +294,12 @@ export async function setLandingPagePublished(
 
     revalidatePath("/dashboard/landing-page");
     revalidatePath(`/dashboard/landing-page/${id}`);
+
+    await logActivity(published ? "landing_page.published" : "landing_page.unpublished", {
+      resource: "landing_page",
+      resourceId: id,
+    });
+
     return {
       success: true,
       message: published ? "Page published." : "Page unpublished.",
@@ -294,7 +309,6 @@ export async function setLandingPagePublished(
   }
 }
 
-// ── Assign products ─────────────────────────────────────────
 export async function assignProducts(
   landingPageId: string,
   productIds: string[],
@@ -329,7 +343,6 @@ export async function assignProducts(
   }
 }
 
-// ── Delete ──────────────────────────────────────────────────
 export async function deleteLandingPage(id: string): Promise<ActionResult> {
   try {
     const supabase = await createClient();
@@ -344,13 +357,18 @@ export async function deleteLandingPage(id: string): Promise<ActionResult> {
     if (error) return { success: false, error: error.message };
 
     revalidatePath("/dashboard/landing-page");
+
+    await logActivity("landing_page.deleted", {
+      resource: "landing_page",
+      resourceId: id,
+    });
+
     return { success: true, message: "Landing page deleted." };
   } catch {
     return { success: false, error: "Failed to delete landing page" };
   }
 }
 
-// ── Analytics: track view ───────────────────────────────────
 export async function trackPageView(
   landingPageId: string,
   meta: {
@@ -376,7 +394,6 @@ export async function trackPageView(
   }
 }
 
-// ── Analytics: track product click ─────────────────────────
 export async function trackProductClick(
   productId: string,
   landingPageId: string | null,

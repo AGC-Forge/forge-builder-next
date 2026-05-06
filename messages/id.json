@@ -36,7 +36,7 @@
     "subtitle": "Drag, drop, kustomisasi. Pilih dari 10+ gaya platform — Linktree, Beacons, e-commerce, dan lainnya. Tanpa kode.",
     "cta1": "Mulai buat halaman gratis →",
     "cta2": "Lihat demo",
-    "previewUrl": "pageforge.io/slugkamu",
+    "previewUrl": "snapland.io/slugkamu",
     "previewComponents": "Komponen",
     "previewSettings": "Pengaturan",
     "heroBlock": "Seksi Hero — Seret untuk mengurutkan",
@@ -89,7 +89,7 @@
       },
       "slug": {
         "title": "Custom Slug",
-        "desc": "Klaim URL bermerek kamu sendiri seperti pageforge.io/brandkamu"
+        "desc": "Klaim URL bermerek kamu sendiri seperti snapland.io/brandkamu"
       },
       "product": {
         "title": "Assign Produk",
@@ -196,7 +196,7 @@
   "HomeSectionCTA": {
     "title1": "Siap membangun",
     "title2": "halaman impianmu?",
-    "subtitle": "Bergabung dengan ribuan kreator, penjual, dan brand yang sudah menggunakan PageForge.",
+    "subtitle": "Bergabung dengan ribuan kreator, penjual, dan brand yang sudah menggunakan SnapLand.",
     "btn1": "Mulai gratis — tanpa kartu kredit",
     "btn2": "Jadwalkan demo"
   },
@@ -219,7 +219,7 @@
       "terms": "Syarat & Ketentuan",
       "contact": "Kontak"
     },
-    "copyright": "© 2026 PageForge. Dibangun dengan Next.js 16 · Tailwind CSS · Shadcn UI",
+    "copyright": "© 2026 SnapLand. Dibangun dengan Next.js 16 · Tailwind CSS · Shadcn UI",
     "privacyPolicy": "Kebijakan Privasi"
   }
 }

@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/table";
 import { getInitials } from "@/lib/utils";
 
-// Map action strings to readable labels and badge variants
 const ACTION_META: Record<
   string,
   {
@@ -40,6 +39,21 @@ const ACTION_META: Record<
   "user.invited": { label: "User Invited", variant: "default" },
   "user.deleted": { label: "User Deleted", variant: "destructive" },
   "user.updated": { label: "User Updated", variant: "secondary" },
+  "landing_page.unpublished": { label: "LP Unpublished", variant: "secondary" },
+  "application.created": { label: "App Created", variant: "default" },
+  "application.updated": { label: "App Updated", variant: "secondary" },
+  "application.deleted": { label: "App Deleted", variant: "destructive" },
+  "order.pending": { label: "Order Pending", variant: "outline" },
+  "order.processing": { label: "Order Processing", variant: "default" },
+  "order.shipped": { label: "Order Shipped", variant: "default" },
+  "order.completed": { label: "Order Completed", variant: "default" },
+  "order.cancelled": { label: "Order Cancelled", variant: "destructive" },
+  "order.payment_confirmed": { label: "Payment Confirmed", variant: "default" },
+  "membership.upgraded": { label: "Membership Upgraded", variant: "default" },
+  "membership.downgraded": {
+    label: "Membership Downgraded",
+    variant: "secondary",
+  },
 };
 
 interface Props {

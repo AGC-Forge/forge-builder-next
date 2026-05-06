@@ -17,12 +17,19 @@ function fixInternalRewrite(value: string): string {
 }
 
 export async function proxy(request: NextRequest) {
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set('x-pathname', request.nextUrl.pathname)
+
   let authResponse: NextResponse;
   try {
     authResponse = await updateSession(request);
   } catch (error) {
     console.error("[proxy] updateSession failed", String(error));
-    authResponse = NextResponse.next({ request });
+    authResponse = NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
   }
 
   if (authResponse.headers.has("location")) return authResponse;
@@ -32,6 +39,7 @@ export async function proxy(request: NextRequest) {
     intlResponse = intlMiddleware(request);
   } catch (error) {
     console.error("[proxy] intl middleware failed", String(error));
+
     return authResponse;
   }
 
@@ -57,7 +65,17 @@ export async function proxy(request: NextRequest) {
     authResponse.headers.set(key, value);
   });
 
-  return authResponse;
+  const finalResponse = NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
+
+  authResponse.headers.forEach((value, key) => {
+    finalResponse.headers.set(key, value);
+  });
+
+  return finalResponse;
 }
 
 export const config = {

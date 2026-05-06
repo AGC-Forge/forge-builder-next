@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
@@ -51,14 +52,19 @@ export function Navbar() {
     >
       <nav className="max-w-7xl mx-auto px-6 lg:px-12 h-16 flex items-center justify-between">
         {/* Logo */}
-        <Link
-          href="/"
-          locale={locale}
-          className="font-body-dm-sans text-xl font-extrabold tracking-tight bg-linear-to-r from-violet-500 to-cyan-600 bg-clip-text text-transparent"
-        >
-          SnapLand
-        </Link>
+        <Link href="/" locale={locale} className="flex items-center gap-2">
+          <Image
+            src="/logo.png"
+            alt="SnapLand"
+            width={46}
+            height={46}
+            className="w-10 h-auto object-cover rounded-full"
+          />
 
+          <span className="font-body-dm-sans text-xl font-extrabold tracking-tight bg-linear-to-r from-violet-500 to-cyan-600 bg-clip-text text-transparent">
+            SnapLand
+          </span>
+        </Link>
         {/* Desktop Nav */}
         <ul className="hidden lg:flex items-center gap-8">
           {navLinks.map((link) => (

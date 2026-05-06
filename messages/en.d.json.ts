@@ -39,7 +39,7 @@ declare const messages: {
     "subtitle": "Drag, drop, customize. Choose from 10+ platform styles — Linktree, Beacons, e-commerce, and more. No code needed.",
     "cta1": "Start building for free →",
     "cta2": "View live demos",
-    "previewUrl": "pageforge.io/yourslug",
+    "previewUrl": "snapland.io/yourslug",
     "previewComponents": "Components",
     "previewSettings": "Settings",
     "heroBlock": "Hero Section — Drag to reorder",
@@ -92,7 +92,7 @@ declare const messages: {
       },
       "slug": {
         "title": "Custom Slug",
-        "desc": "Claim your own branded URL like pageforge.io/yourbrand"
+        "desc": "Claim your own branded URL like snapland.io/yourbrand"
       },
       "product": {
         "title": "Product Assignment",
@@ -199,7 +199,7 @@ declare const messages: {
   "HomeSectionCTA": {
     "title1": "Ready to build your",
     "title2": "perfect page?",
-    "subtitle": "Join thousands of creators, sellers, and brands already using PageForge.",
+    "subtitle": "Join thousands of creators, sellers, and brands already using SnapLand.",
     "btn1": "Start for free — no card needed",
     "btn2": "Schedule a demo"
   },
@@ -222,7 +222,7 @@ declare const messages: {
       "terms": "Terms",
       "contact": "Contact"
     },
-    "copyright": "© 2026 PageForge. Built with Next.js 16 · Tailwind CSS · Shadcn UI",
+    "copyright": "© 2026 SnapLand. Built with Next.js 16 · Tailwind CSS · Shadcn UI",
     "privacyPolicy": "Privacy Policy"
   }
 };

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { logActivity } from "@/actions/activity-logs";
 import { productSchema, type ProductInput } from "@/lib/validations/product";
 import type { Product, PaginatedResult } from "@/types/database";
 
@@ -115,6 +116,13 @@ export async function createProduct(
     if (error) return { success: false, error: error.message };
 
     revalidatePath("/dashboard/products");
+
+    await logActivity("product.created", {
+      resource: "product",
+      resourceId: data.id,
+      metadata: { title: data.title },
+    });
+
     return { success: true, data: data as Product, message: "Product created." };
   } catch (err) {
     return { success: false, error: "Failed to create product" };
@@ -150,6 +158,12 @@ export async function updateProduct(
 
     revalidatePath("/dashboard/products");
     revalidatePath(`/dashboard/products/${id}`);
+
+    await logActivity("product.updated", {
+      resource: "product",
+      resourceId: id,
+    });
+
     return { success: true, data: data as Product, message: "Product updated." };
   } catch {
     return { success: false, error: "Failed to update product" };
@@ -193,6 +207,12 @@ export async function deleteProduct(id: string): Promise<ActionResult> {
     if (error) return { success: false, error: error.message };
 
     revalidatePath("/dashboard/products");
+
+    await logActivity("product.deleted", {
+      resource: "product",
+      resourceId: id,
+    });
+
     return { success: true, message: "Product deleted." };
   } catch {
     return { success: false, error: "Failed to delete product" };

@@ -32,6 +32,11 @@ export interface RenderContext {
   textColor: string;
   fontFamily: string;
   appUrl?: string;
+  landingPageId?: string;
+  onProductClick?: (
+    productId: string,
+    clickType: "affiliate" | "marketplace" | "detail",
+  ) => void;
 }
 
 interface Props {
@@ -967,6 +972,12 @@ function ProductCardBlock({ props, classes, ctx }: BlockProps) {
             classes.button,
           )}
           style={{ backgroundColor: ctx.primaryColor }}
+          onClick={() =>
+            ctx.onProductClick?.(
+              product.id,
+              product.affiliate_url ? "affiliate" : "marketplace",
+            )
+          }
         >
           {(props.ctaText as string) || "Buy Now"}
         </a>
@@ -1053,6 +1064,12 @@ function ProductListBlock({ props, classes, ctx }: BlockProps) {
               "block rounded-xl overflow-hidden border bg-card hover:shadow-md transition-shadow",
               classes.card,
             )}
+            onClick={() =>
+              ctx.onProductClick?.(
+                product.id,
+                product.affiliate_url ? "affiliate" : "marketplace",
+              )
+            }
           >
             {thumb && (
               <Image

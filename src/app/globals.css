@@ -52,6 +52,13 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-bg-color-dark: oklch(22.72% 0.025 266.92);
+  --color-body-color: oklch(60.42% 0.028 261.1);
+  --color-body-color-dark: oklch(69.41% 0.032 270.93);
+  --color-stroke-stroke: oklch(92.92% 0.011 256.7);
+  --color-stroke-dark: oklch(34.48% 0.018 268.15);
+  --color-gray-dark: oklch(25.62% 0.022 265.74);
+  --color-gray-light: oklch(96.16% 0.01 273.36);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -59,6 +66,18 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  --shadow-sign-up: 0px 5px 10px rgba(4, 10, 34, 0.2);
+  --shadow-one: 0px 2px 3px rgba(7, 7, 77, 0.05);
+  --shadow-two: 0px 5px 10px rgba(6, 8, 15, 0.1);
+  --shadow-three: 0px 5px 15px rgba(6, 8, 15, 0.05);
+  --shadow-sticky: inset 0 -1px 0 0 rgba(0, 0, 0, 0.1);
+  --shadow-sticky-dark: inset 0 -1px 0 0 rgba(255, 255, 255, 0.1);
+  --shadow-feature-2: 0px 10px 40px rgba(48, 86, 211, 0.12);
+  --shadow-submit: 0px 5px 20px rgba(4, 10, 34, 0.1);
+  --shadow-submit-dark: 0px 5px 20px rgba(4, 10, 34, 0.1);
+  --shadow-btn: 0px 1px 2px rgba(4, 10, 34, 0.15);
+  --shadow-btn-hover: 0px 1px 2px rgba(0, 0, 0, 0.15);
+  --shadow-btn-light: 0px 1px 2px rgba(0, 0, 0, 0.1);
   --animate-marquee: marquee 10s linear infinite;
   --animate-marquee-reverse: marquee-reverse 25s linear infinite;
   --animate-blink: blink 1s linear infinite;
@@ -80,6 +99,19 @@
   --animate-move-out: move-out 0.6s ease infinite;
   --animate-dimlight: dimlight 5s infinite;
   --animate-text-anim: text-anim 10s infinite;
+  --shadow-sign-up: 0px 5px 10px rgba(4, 10, 34, 0.2);
+  --shadow-one: 0px 2px 3px rgba(7, 7, 77, 0.05);
+  --shadow-two: 0px 5px 10px rgba(6, 8, 15, 0.1);
+  --shadow-three: 0px 5px 15px rgba(6, 8, 15, 0.05);
+  --shadow-sticky: inset 0 -1px 0 0 rgba(0, 0, 0, 0.1);
+  --shadow-sticky-dark: inset 0 -1px 0 0 rgba(255, 255, 255, 0.1);
+  --shadow-feature-2: 0px 10px 40px rgba(48, 86, 211, 0.12);
+  --shadow-submit: 0px 5px 20px rgba(4, 10, 34, 0.1);
+  --shadow-submit-dark: 0px 5px 20px rgba(4, 10, 34, 0.1);
+  --shadow-btn: 0px 1px 2px rgba(4, 10, 34, 0.15);
+  --shadow-btn-hover: 0px 1px 2px rgba(0, 0, 0, 0.15);
+  --shadow-btn-light: 0px 1px 2px rgba(0, 0, 0, 0.1);
+  --drop-shadow-three: 0px 5px 15px rgba(6, 8, 15, 0.05);
 
   @keyframes marquee {
     from {
@@ -115,8 +147,12 @@
     }
   }
   @keyframes fade-in {
-    0% { opacity: 0 }
-    100% { opacity: 1 }
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
   }
   @keyframes fade-out {
     from {
@@ -203,7 +239,9 @@
       opacity: 1;
       transform: scale(1.05);
     }
-    70% { transform: scale(0.9) }
+    70% {
+      transform: scale(0.9);
+    }
     100% {
       opacity: 1;
       transform: scale(1);
@@ -220,7 +258,8 @@
     }
   }
   @keyframes glow {
-    0%, 100% {
+    0%,
+    100% {
       box-shadow: 0 0 10px #ff00ff;
     }
     50% {
@@ -257,11 +296,28 @@
     }
   }
   @keyframes dimlight {
-    0%, 18%, 20%, 50.1%, 60%, 65.1%, 80%, 90.1%, 92% {
+    0%,
+    18%,
+    20%,
+    50.1%,
+    60%,
+    65.1%,
+    80%,
+    90.1%,
+    92% {
       color: #0e3742;
       box-shadow: none;
     }
-    18.1%, 20.1%, 30%, 50%, 60.1%, 65%, 80.1%, 90%, 92.1%, 100% {
+    18.1%,
+    20.1%,
+    30%,
+    50%,
+    60.1%,
+    65%,
+    80.1%,
+    90%,
+    92.1%,
+    100% {
       color: #fff;
       text-shadow: 0 0 10px #03bcf4;
     }

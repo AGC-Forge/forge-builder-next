@@ -1,4 +1,5 @@
 import { Link } from "@/i18n/navigation";
+import Image from "next/image";
 import { useTranslations, useLocale } from "next-intl";
 
 export function Footer() {
@@ -30,10 +31,20 @@ export function Footer() {
     <footer className="border-t border-white/8">
       <div className="max-w-7xl mx-auto px-6 lg:px-12 pt-16 pb-10 grid grid-cols-1 md:grid-cols-4 gap-12">
         {/* Brand */}
-        <div className="md:col-span-1">
-          <span className="font-body-dm-sans text-xl font-extrabold bg-linear-to-r from-teal-500 via-amber-300 to-violet-500 bg-clip-text text-transparent block mb-3">
-            PageForge
-          </span>
+        <div className="md:col-span-1 space-y-5">
+          <Link href="/" locale={locale} className="flex items-center gap-2">
+            <Image
+              src="/logo.png"
+              alt="SnapLand"
+              width={46}
+              height={46}
+              className="w-10 h-auto object-cover rounded-full"
+            />
+
+            <span className="font-body-dm-sans text-xl font-extrabold tracking-tight bg-linear-to-r from-violet-500 to-cyan-600 bg-clip-text text-transparent">
+              SnapLand
+            </span>
+          </Link>
           <p className="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed max-w-65">
             {t("tagline")}
           </p>
