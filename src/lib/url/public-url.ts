@@ -4,7 +4,7 @@ type HeaderLike = {
 
 function stripInternalPort(url: URL) {
   const isLocalhost = url.hostname === "localhost" || url.hostname === "127.0.0.1";
-  if (!isLocalhost && (url.port === "3000" || url.port === "3005")) {
+  if (!isLocalhost) {
     url.port = "";
   }
   return url;
