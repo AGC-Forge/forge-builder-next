@@ -1,13 +1,5 @@
 "use client";
 
-/**
- * V2 Block Renderer Engine
- * Path: src/components/landing-page/v2/block-renderer.tsx
- *
- * Renders BlockV2 format (TailwindCSS classes) for public landing pages.
- * Called by the new LP renderer for pages built with Builder V2.
- */
-
 import { useEffect, useRef, useState, useMemo } from "react";
 import Image from "next/image";
 import { formatCurrency, cn } from "@/lib/utils";
@@ -24,6 +16,7 @@ import {
   TW_MAX_WIDTH,
   ANIMATION_CLASSES,
 } from "@/types/builder";
+import { resolveWaRotatorUrl } from "@/lib/apps/wa-rotator";
 
 // ── Types ──────────────────────────────────────────────────────
 export interface RenderContext {
@@ -1823,13 +1816,36 @@ function ButtonBlock({ props, classes, ctx }: BlockProps) {
           ? "px-8 py-3.5 text-base"
           : "px-6 py-3 text-sm";
 
-  const href = (props.url as string) || "#";
+  // ── WA Rotator: click handler resolves URL dynamically ─────
+  const hasRotator = Boolean(props.waRotatorId);
+
+  async function handleClick(e: React.MouseEvent<HTMLAnchorElement>) {
+    if (!hasRotator) return; // normal link behavior
+
+    e.preventDefault(); // stop default navigation
+
+    const url = await resolveWaRotatorUrl(
+      props.waRotatorId as string,
+      props.waTemplateMessage as string | undefined,
+    );
+
+    if (url) {
+      window.open(
+        url,
+        (props.target as string) || "_blank",
+        "noopener,noreferrer",
+      );
+    }
+  }
+
+  const href = hasRotator ? "#" : (props.url as string) || "#";
 
   return (
     <a
       href={href}
-      target={(props.target as string) || "_blank"}
+      target={hasRotator ? undefined : (props.target as string) || "_blank"}
       rel="noopener noreferrer"
+      onClick={hasRotator ? handleClick : undefined}
       className={cn(
         "inline-flex items-center justify-center gap-2 rounded-xl",
         styleClass,
@@ -1904,24 +1920,45 @@ function FloatButtonBlock({
     "top-right": "fixed top-6 right-6",
     "top-left": "fixed top-6 left-6",
   };
-  const href =
-    (props.waRotatorId ? "#whatsapp" : (props.customUrl as string)) ||
-    "https://wa.me/";
+
+  const hasRotator = Boolean(props.waRotatorId);
+
+  async function handleClick(e: React.MouseEvent) {
+    if (!hasRotator) return;
+    e.preventDefault();
+
+    const url = await resolveWaRotatorUrl(
+      props.waRotatorId as string,
+      props.waTemplateMessage as string | undefined,
+    );
+
+    if (url) {
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+  }
+
+  const href = hasRotator
+    ? "#"
+    : props.type === "scroll-top"
+      ? "#top"
+      : (props.customUrl as string) || "https://wa.me/";
+
+  const primaryColor = "#25D366"; // always green for WA float button
 
   return (
     <a
       href={href}
-      target="_blank"
+      target={props.type === "scroll-top" ? "_self" : "_blank"}
       rel="noopener noreferrer"
+      onClick={hasRotator ? handleClick : undefined}
       className={cn(
         posMap[(props.position as string) || "bottom-right"],
         "z-50 flex items-center gap-2 rounded-full shadow-xl px-4 py-3 text-white font-semibold text-sm hover:scale-105 transition-transform",
         props.pulseAnimation ? "animate-pulse" : "",
       )}
+      style={{ backgroundColor: primaryColor }}
     >
-      <span style={{ backgroundColor: "#25D366" }} className="rounded-full">
-        💬
-      </span>
+      <span>💬</span>
       {props.showLabel && <span>{(props.label as string) || "Chat"}</span>}
     </a>
   );
@@ -2151,17 +2188,43 @@ function ChatBotBlock({
   props,
   ctx,
 }: {
-  props: Record<string, unknown>;
+  props: Record<string, any>;
   ctx: RenderContext;
 }) {
   const [open, setOpen] = useState(false);
   const greeting = (props.greeting as string) || "Hi! How can I help you?";
   const botName = (props.botName as string) || "Support";
-  const waUrl = props.waRotatorId ? "#wa-rotator" : "";
   const primaryColor = (props.primaryColor as string) || "#25D366";
+  const hasRotator = Boolean(props.waRotatorId);
+
+  async function handleChatClick(e: React.MouseEvent) {
+    e.preventDefault();
+
+    let url: string | null = null;
+
+    if (hasRotator) {
+      url = await resolveWaRotatorUrl(
+        props.waRotatorId as string,
+        props.waTemplateMessage as string | undefined,
+      );
+    } else {
+      url = `https://wa.me/?text=${encodeURIComponent(greeting)}`;
+    }
+
+    if (url) {
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+  }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+    <div
+      className={cn(
+        "fixed z-50 flex flex-col items-end gap-3",
+        props.position === "bottom-left"
+          ? "bottom-6 left-6"
+          : "bottom-6 right-6",
+      )}
+    >
       {open && (
         <div className="bg-background rounded-2xl shadow-2xl border w-72 overflow-hidden animate-in slide-in-from-bottom-2">
           <div
@@ -2173,22 +2236,21 @@ function ChatBotBlock({
             </div>
             <div>
               <p className="font-semibold text-sm">{botName}</p>
-              <p className="text-xs opacity-80">Online</p>
+              <p className="text-xs opacity-80">● Online</p>
             </div>
           </div>
           <div className="p-4">
             <div className="rounded-xl bg-muted p-3 text-sm mb-4">
               {greeting}
             </div>
-            <a
-              href={`https://wa.me/?text=${encodeURIComponent(greeting)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl font-bold text-sm text-white"
+            <button
+              type="button"
+              onClick={handleChatClick}
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl font-bold text-sm text-white hover:opacity-90 transition-opacity"
               style={{ backgroundColor: primaryColor }}
             >
-              💬 Chat via WhatsApp
-            </a>
+              💬 {hasRotator ? "Chat via WhatsApp" : "Chat Now"}
+            </button>
           </div>
         </div>
       )}

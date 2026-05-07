@@ -12,18 +12,34 @@ import { getConfiguredPublicBaseUrl, getPublicUrl } from "@/lib/url/public-url";
 function getAuthCallbackUrl(next = "/dashboard") {
   const baseUrl = getConfiguredPublicBaseUrl();
   if (!baseUrl) {
+    if (process.env.NODE_ENV === "production") {
+      const fallbackUrl = process.env.NEXT_PUBLIC_APP_URL || "https://snapland.agcforge.com";
+      console.warn(`Using fallback URL: ${fallbackUrl}`);
+      return `${fallbackUrl}/auth/callback?next=${encodeURIComponent(next)}`;
+    }
     throw new Error("NEXT_PUBLIC_APP_URL must be set to the public HTTPS URL");
   }
 
-  return getPublicUrl(
+  const callbackUrl = getPublicUrl(
     `/auth/callback?next=${encodeURIComponent(next)}`,
   ).toString();
+
+  if (process.env.NODE_ENV === "production") {
+    console.log("Auth callback URL:", callbackUrl);
+  }
+  return callbackUrl;
 }
 
 function forceOAuthRedirectTo(url: string, redirectTo: string) {
   const authUrl = new URL(url);
   authUrl.searchParams.set("redirect_to", redirectTo);
-  return authUrl.toString();
+
+  const finalUrl = authUrl.toString();
+  if (process.env.NODE_ENV === "production") {
+    return finalUrl.replace(/:3000/g, "");
+  }
+
+  return finalUrl;
 }
 
 export async function getOAuthRedirectUrl(
