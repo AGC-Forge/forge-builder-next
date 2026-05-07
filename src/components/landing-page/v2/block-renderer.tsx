@@ -16,7 +16,18 @@ import {
   TW_MAX_WIDTH,
   ANIMATION_CLASSES,
 } from "@/types/builder";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+  type CarouselApi,
+} from "@/components/ui/carousel";
+import Autoplay from "embla-carousel-autoplay";
 import { resolveWaRotatorUrl } from "@/lib/apps/wa-rotator";
+import { getPublicApplicationsByIds } from "@/actions/applications";
+import type { Application } from "@/types/builder";
 
 // ── Types ──────────────────────────────────────────────────────
 export interface RenderContext {
@@ -42,6 +53,8 @@ interface BlockProps {
   classes: BlockClasses;
   ctx: RenderContext;
 }
+
+type AlignType = "start" | "end" | "center";
 
 function stripScriptTags(html: string): string {
   return html.replace(
@@ -150,17 +163,15 @@ function BlockContent({ block, ctx }: { block: BlockV2; ctx: RenderContext }) {
     return <DividerBlock props={props} classes={classes} />;
   if (type === "block-frame") return <FrameBlock props={props} />;
   if (type === "block-sidebar")
-    return (
-      <div className={cn("text-sm text-muted-foreground p-4", classes.wrapper)}>
-        {props.content as string}
-      </div>
-    );
+    return <SidebarBlock props={props} classes={classes} ctx={ctx} />;
 
   // ── Content ───────────────────────────────────────────────────
   if (type === "block-text")
     return <TextBlock props={props} classes={classes} ctx={ctx} />;
   if (type === "block-image")
-    return <ImageBlock props={props} classes={classes} ctx={ctx} />;
+    return props.src ? (
+      <ImageBlock props={props} classes={classes} ctx={ctx} />
+    ) : null;
   if (type === "block-gallery")
     return <GalleryBlock props={props} classes={classes} ctx={ctx} />;
   if (type === "block-video")
@@ -235,7 +246,7 @@ function BlockContent({ block, ctx }: { block: BlockV2; ctx: RenderContext }) {
   if (type === "block-auto-redirect")
     return <AutoRedirectBlock props={props} ctx={ctx} />;
   if (type === "block-back-redirect")
-    return <BackRedirectBlock props={props} />;
+    return <BackRedirectBlock props={props} ctx={ctx} />;
   if (type === "block-blog-post")
     return <BlogPostBlock props={props} classes={classes} ctx={ctx} />;
   if (type === "block-applications") return null; // showcase only, no interactive render
@@ -335,6 +346,9 @@ function HeaderBlock({ props, classes, ctx }: BlockProps) {
         <Image
           src={props.logoImageUrl as string}
           alt="logo"
+          width={0}
+          height={0}
+          sizes="100vw"
           className="h-8 w-auto"
         />
       ) : (
@@ -535,12 +549,87 @@ function TextBlock({ props, classes }: BlockProps) {
   );
 }
 
-function ImageBlock({ props, classes }: BlockProps) {
-  if (!props.src) return null;
+function ImageBlock({ props, classes, ctx }: BlockProps) {
+  const linkType = (props.linkType as string) || "none";
+  const hasRotator = linkType === "whatsapp" && Boolean(props.waRotatorId);
+  const hasProduct = linkType === "product" && Boolean(props.productId);
+  const hasCustomLink = linkType === "custom" && Boolean(props.linkUrl);
+
+  const [href, setHref] = useState("");
+  const [isResolving, setIsResolving] = useState(false);
+
+  useEffect(() => {
+    const resolveHref = async () => {
+      if (hasRotator) {
+        setIsResolving(true);
+        try {
+          const url = await resolveWaRotatorUrl(
+            props.waRotatorId as string,
+            props.waTemplateMessage as string | undefined,
+          );
+          setHref(url || "https://wa.me/");
+        } catch (error) {
+          console.error("Failed to resolve wa rotator:", error);
+          setHref("https://wa.me/"); // fallback
+        } finally {
+          setIsResolving(false);
+        }
+      } else if (hasProduct) {
+        // Find product in context to get its affiliate/marketplace URL
+        const product = ctx.products.find((p) => p.id === props.productId);
+        if (product) {
+          setHref(product.affiliate_url || product.marketplace_url || "#");
+        } else {
+          setHref("#");
+        }
+      } else if (hasCustomLink) {
+        setHref((props.linkUrl as string) || "");
+      } else {
+        setHref("");
+      }
+    };
+
+    resolveHref();
+  }, [
+    props.waRotatorId,
+    props.waTemplateMessage,
+    props.linkUrl,
+    props.productId,
+    hasRotator,
+    hasProduct,
+    hasCustomLink,
+    ctx.products,
+  ]);
+
+  async function handleClick(e: React.MouseEvent<HTMLAnchorElement>) {
+    if (isResolving) {
+      e.preventDefault();
+      return;
+    }
+    if (!href || href === "#") {
+      e.preventDefault();
+      return;
+    }
+
+    // Track product click if it's a product link
+    if (hasProduct && ctx.onProductClick) {
+      const product = ctx.products.find((p) => p.id === props.productId);
+      if (product) {
+        const clickType = product.affiliate_url ? "affiliate" : "marketplace";
+        ctx.onProductClick(product.id, clickType);
+      }
+    }
+  }
+
   const img = (
     <Image
-      src={props.src as string}
+      src={
+        (props.src as string) || "https://placehold.co/600x400?text=No+Image"
+      }
       alt={(props.alt as string) || ""}
+      width={0}
+      height={0}
+      sizes="100vw"
       className={cn(
         "w-full max-w-full block rounded-xl overflow-hidden object-cover",
         classes.image,
@@ -550,17 +639,23 @@ function ImageBlock({ props, classes }: BlockProps) {
           (props.aspectRatio as string) !== "auto"
             ? (props.aspectRatio as string)
             : undefined,
+        objectFit: (props.objectFit as any) || "cover",
       }}
     />
   );
+
+  const shouldWrap = hasRotator || hasProduct || hasCustomLink;
+  const linkTarget = (props.linkTarget as string) || "_blank";
+
   if (props.caption) {
     return (
       <figure className="w-full">
-        {props.linkUrl ? (
+        {shouldWrap ? (
           <a
-            href={props.linkUrl as string}
-            target={(props.linkTarget as string) || "_blank"}
+            href={href || "#"}
+            target={linkTarget}
             rel="noopener noreferrer"
+            onClick={handleClick}
           >
             {img}
           </a>
@@ -573,12 +668,14 @@ function ImageBlock({ props, classes }: BlockProps) {
       </figure>
     );
   }
-  return props.linkUrl ? (
+
+  return shouldWrap ? (
     <a
-      href={props.linkUrl as string}
-      target={(props.linkTarget as string) || "_blank"}
+      href={href || "#"}
+      target={linkTarget}
       rel="noopener noreferrer"
       className="block"
+      onClick={handleClick}
     >
       {img}
     </a>
@@ -587,8 +684,131 @@ function ImageBlock({ props, classes }: BlockProps) {
   );
 }
 
-function GalleryBlock({ props, classes }: BlockProps) {
-  const images = (props.images as { src: string; alt: string }[]) ?? [];
+function GalleryImageItem({
+  img,
+  props,
+  classes,
+  ctx,
+}: {
+  img: {
+    src: string;
+    alt: string;
+    linkType?: string;
+    linkUrl?: string;
+    waRotatorId?: string;
+    productId?: string;
+  };
+  props: Record<string, any>;
+  classes: BlockClasses;
+  ctx: RenderContext;
+}) {
+  const linkType = img.linkType || "none";
+  const hasRotator = linkType === "whatsapp" && Boolean(img.waRotatorId);
+  const hasProduct = linkType === "product" && Boolean(img.productId);
+  const hasCustomLink = linkType === "custom" && Boolean(img.linkUrl);
+
+  const [href, setHref] = useState("");
+  const [isResolving, setIsResolving] = useState(false);
+
+  useEffect(() => {
+    const resolveHref = async () => {
+      if (hasRotator) {
+        setIsResolving(true);
+        try {
+          const url = await resolveWaRotatorUrl(
+            img.waRotatorId as string,
+            undefined,
+          );
+          setHref(url || "https://wa.me/");
+        } catch (error) {
+          console.error("Failed to resolve wa rotator:", error);
+          setHref("https://wa.me/"); // fallback
+        } finally {
+          setIsResolving(false);
+        }
+      } else if (hasProduct) {
+        const product = ctx.products.find((p) => p.id === img.productId);
+        if (product) {
+          setHref(product.affiliate_url || product.marketplace_url || "#");
+        } else {
+          setHref("#");
+        }
+      } else if (hasCustomLink) {
+        setHref((img.linkUrl as string) || "");
+      } else {
+        setHref("");
+      }
+    };
+
+    resolveHref();
+  }, [
+    img.waRotatorId,
+    img.linkUrl,
+    img.productId,
+    hasRotator,
+    hasProduct,
+    hasCustomLink,
+    ctx.products,
+  ]);
+
+  async function handleClick(e: React.MouseEvent<HTMLAnchorElement>) {
+    if (isResolving) {
+      e.preventDefault();
+      return;
+    }
+    if (!href || href === "#") {
+      e.preventDefault();
+      return;
+    }
+
+    if (hasProduct && ctx.onProductClick) {
+      const product = ctx.products.find((p) => p.id === img.productId);
+      if (product) {
+        const clickType = product.affiliate_url ? "affiliate" : "marketplace";
+        ctx.onProductClick(product.id, clickType);
+      }
+    }
+  }
+
+  const imageEl = (
+    <Image
+      src={(img.src as string) || "https://placehold.co/600x400?text=No+Image"}
+      alt={(img.alt as string) || ""}
+      width={0}
+      height={0}
+      sizes="100vw"
+      className={cn("w-full object-cover rounded-lg", classes.image)}
+      style={{ aspectRatio: (props.aspectRatio as string) || "1/1" }}
+    />
+  );
+
+  const shouldWrap = hasRotator || hasProduct || hasCustomLink;
+
+  return shouldWrap ? (
+    <a
+      href={href || "#"}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block"
+      onClick={handleClick}
+    >
+      {imageEl}
+    </a>
+  ) : (
+    imageEl
+  );
+}
+
+function GalleryBlock({ props, classes, ctx }: BlockProps) {
+  const images =
+    (props.images as {
+      src: string;
+      alt: string;
+      linkType?: string;
+      linkUrl?: string;
+      waRotatorId?: string;
+      productId?: string;
+    }[]) ?? [];
   const cols = (props.columns as number) || 3;
   if (images.length === 0) return null;
   return (
@@ -599,12 +819,12 @@ function GalleryBlock({ props, classes }: BlockProps) {
       )}
     >
       {images.map((img, i) => (
-        <Image
+        <GalleryImageItem
           key={i}
-          src={img.src as string}
-          alt={(img.alt as string) || ""}
-          className={cn("w-full object-cover rounded-lg", classes.image)}
-          style={{ aspectRatio: (props.aspectRatio as string) || "1/1" }}
+          img={img}
+          props={props}
+          classes={classes}
+          ctx={ctx}
         />
       ))}
     </div>
@@ -653,85 +873,131 @@ function VideoBlock({ props, classes }: BlockProps) {
 function CarouselBlock({ props, classes, ctx }: BlockProps) {
   const items =
     (props.items as { src?: string; title?: string; content?: string }[]) ?? [];
-  const [current, setCurrent] = useState(0);
 
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
+  const [count, setCount] = useState(0);
+  const [autoPlayInterval] = useState(() => {
+    if (typeof props.autoPlayInterval === "number") {
+      return props.autoPlayInterval;
+    } else if (typeof props.autoPlayInterval === "string") {
+      return Number(props.autoPlayInterval);
+    }
+    return 3000;
+  });
+  const [slidesPerView] = useState(() => {
+    if (typeof props.slidesPerView === "number") {
+      return props.slidesPerView;
+    } else if (typeof props.slidesPerView === "string") {
+      return Number(props.slidesPerView);
+    }
+    return 1;
+  });
+
+  // Sync Embla state ke React state
   useEffect(() => {
-    if (!props.autoPlay || items.length <= 1) return;
-    const interval = setInterval(
-      () => {
-        setCurrent((c) => (c + 1) % items.length);
-      },
-      (props.autoPlayInterval as number) || 4000,
-    );
-    return () => clearInterval(interval);
-  }, [items.length, props.autoPlay, props.autoPlayInterval]);
+    if (!api) return;
+
+    setCount(api.scrollSnapList().length);
+    setCurrent(api.selectedScrollSnap());
+
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap());
+    });
+
+    return () => {
+      api.off("select", () => {});
+    };
+  }, [api]);
 
   if (items.length === 0) return null;
 
+  const autoPlayPlugin = Autoplay({
+    active: Boolean(props.autoPlay),
+    delay: autoPlayInterval,
+    stopOnInteraction: true,
+    stopOnMouseEnter: true,
+  });
+
   return (
-    <div
-      className={cn(
-        "relative w-full overflow-hidden rounded-xl",
-        classes.wrapper,
-      )}
-    >
-      <div
-        className="flex transition-transform duration-500"
-        style={{ transform: `translateX(-${current * 100}%)` }}
+    <div className={cn("relative w-full", classes.wrapper)}>
+      <Carousel
+        setApi={setApi}
+        opts={{
+          align: "start",
+          loop: Boolean(props.infinite),
+        }}
+        plugins={props.autoPlay ? [autoPlayPlugin] : []}
+        className="w-full"
       >
-        {items.map((item, i) => (
-          <div key={i} className="w-full shrink-0 p-4">
-            {item.src && (
-              <Image
-                src={item.src}
-                alt={item.title || ""}
-                className="w-full rounded-lg object-cover"
-                style={{ aspectRatio: "16/9" }}
-              />
-            )}
-            {item.title && <p className="font-semibold mt-3">{item.title}</p>}
-            {item.content && (
-              <p className="text-sm text-muted-foreground mt-1">
-                {item.content}
-              </p>
-            )}
-          </div>
-        ))}
-      </div>
-      {props.showDots && items.length > 1 && (
-        <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
-          {items.map((_, i) => (
+        <CarouselContent className="-ml-2 md:-ml-4">
+          {items.map((item, i) => (
+            <CarouselItem
+              key={i}
+              className={cn(
+                "pl-2 md:pl-4",
+                // Responsive: 1 kolom mobile, bisa dikonfigurasi desktop
+                slidesPerView === 2
+                  ? "sm:basis-1/2"
+                  : slidesPerView === 3
+                    ? "sm:basis-1/3"
+                    : "basis-full",
+              )}
+            >
+              <div className="overflow-hidden rounded-xl">
+                {item.src && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={item.src}
+                    alt={item.title || ""}
+                    className="w-full object-cover rounded-xl"
+                    style={{ aspectRatio: "16/9" }}
+                  />
+                )}
+                {(item.title || item.content) && (
+                  <div className="pt-3 px-1">
+                    {item.title && (
+                      <p className="font-semibold text-sm">{item.title}</p>
+                    )}
+                    {item.content && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {item.content}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+
+        {/* Arrows */}
+        {props.showArrows && items.length > 1 && (
+          <>
+            <CarouselPrevious className="-left-4 sm:-left-6" />
+            <CarouselNext className="-right-4 sm:-right-6" />
+          </>
+        )}
+      </Carousel>
+
+      {/* Dots indicator */}
+      {props.showDots && count > 1 && (
+        <div className="mt-3 flex justify-center gap-1.5">
+          {Array.from({ length: count }).map((_, i) => (
             <button
               key={i}
               type="button"
-              onClick={() => setCurrent(i)}
+              onClick={() => api?.scrollTo(i)}
+              aria-label={`Go to slide ${i + 1}`}
               className={cn(
-                "size-2 rounded-full transition-all",
-                i === current ? "bg-white scale-125" : "bg-white/50",
+                "rounded-full transition-all",
+                i === current
+                  ? "w-4 h-2 bg-primary"
+                  : "size-2 bg-muted-foreground/30 hover:bg-muted-foreground/60",
               )}
             />
           ))}
         </div>
-      )}
-      {props.showArrows && items.length > 1 && (
-        <>
-          <button
-            type="button"
-            onClick={() =>
-              setCurrent((c) => (c - 1 + items.length) % items.length)
-            }
-            className="absolute left-2 top-1/2 -translate-y-1/2 size-8 rounded-full bg-black/30 text-white flex items-center justify-center hover:bg-black/50 transition-colors"
-          >
-            ‹
-          </button>
-          <button
-            type="button"
-            onClick={() => setCurrent((c) => (c + 1) % items.length)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 size-8 rounded-full bg-black/30 text-white flex items-center justify-center hover:bg-black/50 transition-colors"
-          >
-            ›
-          </button>
-        </>
       )}
     </div>
   );
@@ -817,6 +1083,9 @@ function LogosBlock({ props, classes }: BlockProps) {
             key={i}
             src={logo.src}
             alt={logo.alt || ""}
+            width={0}
+            height={0}
+            sizes="100vw"
             className="h-8 w-auto object-contain"
           />
         ))}
@@ -887,6 +1156,9 @@ function ProductCardBlock({ props, classes, ctx }: BlockProps) {
         <Image
           src={thumb}
           alt={product.title}
+          width={0}
+          height={0}
+          sizes="100vw"
           className={cn("w-full object-cover", classes.image)}
           style={{
             aspectRatio: props.layout === "horizontal" ? "16/9" : "4/3",
@@ -1026,6 +1298,9 @@ function ProductListBlock({ props, classes, ctx }: BlockProps) {
                 <Image
                   src={thumb}
                   alt={product.title}
+                  width={0}
+                  height={0}
+                  sizes="100vw"
                   className="size-16 rounded-lg object-cover shrink-0"
                 />
               )}
@@ -1068,6 +1343,9 @@ function ProductListBlock({ props, classes, ctx }: BlockProps) {
               <Image
                 src={thumb}
                 alt={product.title}
+                width={0}
+                height={0}
+                sizes="100vw"
                 className={cn("w-full object-cover", classes.image)}
                 style={{ aspectRatio: "1/1" }}
               />
@@ -1104,19 +1382,40 @@ function ProductListBlock({ props, classes, ctx }: BlockProps) {
 }
 
 function PricingBlock({ props, classes, ctx }: BlockProps) {
-  // Renders placeholder — real data comes from pricing_item apps in Sprint D
   const highlighted = (props.highlightIndex as number) ?? 1;
-  const plans =
-    (props.plans as {
-      name: string;
-      price: number | string;
-      period: string;
-      features: string[];
-      ctaText: string;
-      ctaUrl: string;
-    }[]) ?? [];
+  const pricingItemIds = useMemo(
+    () => (props.pricingItemIds as string[]) ?? [],
+    [props.pricingItemIds],
+  );
+  const [apps, setApps] = useState<Application[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  if (plans.length === 0)
+  useEffect(() => {
+    if (pricingItemIds.length === 0) {
+      setLoading(false);
+      return;
+    }
+    getPublicApplicationsByIds(pricingItemIds).then((res) => {
+      if (res.success) {
+        // Sort apps to match the order of pricingItemIds
+        const sortedApps = (res.data ?? []).sort(
+          (a, b) => pricingItemIds.indexOf(a.id) - pricingItemIds.indexOf(b.id),
+        );
+        setApps(sortedApps);
+      }
+      setLoading(false);
+    });
+  }, [pricingItemIds]);
+
+  if (loading) {
+    return (
+      <div className="text-center text-muted-foreground text-sm p-8">
+        Loading pricing plans...
+      </div>
+    );
+  }
+
+  if (apps.length === 0)
     return (
       <div className="text-center text-muted-foreground text-sm p-8">
         Configure pricing plans in the block settings.
@@ -1126,72 +1425,81 @@ function PricingBlock({ props, classes, ctx }: BlockProps) {
   return (
     <div
       className={cn(
-        `grid grid-cols-1 sm:grid-cols-${Math.min(plans.length, 3)} gap-6`,
+        `grid grid-cols-1 sm:grid-cols-${Math.min(apps.length, 3)} gap-6`,
         classes.wrapper,
       )}
     >
-      {plans.map((plan, i) => (
-        <div
-          key={i}
-          className={cn(
-            "rounded-2xl border p-6 flex flex-col",
-            i === highlighted
-              ? "border-primary ring-2 ring-primary relative"
-              : "",
-            classes.card,
-          )}
-        >
-          {i === highlighted && (
-            <div
-              className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-bold px-3 py-1 rounded-full text-white"
-              style={{ backgroundColor: ctx.primaryColor }}
-            >
-              Most Popular
-            </div>
-          )}
-          <h3 className="font-bold text-lg mb-1">{plan.name}</h3>
-          <div className="mb-4">
-            <span className="text-3xl font-extrabold">
-              {typeof plan.price === "number"
-                ? formatCurrency(plan.price, {
-                    currency: "IDR",
-                    noDecimals: true,
-                  })
-                : plan.price}
-            </span>
-            {plan.period && (
-              <span className="text-muted-foreground text-sm">
-                /{plan.period}
-              </span>
-            )}
-          </div>
-          <ul className="space-y-2 flex-1 mb-6">
-            {plan.features.map((f, j) => (
-              <li key={j} className="text-sm flex items-start gap-2">
-                <span className="text-green-500 shrink-0">✓</span>
-                {f}
-              </li>
-            ))}
-          </ul>
-          <a
-            href={plan.ctaUrl || "#"}
-            target="_blank"
-            rel="noopener noreferrer"
+      {apps.map((app, i) => {
+        const config = app.config as {
+          price?: number | string;
+          period?: string;
+          features?: string[];
+          ctaText?: string;
+          ctaUrl?: string;
+        };
+        return (
+          <div
+            key={app.id}
             className={cn(
-              "text-center py-2.5 rounded-xl font-semibold text-sm transition-opacity hover:opacity-90",
-              i === highlighted ? "text-white" : "border",
-              classes.button,
-            )}
-            style={
+              "rounded-2xl border p-6 flex flex-col",
               i === highlighted
-                ? { backgroundColor: ctx.primaryColor }
-                : { color: ctx.primaryColor, borderColor: ctx.primaryColor }
-            }
+                ? "border-primary ring-2 ring-primary relative"
+                : "",
+              classes.card,
+            )}
           >
-            {plan.ctaText || "Get Started"}
-          </a>
-        </div>
-      ))}
+            {i === highlighted && (
+              <div
+                className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-bold px-3 py-1 rounded-full text-white"
+                style={{ backgroundColor: ctx.primaryColor }}
+              >
+                Most Popular
+              </div>
+            )}
+            <h3 className="font-bold text-lg mb-1">{app.name}</h3>
+            <div className="mb-4">
+              <span className="text-3xl font-extrabold">
+                {typeof config.price === "number"
+                  ? formatCurrency(config.price, {
+                      currency: "IDR",
+                      noDecimals: true,
+                    })
+                  : config.price}
+              </span>
+              {config.period && (
+                <span className="text-muted-foreground text-sm">
+                  /{config.period}
+                </span>
+              )}
+            </div>
+            <ul className="space-y-2 flex-1 mb-6">
+              {(config.features ?? []).map((f, j) => (
+                <li key={j} className="text-sm flex items-start gap-2">
+                  <span className="text-green-500 shrink-0">✓</span>
+                  {f}
+                </li>
+              ))}
+            </ul>
+            <a
+              href={config.ctaUrl || "#"}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(
+                "text-center py-2.5 rounded-xl font-semibold text-sm transition-opacity hover:opacity-90",
+                i === highlighted ? "text-white" : "border",
+                classes.button,
+              )}
+              style={
+                i === highlighted
+                  ? { backgroundColor: ctx.primaryColor }
+                  : { color: ctx.primaryColor, borderColor: ctx.primaryColor }
+              }
+            >
+              {config.ctaText || "Get Started"}
+            </a>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -1416,23 +1724,23 @@ function TestimonialBlock({ props, classes, ctx }: BlockProps) {
       rating: number;
       avatar?: string;
     }[]) ?? [];
+
   const cols = (props.columns as number) || 3;
 
+  // ── Carousel mode ──────────────────────────────────────────
   if (props.style === "carousel") {
     return (
-      <CarouselBlock
-        props={{
-          items: items.map((i) => ({ content: i.text, title: i.name })),
-          showArrows: true,
-          showDots: true,
-          autoPlay: false,
-        }}
+      <TestimonialCarousel
+        items={items}
+        props={props}
         classes={classes}
         ctx={ctx}
+        cols={cols}
       />
     );
   }
 
+  // ── Grid / List mode ───────────────────────────────────────
   return (
     <div
       className={cn(
@@ -1443,53 +1751,205 @@ function TestimonialBlock({ props, classes, ctx }: BlockProps) {
       )}
     >
       {items.map((item, i) => (
-        <div
+        <TestimonialCard
           key={i}
-          className={cn(
-            "rounded-2xl border bg-card p-5 flex flex-col gap-3",
-            classes.card,
-          )}
-        >
-          {props.showRating && (
-            <div className="flex gap-0.5 text-yellow-400">
-              {Array.from({ length: Math.min(item.rating, 5) }).map((_, j) => (
-                <span key={j}>★</span>
-              ))}
-            </div>
-          )}
-          <p
-            className={cn(
-              "text-sm text-muted-foreground leading-relaxed italic",
-              classes.text,
-            )}
-          >
-            &quot;{item.text}&quot;
-          </p>
-          <div className="flex items-center gap-2 mt-auto">
-            {props.showAvatar &&
-              (item.avatar ? (
-                <Image
-                  src={item.avatar}
-                  alt={item.name}
-                  className="size-8 rounded-full object-cover"
-                />
-              ) : (
-                <div
-                  className="size-8 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                  style={{ backgroundColor: ctx.primaryColor }}
-                >
-                  {item.name.charAt(0)}
-                </div>
-              ))}
-            <div>
-              <p className="font-semibold text-sm">{item.name}</p>
-              {item.role && (
-                <p className="text-xs text-muted-foreground">{item.role}</p>
-              )}
-            </div>
-          </div>
-        </div>
+          item={item}
+          props={props}
+          classes={classes}
+          ctx={ctx}
+        />
       ))}
+    </div>
+  );
+}
+
+function TestimonialCarousel({
+  items,
+  props,
+  classes,
+  ctx,
+  cols,
+}: {
+  items: {
+    name: string;
+    role?: string;
+    text: string;
+    rating: number;
+    avatar?: string;
+  }[];
+  props: Record<string, unknown>;
+  classes: BlockClasses;
+  ctx: RenderContext;
+  cols: number;
+}) {
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
+  const [count, setCount] = useState(0);
+  const [autoPlayDelay] = useState(() => {
+    if (typeof props.autoPlayDelay === "number") {
+      return props.autoPlayDelay;
+    } else if (typeof props.autoPlayDelay === "string") {
+      return Number(props.autoPlayDelay);
+    }
+    return 3000;
+  });
+
+  useEffect(() => {
+    if (!api) return;
+
+    setCount(api.scrollSnapList().length);
+    setCurrent(api.selectedScrollSnap());
+
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap());
+    });
+
+    return () => {
+      api.off("select", () => {});
+    };
+  }, [api]);
+
+  const autoPlayPlugin = Autoplay({
+    active: Boolean(props.autoPlay),
+    delay: autoPlayDelay,
+    stopOnInteraction: true,
+    stopOnMouseEnter: true,
+  });
+
+  // How many slides visible at once based on cols config
+  const basisClass =
+    cols === 1 ? "basis-full" : cols === 2 ? "sm:basis-1/2" : "sm:basis-1/3";
+
+  return (
+    <div className={cn("relative w-full", classes.wrapper)}>
+      <Carousel
+        setApi={setApi}
+        opts={{
+          align: "start",
+          loop: Boolean(props.loop ?? true),
+        }}
+        plugins={props.autoPlay ? [autoPlayPlugin] : []}
+        className="w-full"
+      >
+        <CarouselContent className="-ml-3 md:-ml-4">
+          {items.map((item, i) => (
+            <CarouselItem key={i} className={cn("pl-3 md:pl-4", basisClass)}>
+              <TestimonialCard
+                item={item}
+                props={props}
+                classes={classes}
+                ctx={ctx}
+              />
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+
+        {/* Arrows — only show when enough items */}
+        {(props.showArrows ?? true) && items.length > 1 && (
+          <>
+            <CarouselPrevious className="-left-4 sm:-left-6" />
+            <CarouselNext className="-right-4 sm:-right-6" />
+          </>
+        )}
+      </Carousel>
+
+      {/* Dots */}
+      {(props.showDots ?? true) && count > 1 && (
+        <div className="mt-4 flex justify-center gap-1.5">
+          {Array.from({ length: count }).map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => api?.scrollTo(i)}
+              aria-label={`Go to testimonial ${i + 1}`}
+              className={cn(
+                "rounded-full transition-all cursor-pointer",
+                i === current
+                  ? "w-4 h-2 bg-primary"
+                  : "size-2 bg-muted-foreground/30 hover:bg-muted-foreground/60",
+              )}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TestimonialCard({
+  item,
+  props,
+  classes,
+  ctx,
+}: {
+  item: {
+    name: string;
+    role?: string;
+    text: string;
+    rating: number;
+    avatar?: string;
+  };
+  props: Record<string, any>;
+  classes: BlockClasses;
+  ctx: RenderContext;
+}) {
+  return (
+    <div
+      className={cn(
+        "rounded-2xl border bg-card p-5 flex flex-col gap-3 h-full",
+        classes.card,
+      )}
+    >
+      {/* Rating stars */}
+      {props.showRating && (
+        <div className="flex gap-0.5 text-yellow-400">
+          {Array.from({ length: Math.min(item.rating ?? 5, 5) }).map((_, j) => (
+            <span key={j} aria-hidden>
+              ★
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* Review text */}
+      <p
+        className={cn(
+          "text-sm text-muted-foreground leading-relaxed italic flex-1",
+          classes.text,
+        )}
+      >
+        &ldquo;{item.text}&rdquo;
+      </p>
+
+      {/* Author */}
+      <div className="flex items-center gap-2 mt-auto">
+        {props.showAvatar &&
+          (item.avatar ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={item.avatar}
+              alt={item.name}
+              className="size-9 rounded-full object-cover shrink-0"
+            />
+          ) : (
+            <div
+              className="size-9 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
+              style={{ backgroundColor: ctx.primaryColor }}
+            >
+              {item.name.charAt(0).toUpperCase()}
+            </div>
+          ))}
+        <div className="min-w-0">
+          <p className={cn("font-semibold text-sm truncate", classes.heading)}>
+            {item.name}
+          </p>
+          {item.role && (
+            <p className="text-xs text-muted-foreground truncate">
+              {item.role}
+            </p>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -1609,6 +2069,9 @@ function FakeCommentBlock({ props, classes }: BlockProps) {
             <Image
               src={c.avatar}
               alt={c.username}
+              width={0}
+              height={0}
+              sizes="100vw"
               className="size-9 rounded-full object-cover shrink-0"
             />
           ) : (
@@ -1688,6 +2151,9 @@ function FakeNotificationBlock({
           <Image
             src={msg.avatar}
             alt={msg.name}
+            width={0}
+            height={0}
+            sizes="100vw"
             className="size-9 rounded-full object-cover shrink-0"
           />
         ) : (
@@ -1699,11 +2165,17 @@ function FakeNotificationBlock({
           </div>
         )}
         <div>
-          <p className="text-sm font-semibold">{msg.name}</p>
+          <p className="text-sm font-semibold truncate text-start">
+            {msg.name}
+          </p>
           {msg.location && (
-            <p className="text-xs text-muted-foreground">{msg.location}</p>
+            <p className="text-xs text-muted-foreground truncate text-start">
+              {msg.location}
+            </p>
           )}
-          <p className="text-xs text-muted-foreground">{msg.action}</p>
+          <p className="text-xs text-muted-foreground truncate text-start">
+            {msg.action}
+          </p>
         </div>
       </div>
     </div>
@@ -1872,7 +2344,11 @@ function ButtonGroupBlock({ props, classes, ctx }: BlockProps) {
       url: string;
       style?: string;
       size?: string;
+      linkType?: string;
+      waRotatorId?: string;
+      productId?: string;
     }[]) ?? [];
+
   const alignClass =
     props.alignment === "left"
       ? "justify-start"
@@ -1883,27 +2359,146 @@ function ButtonGroupBlock({ props, classes, ctx }: BlockProps) {
   return (
     <div className={cn("flex flex-wrap gap-3", alignClass, classes.wrapper)}>
       {buttons.map((btn, i) => (
-        <a
+        <ButtonItem
           key={i}
-          href={btn.url || "#"}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={cn(
-            "inline-flex items-center gap-2 rounded-xl font-semibold transition-opacity hover:opacity-90",
-            btn.size === "sm" ? "px-4 py-2 text-sm" : "px-6 py-3 text-sm",
-            btn.style === "outlined" ? "border-2" : "text-white",
-            classes.button,
-          )}
-          style={
-            btn.style === "outlined"
-              ? { borderColor: ctx.primaryColor, color: ctx.primaryColor }
-              : { backgroundColor: ctx.primaryColor }
-          }
-        >
-          {btn.text}
-        </a>
+          btn={btn}
+          props={props}
+          classes={classes}
+          ctx={ctx}
+        />
       ))}
     </div>
+  );
+}
+
+function ButtonItem({
+  btn,
+  props,
+  classes,
+  ctx,
+}: {
+  btn: {
+    text: string;
+    url: string;
+    style?: string | undefined;
+    size?: string | undefined;
+    linkType?: string | undefined;
+    waRotatorId?: string | undefined;
+    productId?: string | undefined;
+  };
+  props: Record<string, any>;
+  classes: BlockClasses;
+  ctx: RenderContext;
+}) {
+  const linkType = btn.linkType || "none";
+  const hasRotator = linkType === "whatsapp" && Boolean(btn.waRotatorId);
+  const hasProduct = linkType === "product" && Boolean(btn.productId);
+  const hasCustomLink = linkType === "custom" && Boolean(btn.url);
+
+  const [href, setHref] = useState("");
+  const [isResolving, setIsResolving] = useState(false);
+
+  useEffect(() => {
+    const resolveHref = async () => {
+      if (hasRotator) {
+        setIsResolving(true);
+        try {
+          const url = await resolveWaRotatorUrl(
+            btn.waRotatorId as string,
+            undefined,
+          );
+          setHref(url || "https://wa.me/");
+        } catch (error) {
+          console.error("Failed to resolve wa rotator:", error);
+          setHref("https://wa.me/"); // fallback
+        } finally {
+          setIsResolving(false);
+        }
+      } else if (hasProduct) {
+        const product = ctx.products.find((p) => p.id === btn.productId);
+        if (product) {
+          setHref(product.affiliate_url || product.marketplace_url || "#");
+        } else {
+          setHref("#");
+        }
+      } else if (hasCustomLink) {
+        setHref((btn.url as string) || "");
+      } else {
+        setHref("");
+      }
+    };
+
+    resolveHref();
+  }, [
+    btn.waRotatorId,
+    btn.url,
+    btn.productId,
+    hasRotator,
+    hasProduct,
+    hasCustomLink,
+    ctx.products,
+  ]);
+
+  async function handleClick(e: React.MouseEvent<HTMLAnchorElement>) {
+    if (isResolving) {
+      e.preventDefault();
+      return;
+    }
+    if (!href || href === "#") {
+      e.preventDefault();
+      return;
+    }
+
+    if (hasProduct && ctx.onProductClick) {
+      const product = ctx.products.find((p) => p.id === btn.productId);
+      if (product) {
+        const clickType = product.affiliate_url ? "affiliate" : "marketplace";
+        ctx.onProductClick(product.id, clickType);
+      }
+    }
+  }
+
+  const shouldWrap = hasRotator || hasProduct || hasCustomLink;
+
+  return shouldWrap ? (
+    <a
+      href={href || "#"}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={cn(
+        "inline-flex items-center gap-2 rounded-xl font-semibold transition-opacity hover:opacity-90",
+        btn.size === "sm" ? "px-4 py-2 text-sm" : "px-6 py-3 text-sm",
+        btn.style === "outlined" ? "border-2" : "text-white",
+        classes.button,
+      )}
+      style={
+        btn.style === "outlined"
+          ? { borderColor: ctx.primaryColor, color: ctx.primaryColor }
+          : { backgroundColor: ctx.primaryColor }
+      }
+      onClick={handleClick}
+    >
+      {btn.text}
+    </a>
+  ) : (
+    <a
+      href={btn.url || "#"}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={cn(
+        "inline-flex items-center gap-2 rounded-xl font-semibold transition-opacity hover:opacity-90",
+        btn.size === "sm" ? "px-4 py-2 text-sm" : "px-6 py-3 text-sm",
+        btn.style === "outlined" ? "border-2" : "text-white",
+        classes.button,
+      )}
+      style={
+        btn.style === "outlined"
+          ? { borderColor: ctx.primaryColor, color: ctx.primaryColor }
+          : { backgroundColor: ctx.primaryColor }
+      }
+    >
+      {btn.text}
+    </a>
   );
 }
 
@@ -1921,36 +2516,92 @@ function FloatButtonBlock({
     "top-left": "fixed top-6 left-6",
   };
 
-  const hasRotator = Boolean(props.waRotatorId);
+  const linkType = props.type || "scroll-top";
+  const hasRotator = linkType === "whatsapp" && Boolean(props.waRotatorId);
+  const hasProduct = linkType === "product" && Boolean(props.productId);
+  const hasCustomLink = linkType === "custom" && Boolean(props.targetUrl);
 
-  async function handleClick(e: React.MouseEvent) {
-    if (!hasRotator) return;
-    e.preventDefault();
+  const [href, setHref] = useState("");
+  const [isResolving, setIsResolving] = useState(false);
 
-    const url = await resolveWaRotatorUrl(
-      props.waRotatorId as string,
-      props.waTemplateMessage as string | undefined,
-    );
+  useEffect(() => {
+    const resolveHref = async () => {
+      if (hasRotator) {
+        setIsResolving(true);
+        try {
+          const url = await resolveWaRotatorUrl(
+            props.waRotatorId as string,
+            props.waTemplateMessage as string | undefined,
+          );
+          setHref(url || "https://wa.me/");
+        } catch (error) {
+          console.error("Failed to resolve wa rotator:", error);
+          setHref("https://wa.me/"); // fallback
+        } finally {
+          setIsResolving(false);
+        }
+      } else if (hasProduct) {
+        // Find product in context to get its affiliate/marketplace URL
+        const product = ctx.products.find((p) => p.id === props.productId);
+        if (product) {
+          setHref(product.affiliate_url || product.marketplace_url || "#");
+        } else {
+          setHref("#");
+        }
+      } else if (hasCustomLink) {
+        setHref((props.linkUrl as string) || "");
+      } else {
+        setHref("");
+      }
+    };
 
-    if (url) {
-      window.open(url, "_blank", "noopener,noreferrer");
+    resolveHref();
+  }, [
+    props.waRotatorId,
+    props.waTemplateMessage,
+    props.linkUrl,
+    props.productId,
+    hasRotator,
+    hasProduct,
+    hasCustomLink,
+    ctx.products,
+  ]);
+
+  async function handleClick(e: React.MouseEvent<HTMLAnchorElement>) {
+    if (isResolving) {
+      e.preventDefault();
+      return;
+    }
+
+    if (linkType === "scroll-top") {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    if (!href || href === "#") {
+      e.preventDefault();
+      return;
+    }
+
+    // Track product click if it's a product link
+    if (hasProduct && ctx.onProductClick) {
+      const product = ctx.products.find((p) => p.id === props.productId);
+      if (product) {
+        const clickType = product.affiliate_url ? "affiliate" : "marketplace";
+        ctx.onProductClick(product.id, clickType);
+      }
     }
   }
-
-  const href = hasRotator
-    ? "#"
-    : props.type === "scroll-top"
-      ? "#top"
-      : (props.customUrl as string) || "https://wa.me/";
 
   const primaryColor = "#25D366"; // always green for WA float button
 
   return (
     <a
-      href={href}
-      target={props.type === "scroll-top" ? "_self" : "_blank"}
+      href={href || "#"}
+      target={linkType === "scroll-top" ? "_self" : "_blank"}
       rel="noopener noreferrer"
-      onClick={hasRotator ? handleClick : undefined}
+      onClick={handleClick}
       className={cn(
         posMap[(props.position as string) || "bottom-right"],
         "z-50 flex items-center gap-2 rounded-full shadow-xl px-4 py-3 text-white font-semibold text-sm hover:scale-105 transition-transform",
@@ -2417,6 +3068,9 @@ function AnimationBlock({ props, classes, ctx }: BlockProps) {
         <Image
           src={props.content as string}
           alt="animation"
+          width={0}
+          height={0}
+          sizes="100vw"
           className="animate-pulse max-w-xs w-full"
         />
       </div>
@@ -2464,14 +3118,77 @@ function AutoRedirectBlock({
 }) {
   const [secs, setSecs] = useState((props.delaySeconds as number) || 5);
 
+  const linkType = props.linkType || "none";
+  const hasRotator = linkType === "whatsapp" && Boolean(props.waRotatorId);
+  const hasProduct = linkType === "product" && Boolean(props.productId);
+  const hasCustomLink = linkType === "custom" && Boolean(props.targetUrl);
+
+  const [finalURL, setFinalURL] = useState<string>("");
+  const [isResolving, setIsResolving] = useState(false);
+
   useEffect(() => {
-    if (secs <= 0 && props.targetUrl) {
-      window.location.href = props.targetUrl as string;
+    const resolveURL = async () => {
+      if (hasRotator) {
+        setIsResolving(true);
+        try {
+          const rotatorUrl = await resolveWaRotatorUrl(
+            props.waRotatorId as string,
+            props.waTemplateMessage as string | undefined,
+          );
+          setFinalURL(
+            rotatorUrl || (props.targetUrl as string) || "https://wa.me/",
+          );
+        } catch (error) {
+          console.error("Gagal resolve wa rotator", error);
+          setFinalURL((props.targetUrl as string) || "");
+        } finally {
+          setIsResolving(false);
+        }
+      } else if (hasProduct) {
+        const product = ctx.products.find((p) => p.id === props.productId);
+        if (product) {
+          setFinalURL(product.affiliate_url || product.marketplace_url || "");
+        } else {
+          setFinalURL("");
+        }
+      } else if (hasCustomLink) {
+        setFinalURL((props.targetUrl as string) || "");
+      } else {
+        setFinalURL("");
+      }
+    };
+
+    resolveURL();
+  }, [
+    hasRotator,
+    hasProduct,
+    hasCustomLink,
+    props.targetUrl,
+    props.waRotatorId,
+    props.waTemplateMessage,
+    props.productId,
+    ctx.products,
+  ]);
+
+  useEffect(() => {
+    if (isResolving || !finalURL) return;
+
+    if (secs <= 0) {
+      // Track product click if it's a product link
+      if (hasProduct && ctx.onProductClick) {
+        const product = ctx.products.find((p) => p.id === props.productId);
+        if (product) {
+          const clickType = product.affiliate_url ? "affiliate" : "marketplace";
+          ctx.onProductClick(product.id, clickType);
+        }
+      }
+      window.location.href = finalURL;
       return;
     }
+
     const t = setTimeout(() => setSecs((s) => s - 1), 1000);
     return () => clearTimeout(t);
-  }, [secs, props.targetUrl]);
+  }, [secs, finalURL, isResolving, hasProduct, ctx, props.productId]);
 
   const message = (
     (props.message as string) || "Redirecting in {seconds} seconds..."
@@ -2488,26 +3205,86 @@ function AutoRedirectBlock({
         </p>
       )}
       <p className="text-muted-foreground">{message}</p>
-      {props.targetUrl && (
+      {finalURL && (
         <p className="text-xs text-muted-foreground mt-2 font-mono">
-          {props.targetUrl as string}
+          {finalURL}
         </p>
       )}
     </div>
   );
 }
 
-function BackRedirectBlock({ props }: { props: Record<string, any> }) {
+function BackRedirectBlock({
+  props,
+  ctx,
+}: {
+  props: Record<string, any>;
+  ctx: RenderContext;
+}) {
+  const linkType = props.linkType || "none";
+  const hasRotator = linkType === "whatsapp" && Boolean(props.waRotatorId);
+  const hasProduct = linkType === "product" && Boolean(props.productId);
+  const hasCustomLink = linkType === "custom" && Boolean(props.redirectUrl);
+
   useEffect(() => {
     if (!props.enabled) return;
+
     history.pushState(null, "", window.location.href);
-    const onPopState = () => {
+
+    const onPopState = async () => {
       history.pushState(null, "", window.location.href);
-      if (props.redirectUrl) window.location.href = props.redirectUrl as string;
+
+      let finalURL: string | undefined = undefined;
+
+      if (hasRotator) {
+        try {
+          const rotatorUrl = await resolveWaRotatorUrl(
+            props.waRotatorId as string,
+            props.waTemplateMessage as string | undefined,
+          );
+          if (rotatorUrl) {
+            finalURL = rotatorUrl;
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      } else if (hasProduct) {
+        const product = ctx.products.find((p) => p.id === props.productId);
+        if (product) {
+          finalURL =
+            product.affiliate_url || product.marketplace_url || undefined;
+        }
+      } else if (hasCustomLink) {
+        finalURL = props.redirectUrl as string | undefined;
+      }
+
+      if (finalURL) {
+        // Track product click if it's a product link
+        if (hasProduct && ctx.onProductClick) {
+          const product = ctx.products.find((p) => p.id === props.productId);
+          if (product) {
+            const clickType = product.affiliate_url
+              ? "affiliate"
+              : "marketplace";
+            ctx.onProductClick(product.id, clickType);
+          }
+        }
+        window.location.href = finalURL;
+      }
     };
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
-  }, [props.enabled, props.redirectUrl]);
+  }, [
+    hasRotator,
+    hasProduct,
+    hasCustomLink,
+    props.enabled,
+    props.redirectUrl,
+    props.waRotatorId,
+    props.waTemplateMessage,
+    props.productId,
+    ctx,
+  ]);
 
   return null; // invisible block
 }
@@ -2546,6 +3323,9 @@ function BlogPostBlock({ props, classes, ctx }: BlockProps) {
             <Image
               src={post.image}
               alt={post.title}
+              width={0}
+              height={0}
+              sizes="100vw"
               className="w-full object-cover"
               style={{ aspectRatio: "16/9" }}
             />
@@ -2575,6 +3355,127 @@ function BlogPostBlock({ props, classes, ctx }: BlockProps) {
           </div>
         </a>
       ))}
+    </div>
+  );
+}
+
+function SidebarBlock({ props, classes, ctx }: BlockProps) {
+  const position = (props.position as string) ?? "left";
+  const width = (props.width as string) ?? "280px";
+  const sticky = (props.sticky as boolean) ?? false;
+  const topOffset = (props.topOffset as string) ?? "0px";
+  const content = (props.content as string) ?? "";
+
+  // ── Sticky sidebar: render as a floating panel ─────────────
+  // When sticky=true the sidebar is position:sticky inside the
+  // nearest scrolling ancestor (the page body).  The main page
+  // content must sit beside it, so we use a flex row wrapper.
+  // Because BlockRenderer already wraps in <InnerContainer>,
+  // we break out of that centering by using a full-width
+  // negative-margin trick via classes.
+  //
+  // Non-sticky: render as a simple aside that sits on the side
+  // the user selected in the builder.
+
+  const sidebarStyles: React.CSSProperties = {
+    width,
+    minWidth: width,
+    maxWidth: "100%",
+    ...(sticky
+      ? {
+          position: "sticky",
+          top: topOffset || "1rem",
+          alignSelf: "flex-start",
+          maxHeight: "calc(100vh - 2rem)",
+          overflowY: "auto",
+        }
+      : {}),
+  };
+
+  const aside = (
+    <aside
+      aria-label="Sidebar"
+      className={cn(
+        // Base
+        "shrink-0 rounded-xl border bg-card",
+        // Spacing
+        "p-4",
+        // Mobile: always full width and not sticky
+        "w-full sm:w-auto",
+        // Custom classes from builder
+        classes.wrapper,
+      )}
+      style={sidebarStyles}
+    >
+      {/* Render HTML content if it looks like HTML, plain text otherwise */}
+      {content.trim().startsWith("<") ? (
+        <div
+          className="prose prose-sm max-w-none text-sm"
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: user content
+          dangerouslySetInnerHTML={{ __html: content }}
+        />
+      ) : (
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          {content}
+        </p>
+      )}
+    </aside>
+  );
+
+  // When position is left or right, we return just the aside —
+  // layout context (flex row with main content) should be set up
+  // by the parent page or a block-columns block wrapping this.
+  // We do add a visual indicator of position via border accent.
+  return (
+    <div
+      className={cn(
+        "flex w-full",
+        position === "right" ? "justify-end" : "justify-start",
+      )}
+    >
+      <aside
+        aria-label="Sidebar"
+        className={cn(
+          "rounded-xl border bg-card p-4",
+          // Left accent line to visually indicate it's a sidebar
+          position === "left" ? "border-l-4" : "border-r-4",
+          // Full width on mobile, fixed width on desktop
+          "w-full",
+          classes.wrapper,
+        )}
+        style={{
+          // Apply the configured width only on sm+ screens
+          // (on mobile it stretches full width for readability)
+          ...sidebarStyles,
+        }}
+      >
+        {/* Content */}
+        {content.trim().startsWith("<") ? (
+          <div
+            className={cn("prose prose-sm max-w-none", classes.inner)}
+            // biome-ignore lint/security/noDangerouslySetInnerHtml: user content
+            dangerouslySetInnerHTML={{ __html: content }}
+          />
+        ) : content ? (
+          <p
+            className={cn(
+              "text-sm text-muted-foreground leading-relaxed",
+              classes.text,
+            )}
+          >
+            {content}
+          </p>
+        ) : (
+          // Empty state shown in builder preview
+          <div className="flex flex-col items-center justify-center py-6 text-center">
+            <div className="mb-1 text-2xl opacity-20">☰</div>
+            <p className="text-xs text-muted-foreground/60">Sidebar content</p>
+            <p className="text-[10px] text-muted-foreground/40 mt-0.5">
+              Add content in the block settings
+            </p>
+          </div>
+        )}
+      </aside>
     </div>
   );
 }

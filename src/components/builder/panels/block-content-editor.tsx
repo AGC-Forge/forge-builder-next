@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef } from "react";
 import type { BlockV2, Application } from "@/types/builder";
 import type { Product } from "@/types/database";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import {
   Select,
   SelectContent,
@@ -18,11 +19,12 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 import { PROMPT_TEMPLATES_BUILDER } from "../promtp-templates";
-import { Plus, Trash2, Wand2, Loader2, RefreshCw } from "lucide-react";
+import { Plus, Trash2, Wand2, Loader2, RefreshCw, Upload } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface Props {
   block: BlockV2;
@@ -205,6 +207,138 @@ function ProductPicker({
       </Select>
     </div>
   );
+}
+
+function FieldUpload({
+  props,
+  k,
+  label,
+  placeholder,
+  set,
+}: {
+  props: Record<string, unknown>;
+  k: string;
+  label: string;
+  placeholder?: string;
+  set: (key: string, val: unknown) => void;
+}) {
+  const [isImageUploading, setIsImageUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  async function handleImageFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsImageUploading(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64 = (reader.result as string).split(",")[1];
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            base64,
+            mimeType: file.type,
+            folder: "snapland/landing-pages",
+          }),
+        });
+        const json = await res.json();
+        if (!res.ok || json.error) {
+          toast.error(json.error ?? "Upload failed");
+          return;
+        }
+        const newUrl: string = json.data.url;
+        set(k, newUrl);
+      };
+      reader.readAsDataURL(file);
+    } finally {
+      setIsImageUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  }
+
+  const deleteImage = async () => {
+    const imageUrl = props[k] as string;
+    if (!imageUrl) {
+      toast.error("Image not found.");
+      return;
+    }
+    if (!extractPublicIdFromUrl(imageUrl)) {
+      return;
+    }
+    const response = await fetch(
+      `/api/upload?url=${encodeURIComponent(imageUrl)}`,
+      {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+    const data = await response.json();
+
+    if (!response.ok) {
+      toast.error(data.error ?? "Failed to delete image");
+    }
+
+    set(k, "");
+    toast.success(data.message ?? "Image deleted successfully");
+  };
+
+  return (
+    <Field className="space-y-1.5">
+      <FieldLabel className="text-xs">{label}</FieldLabel>
+      <ButtonGroup>
+        <Input
+          type="file"
+          onChange={handleImageFile}
+          className="h-8 text-xs"
+          disabled={isImageUploading}
+        />
+        <Button
+          variant="destructive"
+          size="icon"
+          className="h-8 w-8 flex items-center justify-center"
+          onClick={deleteImage}
+        >
+          <Trash2 />
+        </Button>
+      </ButtonGroup>
+      <FieldDescription className="text-xs text-muted-foreground">
+        {placeholder}
+      </FieldDescription>
+    </Field>
+  );
+}
+
+function extractPublicIdFromUrl(imageUrl: string): string | null {
+  try {
+    const url = new URL(imageUrl);
+
+    if (!url.hostname.includes("cloudinary.com")) {
+      console.warn("Bukan URL Cloudinary:", imageUrl);
+      return null;
+    }
+
+    const pathParts = url.pathname.split("/");
+
+    const uploadIndex = pathParts.indexOf("upload");
+    if (uploadIndex === -1) return null;
+
+    let relevantParts = pathParts.slice(uploadIndex + 1);
+
+    if (relevantParts[0]?.match(/^v\d+$/)) {
+      relevantParts = relevantParts.slice(1);
+    }
+
+    const fullPath = relevantParts.join("/");
+    const publicId =
+      fullPath.substring(0, fullPath.lastIndexOf(".")) || fullPath;
+
+    return publicId || null;
+  } catch (error) {
+    console.error("Gagal extract public_id:", error);
+    return null;
+  }
 }
 
 export function BlockContentEditor({
@@ -481,13 +615,6 @@ export function BlockContentEditor({
       <div className="space-y-3">
         <FieldText
           props={props}
-          k="src"
-          label="Image URL"
-          placeholder="https://..."
-          set={set}
-        />
-        <FieldText
-          props={props}
           k="alt"
           label="Alt Text"
           placeholder="Description of image"
@@ -499,13 +626,75 @@ export function BlockContentEditor({
           label="Caption (optional)"
           set={set}
         />
-        <FieldText
+        <FieldSelect
           props={props}
-          k="linkUrl"
-          label="Link URL (optional)"
-          placeholder="https://..."
           set={set}
+          k="imageSourceType"
+          label="Image Source"
+          options={[
+            { value: "upload", label: "Upload Image" },
+            { value: "custom", label: "Custom URL" },
+          ]}
         />
+        {(props.imageSourceType === "upload" || !props.imageSourceType) && (
+          <FieldUpload
+            k="src"
+            label="Image URL"
+            props={props}
+            set={set}
+            placeholder="Select Image..."
+          />
+        )}
+        {props.imageSourceType === "custom" && (
+          <FieldText
+            props={props}
+            k="src"
+            label="Image URL"
+            placeholder="https://..."
+            set={set}
+          />
+        )}
+        <FieldSelect
+          props={props}
+          set={set}
+          k="linkType"
+          label="Link URL (optional)"
+          options={[
+            { value: "none", label: "None" },
+            { value: "whatsapp", label: "WhatsApp Chat" },
+            { value: "product", label: "Product Link" },
+            { value: "custom", label: "Custom Link" },
+          ]}
+        />
+        {props.linkType === "whatsapp" && (
+          <AppAssignField
+            k="waRotatorId"
+            label="WhatsApp Rotator"
+            appType="wa_rotator"
+            props={props}
+            set={set}
+            availableApps={availableApps}
+            placeholder="Select WA Rotator..."
+          />
+        )}
+        {props.linkType === "product" && (
+          <ProductPicker
+            props={props}
+            availableProducts={availableProducts}
+            k="productId"
+            label="Product"
+            set={set}
+          />
+        )}
+        {props.linkType === "custom" && (
+          <FieldText
+            props={props}
+            k="linkUrl"
+            label="Link URL"
+            placeholder="https://..."
+            set={set}
+          />
+        )}
         <FieldSelect
           props={props}
           k="aspectRatio"
@@ -865,6 +1054,36 @@ export function BlockContentEditor({
             { value: "carousel", label: "Carousel" },
           ]}
         />
+        {(props.type === "carousel" || !props.type) && (
+          <>
+            <FieldToggle
+              props={props}
+              set={set}
+              k="autoPlay"
+              label="Auto play"
+            />
+            <FieldToggle props={props} set={set} k="loop" label="Loop" />
+            <FieldToggle
+              props={props}
+              set={set}
+              k="showArrows"
+              label="Show arrows"
+            />
+            <FieldToggle
+              props={props}
+              set={set}
+              k="showDots"
+              label="Show dots"
+            />
+            <FieldText
+              props={props}
+              k="autoPlayDelay"
+              label="Auto play delay"
+              placeholder="ms"
+              set={set}
+            />
+          </>
+        )}
         <FieldSelect
           props={props}
           set={set}
@@ -1026,14 +1245,48 @@ export function BlockContentEditor({
   if (type === "block-auto-redirect")
     return (
       <div className="space-y-3">
-        <FieldText
-          props={props}
-          set={set}
-          k="targetUrl"
-          label="Redirect URL"
-          placeholder="https://..."
-        />
         <div className="space-y-1.5">
+          <FieldSelect
+            props={props}
+            set={set}
+            k="linkType"
+            label="Link Type"
+            options={[
+              { value: "none", label: "None" },
+              { value: "whatsapp", label: "WhatsApp Chat" },
+              { value: "product", label: "Product Link" },
+              { value: "custom", label: "Custom Link" },
+            ]}
+          />
+          {props.linkType === "whatsapp" && (
+            <AppAssignField
+              k="waRotatorId"
+              label="WhatsApp Rotator"
+              appType="wa_rotator"
+              props={props}
+              set={set}
+              availableApps={availableApps}
+              placeholder="Select WA Rotator..."
+            />
+          )}
+          {props.linkType === "product" && (
+            <ProductPicker
+              props={props}
+              k="productId"
+              availableProducts={availableProducts}
+              label="Product"
+              set={set}
+            />
+          )}
+          {props.linkType === "custom" && (
+            <FieldText
+              props={props}
+              set={set}
+              k="targetUrl"
+              label="Redirect URL"
+              placeholder="https://..."
+            />
+          )}
           <Label className="text-xs">
             Delay: {(props.delaySeconds as number) ?? 5} seconds
           </Label>
@@ -1345,13 +1598,47 @@ export function BlockContentEditor({
           k="enabled"
           label="Enable back redirect trap"
         />
-        <FieldText
+        <FieldSelect
           props={props}
           set={set}
-          k="redirectUrl"
-          label="Redirect URL (optional)"
-          placeholder="https://..."
+          k="linkType"
+          label="Link Type"
+          options={[
+            { value: "none", label: "None" },
+            { value: "whatsapp", label: "WhatsApp Chat" },
+            { value: "product", label: "Product Link" },
+            { value: "custom", label: "Custom Link" },
+          ]}
         />
+        {props.linkType === "whatsapp" && (
+          <AppAssignField
+            k="waRotatorId"
+            label="WhatsApp Rotator"
+            appType="wa_rotator"
+            props={props}
+            set={set}
+            availableApps={availableApps}
+            placeholder="Select WA Rotator..."
+          />
+        )}
+        {props.linkType === "product" && (
+          <ProductPicker
+            props={props}
+            k="productId"
+            availableProducts={availableProducts}
+            label="Product"
+            set={set}
+          />
+        )}
+        {props.linkType === "custom" && (
+          <FieldText
+            props={props}
+            set={set}
+            k="redirectUrl"
+            label="Redirect URL"
+            placeholder="https://..."
+          />
+        )}
         <div className="rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 px-3 py-2">
           <p className="text-xs text-amber-700 dark:text-amber-300">
             ⚠️ When enabled, pressing the browser back button will keep the user
@@ -1625,6 +1912,7 @@ export function BlockContentEditor({
           options={[
             { value: "whatsapp", label: "WhatsApp Chat" },
             { value: "scroll-top", label: "Scroll to Top" },
+            { value: "product", label: "Product List" },
             { value: "custom", label: "Custom Link" },
           ]}
         />
@@ -1637,6 +1925,15 @@ export function BlockContentEditor({
             set={set}
             availableApps={availableApps}
             placeholder="Select WA Rotator..."
+          />
+        )}
+        {props.linkType === "product" && (
+          <ProductPicker
+            props={props}
+            k="productId"
+            availableProducts={availableProducts}
+            label="Product"
+            set={set}
           />
         )}
         {props.type === "custom" && (
@@ -1720,6 +2017,7 @@ export function BlockContentEditor({
             }
             onChange={(v) => set("buttons", v)}
             availableApps={availableApps}
+            availableProducts={availableProducts}
           />
         </div>
       </div>
@@ -1978,7 +2276,10 @@ export function BlockContentEditor({
         <div className="space-y-1.5">
           <Label className="text-xs">Logos</Label>
           <LogoItemsEditor
+            props={props}
             logos={(props.logos as { src: string; alt: string }[]) ?? []}
+            availableApps={availableApps}
+            availableProducts={availableProducts}
             onChange={(v) => set("logos", v)}
           />
         </div>
@@ -2348,6 +2649,16 @@ export function BlockContentEditor({
           k="infinite"
           label="Infinite loop"
         />
+        <FieldSelect
+          props={props}
+          set={set}
+          k="slidesPerView"
+          label="Slides per view"
+          options={[1, 2, 3].map((n) => ({
+            value: String(n),
+            label: `${n} slides`,
+          }))}
+        />
         <div className="space-y-1.5">
           <Label className="text-xs">Slides</Label>
           <CarouselItemsEditor
@@ -2419,7 +2730,10 @@ export function BlockContentEditor({
         <div className="space-y-1.5">
           <Label className="text-xs">Images</Label>
           <GalleryImageEditor
+            props={props}
             images={(props.images as { src: string; alt: string }[]) ?? []}
+            availableApps={availableApps}
+            availableProducts={availableProducts}
             onChange={(v) => set("images", v)}
           />
         </div>
@@ -2556,11 +2870,26 @@ function TestimonialItemsEditor({
   items,
   onChange,
 }: {
-  items: { name: string; role: string; text: string; rating: number }[];
+  items: {
+    name: string;
+    role: string;
+    text: string;
+    rating: number;
+    avatar?: string;
+  }[];
   onChange: (
-    v: { name: string; role: string; text: string; rating: number }[],
+    v: {
+      name: string;
+      role: string;
+      text: string;
+      rating: number;
+      avatar?: string;
+    }[],
   ) => void;
 }) {
+  const [isImageUploading, setIsImageUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
   const add = () =>
     onChange([
       ...items,
@@ -2576,6 +2905,70 @@ function TestimonialItemsEditor({
     onChange(
       items.map((item, idx) => (idx === i ? { ...item, [k]: v } : item)),
     );
+
+  async function handleImageFile(
+    e: React.ChangeEvent<HTMLInputElement>,
+    i: number,
+  ) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsImageUploading(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64 = (reader.result as string).split(",")[1];
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            base64,
+            mimeType: file.type,
+            folder: "snapland/landing-pages",
+          }),
+        });
+        const json = await res.json();
+        if (!res.ok || json.error) {
+          toast.error(json.error ?? "Upload failed");
+          return;
+        }
+        const newUrl: string = json.data.url;
+        update(i, "avatar", newUrl);
+      };
+      reader.readAsDataURL(file);
+    } finally {
+      setIsImageUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  }
+
+  const deleteSection = async (id: number) => {
+    const imageUrl = items[id].avatar;
+    if (!imageUrl) {
+      toast.error("Image not found.");
+      return;
+    }
+
+    if (!extractPublicIdFromUrl(imageUrl)) {
+      remove(id);
+      return;
+    }
+    const response = await fetch(
+      `/api/upload?url=${encodeURIComponent(imageUrl)}`,
+      {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+    const data = await response.json();
+
+    if (!response.ok) {
+      toast.error(data.error ?? "Failed to delete image");
+    }
+
+    remove(id);
+    toast.success(data.message ?? "Image deleted successfully");
+  };
   return (
     <div className="space-y-2">
       {items.map((item, i) => (
@@ -2589,7 +2982,7 @@ function TestimonialItemsEditor({
               variant="ghost"
               size="icon"
               className="size-6"
-              onClick={() => remove(i)}
+              onClick={() => deleteSection(i)}
             >
               <Trash2 className="size-3" />
             </Button>
@@ -2628,6 +3021,35 @@ function TestimonialItemsEditor({
               ))}
             </SelectContent>
           </Select>
+          <div className="flex gap-1.5">
+            <div className="grid gap-1">
+              <label
+                htmlFor={`uploadAvatarFile-${i}`}
+                className={cn(
+                  "flex items-center justify-center w-max px-2 h-7 text-xs rounded-md font-semibold cursor-pointer tracking-wide text-white dark:text-black border bg-neutral-800 dark:bg-neutral-50 hover:bg-neutral-950 dark:hover:bg-neutral-300 transition-all mx-auto",
+                  {
+                    "cursor-not-allowed": isImageUploading,
+                  },
+                )}
+              >
+                <Upload className="size-3 fill-white dark:fill-black inline" />
+                <input
+                  id={`uploadAvatarFile-${i}`}
+                  type="file"
+                  className="hidden"
+                  onChange={(e) => handleImageFile(e, i)}
+                  disabled={isImageUploading}
+                  ref={fileRef}
+                />
+              </label>
+            </div>
+            <Input
+              value={item.avatar}
+              onChange={(e) => update(i, "avatar", e.target.value)}
+              placeholder="Avatar URL"
+              className="h-7 text-xs flex-1"
+            />
+          </div>
         </div>
       ))}
       <Button
@@ -3016,10 +3438,10 @@ function AppAssignField({
         value={(props[k] as string) ?? "none"}
         onValueChange={(v) => set(k, v === "none" ? null : v)}
       >
-        <SelectTrigger className="h-8 text-xs">
+        <SelectTrigger className="h-8 text-xs w-full">
           <SelectValue placeholder={placeholder ?? "Select..."} />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="w-full">
           <SelectItem value="none" className="text-xs text-muted-foreground">
             — None —
           </SelectItem>
@@ -3551,49 +3973,187 @@ function FakeCommentEditor({
 }
 
 function LogoItemsEditor({
+  props,
   logos,
+  availableApps,
+  availableProducts,
   onChange,
 }: {
+  props: Record<string, any>;
   logos: { src: string; alt: string }[];
+  availableApps: Application[];
+  availableProducts: Product[];
   onChange: (v: typeof logos) => void;
 }) {
+  const [isImageUploading, setIsImageUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
   const add = () => onChange([...logos, { src: "", alt: "" }]);
   const remove = (i: number) => onChange(logos.filter((_, idx) => idx !== i));
   const update = (i: number, k: string, v: string) =>
     onChange(logos.map((l, idx) => (idx === i ? { ...l, [k]: v } : l)));
 
+  async function handleImageFile(
+    e: React.ChangeEvent<HTMLInputElement>,
+    i: number,
+  ) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsImageUploading(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64 = (reader.result as string).split(",")[1];
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            base64,
+            mimeType: file.type,
+            folder: "snapland/landing-pages",
+          }),
+        });
+        const json = await res.json();
+        if (!res.ok || json.error) {
+          toast.error(json.error ?? "Upload failed");
+          return;
+        }
+        const newUrl: string = json.data.url;
+        update(i, "src", newUrl);
+      };
+      reader.readAsDataURL(file);
+    } finally {
+      setIsImageUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  }
+
+  const deleteSection = async (id: number) => {
+    const imageUrl = logos[id].src;
+    if (!imageUrl) {
+      toast.error("Image not found.");
+      return;
+    }
+
+    if (!extractPublicIdFromUrl(imageUrl)) {
+      remove(id);
+      return;
+    }
+    const response = await fetch(
+      `/api/upload?url=${encodeURIComponent(imageUrl)}`,
+      {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+    const data = await response.json();
+
+    if (!response.ok) {
+      toast.error(data.error ?? "Failed to delete image");
+    }
+
+    remove(id);
+    toast.success(data.message ?? "Image deleted successfully");
+  };
   return (
     <div className="space-y-1.5">
       {logos.map((logo, i) => (
         <div key={i} className="flex gap-1.5">
-          <Input
-            value={logo.src}
-            onChange={(e) => update(i, "src", e.target.value)}
-            placeholder="Image URL"
-            className="h-7 text-xs flex-1"
-          />
-          <Input
-            value={logo.alt}
-            onChange={(e) => update(i, "alt", e.target.value)}
-            placeholder="Alt"
-            className="h-7 text-xs w-20"
-          />
+          <div className="grid gap-1">
+            <label
+              htmlFor={`uploadFile-${i}`}
+              className={cn(
+                "flex items-center justify-center w-max px-2 h-7 text-xs rounded-md font-semibold cursor-pointer tracking-wide text-white dark:text-black border bg-neutral-800 dark:bg-neutral-50 hover:bg-neutral-950 dark:hover:bg-neutral-300 transition-all mx-auto",
+                {
+                  "cursor-not-allowed": isImageUploading,
+                },
+              )}
+            >
+              <Upload className="size-3 fill-white dark:fill-black inline" />
+              <input
+                type="file"
+                id={`uploadFile-${i}`}
+                ref={fileRef}
+                onChange={(e) => handleImageFile(e, i)}
+                className="hidden"
+                disabled={isImageUploading}
+              />
+            </label>
+            <Input
+              value={logo.src}
+              onChange={(e) => update(i, "src", e.target.value)}
+              placeholder="Image URL"
+              className="h-7 text-xs flex-1"
+              disabled={isImageUploading}
+            />
+            <Input
+              value={logo.alt}
+              onChange={(e) => update(i, "alt", e.target.value)}
+              placeholder="Alt"
+              className="h-7 text-xs w-20"
+              disabled={isImageUploading}
+            />
+            <FieldSelect
+              props={props}
+              set={(v) => update(i, "linkType", v)}
+              k="linkType"
+              label="Link Type (Optional)"
+              options={[
+                { value: "whatsapp", label: "WhatsApp Chat" },
+                { value: "product", label: "Product Image" },
+                { value: "custom", label: "Custom Link" },
+              ]}
+            />
+            {(props.linkType === "whatsapp" || !props.linkType) && (
+              <AppAssignField
+                k="linkUrl"
+                label="WhatsApp Link"
+                appType="wa_rotator"
+                props={props}
+                set={(v) => update(i, "linkUrl", v)}
+                availableApps={availableApps}
+                placeholder="Select WA Rotator..."
+              />
+            )}
+            {(props.linkType === "product" || !props.linkType) && (
+              <ProductPicker
+                props={props}
+                availableProducts={availableProducts}
+                k="productId"
+                label="Product"
+                set={(v) => update(i, "productId", v)}
+              />
+            )}
+            {props.linkType === "custom" && (
+              <FieldText
+                props={props}
+                set={(v) => update(i, "linkUrl", v)}
+                k="linkUrl"
+                label="Custom Link"
+                placeholder="https://..."
+              />
+            )}
+          </div>
           <Button
             type="button"
             variant="ghost"
             size="icon"
             className="size-7 shrink-0"
-            onClick={() => remove(i)}
+            disabled={isImageUploading}
+            onClick={() => deleteSection(i)}
           >
             <Trash2 className="size-3" />
           </Button>
         </div>
       ))}
+
       <Button
         type="button"
         variant="outline"
         size="sm"
         className="w-full text-xs h-7"
+        disabled={isImageUploading}
         onClick={add}
       >
         <Plus className="size-3" /> Add Logo
@@ -3687,12 +4247,78 @@ function CarouselItemsEditor({
   items: { src?: string; title?: string; content?: string }[];
   onChange: (v: typeof items) => void;
 }) {
+  const [isImageUploading, setIsImageUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
   const add = () => onChange([...items, { src: "", title: "", content: "" }]);
   const remove = (i: number) => onChange(items.filter((_, idx) => idx !== i));
   const update = (i: number, k: string, v: string) =>
     onChange(
       items.map((item, idx) => (idx === i ? { ...item, [k]: v } : item)),
     );
+
+  async function handleImageFile(
+    e: React.ChangeEvent<HTMLInputElement>,
+    i: number,
+  ) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsImageUploading(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64 = (reader.result as string).split(",")[1];
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            base64,
+            mimeType: file.type,
+            folder: "snapland/landing-pages",
+          }),
+        });
+        const json = await res.json();
+        if (!res.ok || json.error) {
+          toast.error(json.error ?? "Upload failed");
+          return;
+        }
+        const newUrl: string = json.data.url;
+        update(i, "src", newUrl);
+      };
+      reader.readAsDataURL(file);
+    } finally {
+      setIsImageUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  }
+
+  const deleteSection = async (id: number) => {
+    const imageUrl = items[id].src;
+    if (!imageUrl) {
+      toast.error("Image not found.");
+      return;
+    }
+    if (!extractPublicIdFromUrl(imageUrl)) {
+      remove(id);
+      return;
+    }
+    const response = await fetch(
+      `/api/upload?url=${encodeURIComponent(imageUrl)}`,
+      {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+    const data = await response.json();
+
+    if (!response.ok) {
+      toast.error(data.error ?? "Failed to delete image");
+    }
+
+    remove(id);
+    toast.success(data.message ?? "Image deleted successfully");
+  };
 
   return (
     <div className="space-y-2">
@@ -3707,28 +4333,38 @@ function CarouselItemsEditor({
               variant="ghost"
               size="icon"
               className="size-6"
-              onClick={() => remove(i)}
+              disabled={isImageUploading}
+              onClick={() => deleteSection(i)}
             >
               <Trash2 className="size-3" />
             </Button>
           </div>
+          <input
+            id={`uploadFile-${i}`}
+            type="file"
+            className="w-full text-xs text-neutral-600 font-medium border border-neutral-200 rounded-md cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 file:cursor-pointer file:border-0 file:py-2 file:px-1 file:mr-2 file:bg-neutral-800 hover:file:bg-neutral-950 file:text-white dark:text-black dark:border-neutral-700 dark:file:bg-neutral-50 dark:hover:file:bg-neutral-300"
+            onChange={(e) => handleImageFile(e, i)}
+          />
           <Input
             value={item.src ?? ""}
             onChange={(e) => update(i, "src", e.target.value)}
-            placeholder="Image URL"
+            placeholder="https://example.com/image.jpg"
             className="h-7 text-xs"
+            disabled={isImageUploading}
           />
           <Input
             value={item.title ?? ""}
             onChange={(e) => update(i, "title", e.target.value)}
             placeholder="Title"
             className="h-7 text-xs"
+            disabled={isImageUploading}
           />
           <Input
             value={item.content ?? ""}
             onChange={(e) => update(i, "content", e.target.value)}
             placeholder="Caption/content"
             className="h-7 text-xs"
+            disabled={isImageUploading}
           />
         </div>
       ))}
@@ -3746,13 +4382,265 @@ function CarouselItemsEditor({
 }
 
 function GalleryImageEditor({
+  props,
   images,
+  availableApps,
+  availableProducts,
   onChange,
 }: {
-  images: { src: string; alt: string }[];
+  props: Record<string, any>;
+  images: {
+    src: string;
+    alt: string;
+    linkType?: string;
+    linkUrl?: string;
+    waRotatorId?: string;
+    productId?: string;
+  }[];
+  availableApps: Application[];
+  availableProducts: Product[];
   onChange: (v: typeof images) => void;
 }) {
-  return <LogoItemsEditor logos={images} onChange={onChange} />;
+  const [isImageUploading, setIsImageUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const add = () =>
+    onChange([...images, { src: "", alt: "", linkType: "none" }]);
+  const remove = (i: number) => onChange(images.filter((_, idx) => idx !== i));
+  const update = (i: number, k: string, v: string) =>
+    onChange(images.map((img, idx) => (idx === i ? { ...img, [k]: v } : img)));
+
+  async function handleImageFile(
+    e: React.ChangeEvent<HTMLInputElement>,
+    i: number,
+  ) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsImageUploading(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64 = (reader.result as string).split(",")[1];
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            base64,
+            mimeType: file.type,
+            folder: "snapland/landing-pages",
+          }),
+        });
+        const json = await res.json();
+        if (!res.ok || json.error) {
+          toast.error(json.error ?? "Upload failed");
+          return;
+        }
+        const newUrl: string = json.data.url;
+        update(i, "src", newUrl);
+      };
+      reader.readAsDataURL(file);
+    } finally {
+      setIsImageUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  }
+
+  const deleteSection = async (id: number) => {
+    const imageUrl = images[id].src;
+    if (!imageUrl) {
+      toast.error("Image not found.");
+      return;
+    }
+
+    if (!extractPublicIdFromUrl(imageUrl)) {
+      remove(id);
+      return;
+    }
+    const response = await fetch(
+      `/api/upload?url=${encodeURIComponent(imageUrl)}`,
+      {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+    const data = await response.json();
+
+    if (!response.ok) {
+      toast.error(data.error ?? "Failed to delete image");
+    }
+
+    remove(id);
+    toast.success(data.message ?? "Image deleted successfully");
+  };
+
+  return (
+    <div className="space-y-2">
+      {images.map((img, i) => (
+        <div key={i} className="rounded border p-2 space-y-2 bg-muted/30">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-muted-foreground">
+              Image {i + 1}
+            </span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="size-6"
+              onClick={() => deleteSection(i)}
+            >
+              <Trash2 className="size-3" />
+            </Button>
+          </div>
+
+          <div className="flex gap-1.5">
+            <div className="grid gap-1">
+              <label
+                htmlFor={`uploadGalleryFile-${i}`}
+                className={cn(
+                  "flex items-center justify-center w-max px-2 h-7 text-xs rounded-md font-semibold cursor-pointer tracking-wide text-white dark:text-black border bg-neutral-800 dark:bg-neutral-50 hover:bg-neutral-950 dark:hover:bg-neutral-300 transition-all mx-auto",
+                  {
+                    "cursor-not-allowed": isImageUploading,
+                  },
+                )}
+              >
+                <Upload className="size-3 fill-white dark:fill-black inline" />
+                <input
+                  id={`uploadGalleryFile-${i}`}
+                  type="file"
+                  className="hidden"
+                  onChange={(e) => handleImageFile(e, i)}
+                  disabled={isImageUploading}
+                  ref={fileRef}
+                />
+              </label>
+            </div>
+            <Input
+              value={img.src}
+              onChange={(e) => update(i, "src", e.target.value)}
+              placeholder="Image URL"
+              className="h-7 text-xs flex-1"
+            />
+          </div>
+
+          <Input
+            value={img.alt}
+            onChange={(e) => update(i, "alt", e.target.value)}
+            placeholder="Alt text"
+            className="h-7 text-xs"
+          />
+
+          <div className="space-y-1.5">
+            <Label className="text-[10px]">Link Type</Label>
+            <Select
+              value={img.linkType || "none"}
+              onValueChange={(v) => update(i, "linkType", v)}
+            >
+              <SelectTrigger className="h-7 text-xs w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="w-full">
+                <SelectItem value="none" className="text-xs">
+                  None
+                </SelectItem>
+                <SelectItem value="whatsapp" className="text-xs">
+                  WhatsApp Chat
+                </SelectItem>
+                <SelectItem value="product" className="text-xs">
+                  Product Link
+                </SelectItem>
+                <SelectItem value="custom" className="text-xs">
+                  Custom Link
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {img.linkType === "whatsapp" && (
+            <div className="space-y-1.5">
+              <Label className="text-[10px]">WhatsApp Rotator</Label>
+              <Select
+                value={img.waRotatorId || "none"}
+                onValueChange={(v) =>
+                  update(i, "waRotatorId", v === "none" ? "" : v)
+                }
+              >
+                <SelectTrigger className="h-7 text-xs w-full">
+                  <SelectValue placeholder="Select WA Rotator..." />
+                </SelectTrigger>
+                <SelectContent className="w-full">
+                  <SelectItem
+                    value="none"
+                    className="text-xs text-muted-foreground"
+                  >
+                    — None —
+                  </SelectItem>
+                  {availableApps
+                    .filter((a) => a.app_type === "wa_rotator")
+                    .map((app) => (
+                      <SelectItem
+                        key={app.id}
+                        value={app.id}
+                        className="text-xs"
+                      >
+                        {app.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {img.linkType === "product" && (
+            <div className="space-y-1.5">
+              <Label className="text-[10px]">Product</Label>
+              <Select
+                value={img.productId || "none"}
+                onValueChange={(v) =>
+                  update(i, "productId", v === "none" ? "" : v)
+                }
+              >
+                <SelectTrigger className="h-7 text-xs w-full">
+                  <SelectValue placeholder="Select Product..." />
+                </SelectTrigger>
+                <SelectContent className="w-full">
+                  <SelectItem
+                    value="none"
+                    className="text-xs text-muted-foreground"
+                  >
+                    — None —
+                  </SelectItem>
+                  {availableProducts.map((p) => (
+                    <SelectItem key={p.id} value={p.id} className="text-xs">
+                      {p.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {img.linkType === "custom" && (
+            <Input
+              value={img.linkUrl || ""}
+              onChange={(e) => update(i, "linkUrl", e.target.value)}
+              placeholder="https://..."
+              className="h-7 text-xs"
+            />
+          )}
+        </div>
+      ))}
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="w-full text-xs h-7"
+        onClick={add}
+      >
+        <Plus className="size-3" /> Add Image
+      </Button>
+    </div>
+  );
 }
 
 function ConfirmStepsEditor({
@@ -3806,15 +4694,31 @@ function ButtonGroupEditor({
   buttons,
   onChange,
   availableApps,
+  availableProducts,
 }: {
-  buttons: { text: string; url: string; style?: string; size?: string }[];
+  buttons: {
+    text: string;
+    url: string;
+    style?: string;
+    size?: string;
+    linkType?: string;
+    waRotatorId?: string;
+    productId?: string;
+  }[];
   onChange: (v: typeof buttons) => void;
   availableApps: Application[];
+  availableProducts: Product[];
 }) {
   const add = () =>
     onChange([
       ...buttons,
-      { text: "Button", url: "", style: "filled", size: "md" },
+      {
+        text: "Button",
+        url: "",
+        style: "filled",
+        size: "md",
+        linkType: "none",
+      },
     ]);
   const remove = (i: number) => onChange(buttons.filter((_, idx) => idx !== i));
   const update = (i: number, k: string, v: string) =>
@@ -3844,21 +4748,114 @@ function ButtonGroupEditor({
             placeholder="Button text"
             className="h-7 text-xs"
           />
-          <Input
-            value={btn.url}
-            onChange={(e) => update(i, "url", e.target.value)}
-            placeholder="URL or #anchor"
-            className="h-7 text-xs"
-          />
+          <div className="space-y-1.5">
+            <Label className="text-[10px]">Link Type</Label>
+            <Select
+              value={btn.linkType || "none"}
+              onValueChange={(v) => update(i, "linkType", v)}
+            >
+              <SelectTrigger className="h-7 text-xs w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="w-full">
+                <SelectItem value="none" className="text-xs">
+                  None
+                </SelectItem>
+                <SelectItem value="whatsapp" className="text-xs">
+                  WhatsApp Chat
+                </SelectItem>
+                <SelectItem value="product" className="text-xs">
+                  Product Link
+                </SelectItem>
+                <SelectItem value="custom" className="text-xs">
+                  Custom Link
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {btn.linkType === "whatsapp" && (
+            <div className="space-y-1.5">
+              <Label className="text-[10px]">WhatsApp Rotator</Label>
+              <Select
+                value={btn.waRotatorId || "none"}
+                onValueChange={(v) =>
+                  update(i, "waRotatorId", v === "none" ? "" : v)
+                }
+              >
+                <SelectTrigger className="h-7 text-xs w-full">
+                  <SelectValue placeholder="Select WA Rotator..." />
+                </SelectTrigger>
+                <SelectContent className="w-full">
+                  <SelectItem
+                    value="none"
+                    className="text-xs text-muted-foreground"
+                  >
+                    — None —
+                  </SelectItem>
+                  {availableApps
+                    .filter((a) => a.app_type === "wa_rotator")
+                    .map((app) => (
+                      <SelectItem
+                        key={app.id}
+                        value={app.id}
+                        className="text-xs"
+                      >
+                        {app.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {btn.linkType === "product" && (
+            <div className="space-y-1.5">
+              <Label className="text-[10px]">Product</Label>
+              <Select
+                value={btn.productId || "none"}
+                onValueChange={(v) =>
+                  update(i, "productId", v === "none" ? "" : v)
+                }
+              >
+                <SelectTrigger className="h-7 text-xs w-full">
+                  <SelectValue placeholder="Select Product..." />
+                </SelectTrigger>
+                <SelectContent className="w-full">
+                  <SelectItem
+                    value="none"
+                    className="text-xs text-muted-foreground"
+                  >
+                    — None —
+                  </SelectItem>
+                  {availableProducts.map((p) => (
+                    <SelectItem key={p.id} value={p.id} className="text-xs">
+                      {p.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {btn.linkType === "custom" && (
+            <Input
+              value={btn.url}
+              onChange={(e) => update(i, "url", e.target.value)}
+              placeholder="URL or #anchor"
+              className="h-7 text-xs"
+            />
+          )}
+
           <div className="flex gap-1.5">
             <Select
               value={btn.style ?? "filled"}
               onValueChange={(v) => update(i, "style", v)}
             >
-              <SelectTrigger className="h-7 text-xs">
+              <SelectTrigger className="h-7 text-xs w-full">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="w-full">
                 <SelectItem value="filled" className="text-xs">
                   Filled
                 </SelectItem>
@@ -3874,10 +4871,10 @@ function ButtonGroupEditor({
               value={btn.size ?? "md"}
               onValueChange={(v) => update(i, "size", v)}
             >
-              <SelectTrigger className="h-7 text-xs">
+              <SelectTrigger className="h-7 text-xs w-full">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="w-full">
                 <SelectItem value="sm" className="text-xs">
                   SM
                 </SelectItem>

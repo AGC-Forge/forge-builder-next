@@ -46,13 +46,17 @@ export function AboutPage() {
                   <Image
                     src="/images/about/about-image.svg"
                     alt="about-image"
-                    fill
+                    width={0}
+                    height={0}
+                    sizes="100vw"
                     className="mx-auto max-w-full drop-shadow-three dark:hidden dark:drop-shadow-none lg:mr-0"
                   />
                   <Image
                     src="/images/about/about-image-dark.svg"
                     alt="about-image"
-                    fill
+                    width={0}
+                    height={0}
+                    sizes="100vw"
                     className="mx-auto hidden max-w-full drop-shadow-three dark:block dark:drop-shadow-none lg:mr-0"
                   />
                 </div>
@@ -72,13 +76,17 @@ export function AboutPage() {
                 <Image
                   src="/images/about/about-image-2.svg"
                   alt="about image"
-                  fill
+                  width={0}
+                  height={0}
+                  sizes="100vw"
                   className="drop-shadow-three dark:hidden dark:drop-shadow-none"
                 />
                 <Image
                   src="/images/about/about-image-2-dark.svg"
                   alt="about image"
-                  fill
+                  width={0}
+                  height={0}
+                  sizes="100vw"
                   className="hidden drop-shadow-three dark:block dark:drop-shadow-none"
                 />
               </div>

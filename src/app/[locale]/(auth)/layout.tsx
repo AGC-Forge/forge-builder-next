@@ -26,8 +26,9 @@ export default function AuthLayout({
           <Image
             src="/logo.png"
             alt="SnapLand Logo"
-            width={46}
-            height={46}
+            width={0}
+            height={0}
+            sizes="100vw"
             className="w-16 h-auto object-cover rounded-full"
           />
           <span className="text-2xl font-bold">{t("title")}</span>

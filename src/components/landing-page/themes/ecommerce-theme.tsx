@@ -340,6 +340,9 @@ function BlockRenderer({
       <Image
         src={content.url as string}
         alt={(content.alt as string) ?? ""}
+        width={0}
+        height={0}
+        sizes="100vw"
         style={{
           ...getImageStyle({
             borderRadius: radius,

@@ -86,13 +86,41 @@ export function ImageUploader({ images, onChange, maxImages = 8 }: Props) {
     setUrlInput("");
   }
 
-  function removeImage(id: string) {
-    const filtered = images.filter((img) => img.id !== id);
-    // Re-set primary if removed primary
-    if (filtered.length > 0 && !filtered.some((i) => i.is_primary)) {
-      filtered[0].is_primary = true;
+  async function removeImage(id: string) {
+    try {
+      const image = images.find((img) => img.id === id);
+      if (!image) {
+        toast.error("Image not found.");
+        return;
+      }
+
+      const response = await fetch(
+        `/api/upload?url=${encodeURIComponent(image.url)}`,
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+      const data = await response.json();
+
+      if (!response.ok) {
+        toast.error(data.error ?? "Failed to delete image");
+      }
+
+      const filtered = images.filter((img) => img.id !== id);
+      if (filtered.length > 0 && !filtered.some((i) => i.is_primary)) {
+        filtered[0].is_primary = true;
+      }
+      onChange(filtered);
+
+      toast.success(data.message ?? "Image deleted successfully");
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Failed to delete image",
+      );
+      return;
     }
-    onChange(filtered);
+    // Re-set primary if removed primary
   }
 
   function setPrimary(id: string) {

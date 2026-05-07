@@ -36,8 +36,9 @@ export function Footer() {
             <Image
               src="/logo.png"
               alt="SnapLand"
-              width={46}
-              height={46}
+              width={0}
+              height={0}
+              sizes="100vw"
               className="w-10 h-auto object-cover rounded-full"
             />
 

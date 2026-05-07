@@ -886,7 +886,6 @@ function AppConfigEditor({
             }
             placeholder="Unlimited pages&#10;All blocks&#10;Priority support"
             className="text-xs"
-            rows={4}
           />
         </div>
         <div className="space-y-1">

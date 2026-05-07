@@ -16,6 +16,36 @@ export interface UploadResult {
   bytes: number;
 }
 
+export function extractPublicIdFromUrl(imageUrl: string): string | null {
+  try {
+    const url = new URL(imageUrl);
+
+    if (!url.hostname.includes("cloudinary.com")) {
+      console.warn("No Cloudinary URL:", imageUrl);
+      return null;
+    }
+
+    const pathParts = url.pathname.split("/");
+
+    const uploadIndex = pathParts.indexOf("upload");
+    if (uploadIndex === -1) return null;
+
+    let relevantParts = pathParts.slice(uploadIndex + 1);
+
+    if (relevantParts[0]?.match(/^v\d+$/)) {
+      relevantParts = relevantParts.slice(1);
+    }
+
+    const fullPath = relevantParts.join("/");
+    const publicId = fullPath.substring(0, fullPath.lastIndexOf(".")) || fullPath;
+
+    return publicId || null;
+  } catch (error) {
+    console.error("Gagal extract public_id:", error);
+    return null;
+  }
+}
+
 export async function uploadImage(
   source: string | Buffer,
   folder = "snapland/products",
@@ -42,8 +72,15 @@ export async function uploadImage(
   };
 }
 
-export async function deleteImage(publicId: string): Promise<boolean> {
+export async function deleteImage(imageUrl: string): Promise<boolean> {
   try {
+    const publicId = extractPublicIdFromUrl(imageUrl);
+
+    if (!publicId) {
+      console.error("Tidak bisa extract public_id dari URL:", imageUrl);
+      return false;
+    }
+
     const result = await cloudinary.uploader.destroy(publicId);
     return result.result === "ok";
   } catch {

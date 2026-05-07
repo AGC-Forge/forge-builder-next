@@ -151,7 +151,7 @@ export function BuilderLeftPanel({ availableProducts, landingPageId }: Props) {
           onValueChange={(v) => store.setLeftPanelTab(v as typeof leftPanelTab)}
           className="flex flex-1 flex-col overflow-hidden"
         >
-          <TabsList className="grid grid-cols-4 rounded-none border-b h-9 px-2">
+          <TabsList className="grid grid-cols-4 rounded-none border-b h-9 px-2 gap-2">
             <TabsTrigger value="blocks" className="text-xs gap-1">
               <LayoutTemplate className="size-3" /> Blocks
             </TabsTrigger>

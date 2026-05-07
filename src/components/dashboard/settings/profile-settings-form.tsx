@@ -42,6 +42,10 @@ export function ProfileSettingsForm({ profile }: Props) {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (avatarUrl && avatarUrl.trim() !== "") {
+      await deleteImage(avatarUrl);
+    }
+
     setIsAvatarUploading(true);
     try {
       const reader = new FileReader();
@@ -74,6 +78,23 @@ export function ProfileSettingsForm({ profile }: Props) {
       if (fileRef.current) fileRef.current.value = "";
     }
   }
+
+  const deleteImage = async (imageUrl: string) => {
+    const response = await fetch(
+      `/api/upload?url=${encodeURIComponent(imageUrl)}`,
+      {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+    const data = await response.json();
+
+    if (!response.ok) {
+      toast.error(data.error ?? "Failed to delete image");
+    }
+
+    toast.success(data.message ?? "Image deleted successfully");
+  };
 
   function handleSaveProfile() {
     if (!fullName.trim()) {

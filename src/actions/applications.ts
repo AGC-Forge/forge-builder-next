@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { logActivity } from "@/actions/activity-logs";
 import type { Application, AppType } from "@/types/builder";
 
@@ -210,5 +211,28 @@ export async function toggleApplicationStatus(id: string, isActive: boolean): Pr
     return { success: true, message: isActive ? "Application enabled." : "Application disabled." };
   } catch {
     return { success: false, error: "Failed to update status" };
+  }
+}
+
+/**
+ * Get multiple applications by IDs (Public, uses admin client).
+ * @param ids Array of Application IDs.
+ * @returns Action result.
+ * */
+export async function getPublicApplicationsByIds(ids: string[]): Promise<ActionResult<Application[]>> {
+  if (!ids || ids.length === 0) return { success: true, data: [] };
+
+  try {
+    const supabase = createAdminClient();
+    const { data, error } = await supabase
+      .from("applications")
+      .select("*")
+      .in("id", ids)
+      .eq("is_active", true);
+
+    if (error) return { success: false, error: error.message };
+    return { success: true, data: (data ?? []) as Application[] };
+  } catch {
+    return { success: false, error: "Failed to fetch applications" };
   }
 }

@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
-    "dev:turbo": "next dev --turbopack",
+    "dev:turbo": "node scripts/dev-safe.mjs && next dev --turbopack",
     "clean:next": "node scripts/clean-next.mjs",
     "dev:fresh": "pnpm clean:next && pnpm dev",
     "dev:safe": "node scripts/dev-safe.mjs",
@@ -34,6 +34,8 @@
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
     "dotenv": "^17.4.2",
+    "embla-carousel": "^8.6.0",
+    "embla-carousel-autoplay": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
     "flag-icons": "^7.5.0",
     "geist": "^1.7.0",
