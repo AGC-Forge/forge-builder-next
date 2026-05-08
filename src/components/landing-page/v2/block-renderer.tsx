@@ -555,6 +555,10 @@ function ImageBlock({ props, classes, ctx }: BlockProps) {
   const hasProduct = linkType === "product" && Boolean(props.productId);
   const hasCustomLink = linkType === "custom" && Boolean(props.linkUrl);
 
+  const product =
+    ctx.products.find((p) => p.id === props.productId) ?? ctx.products[0];
+  const productUrl = product.affiliate_url ?? product.marketplace_url ?? "#";
+
   const [href, setHref] = useState("");
   const [isResolving, setIsResolving] = useState(false);
 
@@ -576,9 +580,8 @@ function ImageBlock({ props, classes, ctx }: BlockProps) {
         }
       } else if (hasProduct) {
         // Find product in context to get its affiliate/marketplace URL
-        const product = ctx.products.find((p) => p.id === props.productId);
         if (product) {
-          setHref(product.affiliate_url || product.marketplace_url || "#");
+          setHref(productUrl);
         } else {
           setHref("#");
         }
@@ -599,6 +602,8 @@ function ImageBlock({ props, classes, ctx }: BlockProps) {
     hasProduct,
     hasCustomLink,
     ctx.products,
+    product,
+    productUrl,
   ]);
 
   async function handleClick(e: React.MouseEvent<HTMLAnchorElement>) {
@@ -613,7 +618,9 @@ function ImageBlock({ props, classes, ctx }: BlockProps) {
 
     // Track product click if it's a product link
     if (hasProduct && ctx.onProductClick) {
-      const product = ctx.products.find((p) => p.id === props.productId);
+      const product =
+        ctx.products.find((p) => p.id === props.productId) ?? ctx.products[0];
+
       if (product) {
         const clickType = product.affiliate_url ? "affiliate" : "marketplace";
         ctx.onProductClick(product.id, clickType);
@@ -710,6 +717,10 @@ function GalleryImageItem({
   const [href, setHref] = useState("");
   const [isResolving, setIsResolving] = useState(false);
 
+  const product =
+    ctx.products.find((p) => p.id === props.productId) ?? ctx.products[0];
+  const productUrl = product.affiliate_url ?? product.marketplace_url ?? "#";
+
   useEffect(() => {
     const resolveHref = async () => {
       if (hasRotator) {
@@ -727,9 +738,8 @@ function GalleryImageItem({
           setIsResolving(false);
         }
       } else if (hasProduct) {
-        const product = ctx.products.find((p) => p.id === img.productId);
         if (product) {
-          setHref(product.affiliate_url || product.marketplace_url || "#");
+          setHref(productUrl);
         } else {
           setHref("#");
         }
@@ -749,6 +759,8 @@ function GalleryImageItem({
     hasProduct,
     hasCustomLink,
     ctx.products,
+    product,
+    productUrl,
   ]);
 
   async function handleClick(e: React.MouseEvent<HTMLAnchorElement>) {
@@ -762,7 +774,6 @@ function GalleryImageItem({
     }
 
     if (hasProduct && ctx.onProductClick) {
-      const product = ctx.products.find((p) => p.id === img.productId);
       if (product) {
         const clickType = product.affiliate_url ? "affiliate" : "marketplace";
         ctx.onProductClick(product.id, clickType);
@@ -1939,7 +1950,7 @@ function TestimonialCard({
               {item.name.charAt(0).toUpperCase()}
             </div>
           ))}
-        <div className="min-w-0">
+        <div className="min-w-0 text-start">
           <p className={cn("font-semibold text-sm truncate", classes.heading)}>
             {item.name}
           </p>
@@ -2395,6 +2406,10 @@ function ButtonItem({
   const hasProduct = linkType === "product" && Boolean(btn.productId);
   const hasCustomLink = linkType === "custom" && Boolean(btn.url);
 
+  const product =
+    ctx.products.find((p) => p.id === props.productId) ?? ctx.products[0];
+  const productUrl = product.affiliate_url ?? product.marketplace_url ?? "#";
+
   const [href, setHref] = useState("");
   const [isResolving, setIsResolving] = useState(false);
 
@@ -2415,9 +2430,8 @@ function ButtonItem({
           setIsResolving(false);
         }
       } else if (hasProduct) {
-        const product = ctx.products.find((p) => p.id === btn.productId);
         if (product) {
-          setHref(product.affiliate_url || product.marketplace_url || "#");
+          setHref(productUrl);
         } else {
           setHref("#");
         }
@@ -2437,6 +2451,8 @@ function ButtonItem({
     hasProduct,
     hasCustomLink,
     ctx.products,
+    product,
+    productUrl,
   ]);
 
   async function handleClick(e: React.MouseEvent<HTMLAnchorElement>) {
@@ -2450,7 +2466,6 @@ function ButtonItem({
     }
 
     if (hasProduct && ctx.onProductClick) {
-      const product = ctx.products.find((p) => p.id === btn.productId);
       if (product) {
         const clickType = product.affiliate_url ? "affiliate" : "marketplace";
         ctx.onProductClick(product.id, clickType);
@@ -2521,6 +2536,10 @@ function FloatButtonBlock({
   const hasProduct = linkType === "product" && Boolean(props.productId);
   const hasCustomLink = linkType === "custom" && Boolean(props.targetUrl);
 
+  const product =
+    ctx.products.find((p) => p.id === props.productId) ?? ctx.products[0];
+  const productUrl = product.affiliate_url ?? product.marketplace_url ?? "#";
+
   const [href, setHref] = useState("");
   const [isResolving, setIsResolving] = useState(false);
 
@@ -2541,10 +2560,8 @@ function FloatButtonBlock({
           setIsResolving(false);
         }
       } else if (hasProduct) {
-        // Find product in context to get its affiliate/marketplace URL
-        const product = ctx.products.find((p) => p.id === props.productId);
         if (product) {
-          setHref(product.affiliate_url || product.marketplace_url || "#");
+          setHref(productUrl);
         } else {
           setHref("#");
         }
@@ -2565,6 +2582,8 @@ function FloatButtonBlock({
     hasProduct,
     hasCustomLink,
     ctx.products,
+    product,
+    productUrl,
   ]);
 
   async function handleClick(e: React.MouseEvent<HTMLAnchorElement>) {
@@ -2586,7 +2605,6 @@ function FloatButtonBlock({
 
     // Track product click if it's a product link
     if (hasProduct && ctx.onProductClick) {
-      const product = ctx.products.find((p) => p.id === props.productId);
       if (product) {
         const clickType = product.affiliate_url ? "affiliate" : "marketplace";
         ctx.onProductClick(product.id, clickType);
@@ -3123,6 +3141,10 @@ function AutoRedirectBlock({
   const hasProduct = linkType === "product" && Boolean(props.productId);
   const hasCustomLink = linkType === "custom" && Boolean(props.targetUrl);
 
+  const product =
+    ctx.products.find((p) => p.id === props.productId) ?? ctx.products[0];
+  const productUrl = product.affiliate_url ?? product.marketplace_url ?? "#";
+
   const [finalURL, setFinalURL] = useState<string>("");
   const [isResolving, setIsResolving] = useState(false);
 
@@ -3145,9 +3167,8 @@ function AutoRedirectBlock({
           setIsResolving(false);
         }
       } else if (hasProduct) {
-        const product = ctx.products.find((p) => p.id === props.productId);
         if (product) {
-          setFinalURL(product.affiliate_url || product.marketplace_url || "");
+          setFinalURL(productUrl);
         } else {
           setFinalURL("");
         }
@@ -3168,6 +3189,8 @@ function AutoRedirectBlock({
     props.waTemplateMessage,
     props.productId,
     ctx.products,
+    product,
+    productUrl,
   ]);
 
   useEffect(() => {
@@ -3176,7 +3199,6 @@ function AutoRedirectBlock({
     if (secs <= 0) {
       // Track product click if it's a product link
       if (hasProduct && ctx.onProductClick) {
-        const product = ctx.products.find((p) => p.id === props.productId);
         if (product) {
           const clickType = product.affiliate_url ? "affiliate" : "marketplace";
           ctx.onProductClick(product.id, clickType);
@@ -3188,7 +3210,7 @@ function AutoRedirectBlock({
 
     const t = setTimeout(() => setSecs((s) => s - 1), 1000);
     return () => clearTimeout(t);
-  }, [secs, finalURL, isResolving, hasProduct, ctx, props.productId]);
+  }, [secs, finalURL, isResolving, hasProduct, ctx, product]);
 
   const message = (
     (props.message as string) || "Redirecting in {seconds} seconds..."
@@ -3226,6 +3248,10 @@ function BackRedirectBlock({
   const hasProduct = linkType === "product" && Boolean(props.productId);
   const hasCustomLink = linkType === "custom" && Boolean(props.redirectUrl);
 
+  const product =
+    ctx.products.find((p) => p.id === props.productId) ?? ctx.products[0];
+  const productUrl = product.affiliate_url ?? product.marketplace_url ?? "#";
+
   useEffect(() => {
     if (!props.enabled) return;
 
@@ -3249,10 +3275,8 @@ function BackRedirectBlock({
           console.error(error);
         }
       } else if (hasProduct) {
-        const product = ctx.products.find((p) => p.id === props.productId);
         if (product) {
-          finalURL =
-            product.affiliate_url || product.marketplace_url || undefined;
+          finalURL = productUrl;
         }
       } else if (hasCustomLink) {
         finalURL = props.redirectUrl as string | undefined;
@@ -3261,7 +3285,6 @@ function BackRedirectBlock({
       if (finalURL) {
         // Track product click if it's a product link
         if (hasProduct && ctx.onProductClick) {
-          const product = ctx.products.find((p) => p.id === props.productId);
           if (product) {
             const clickType = product.affiliate_url
               ? "affiliate"
@@ -3284,6 +3307,8 @@ function BackRedirectBlock({
     props.waTemplateMessage,
     props.productId,
     ctx,
+    product,
+    productUrl,
   ]);
 
   return null; // invisible block

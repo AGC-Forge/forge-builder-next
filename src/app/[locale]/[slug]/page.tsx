@@ -27,6 +27,7 @@ const THEME_RESET_CSS = `
 body, html {
   margin: 0; padding: 0; width: 100%;
   overflow-x: hidden; -webkit-text-size-adjust: 100%;
+  background-color: #f5f5f5;
 }
 img, video, iframe { max-width: 100%; height: auto; }
 a { color: inherit; }

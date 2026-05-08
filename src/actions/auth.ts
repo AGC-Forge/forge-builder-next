@@ -15,13 +15,13 @@ function getAuthCallbackUrl(next = "/dashboard") {
     if (process.env.NODE_ENV === "production") {
       const fallbackUrl = process.env.NEXT_PUBLIC_APP_URL || "https://snapland.agcforge.com";
       console.warn(`Using fallback URL: ${fallbackUrl}`);
-      return `${fallbackUrl}/auth/callback?next=${encodeURIComponent(next)}`;
+      return `${fallbackUrl}/auth/confirm?next=${encodeURIComponent(next)}`;
     }
     throw new Error("NEXT_PUBLIC_APP_URL must be set to the public HTTPS URL");
   }
 
   const callbackUrl = getPublicUrl(
-    `/auth/callback?next=${encodeURIComponent(next)}`,
+    `/auth/confirm?next=${encodeURIComponent(next)}`,
   ).toString();
 
   if (process.env.NODE_ENV === "production") {
