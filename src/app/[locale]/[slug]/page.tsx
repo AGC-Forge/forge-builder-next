@@ -44,7 +44,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!result.success || !result.data) return {};
 
   const page = result.data;
-  console.log(page);
   const title = page.seo?.title ?? page.title;
   const description = page.seo?.description ?? page.description ?? undefined;
   const ogImage =

@@ -1927,7 +1927,7 @@ export function BlockContentEditor({
             placeholder="Select WA Rotator..."
           />
         )}
-        {props.linkType === "product" && (
+        {props.type === "product" && (
           <ProductPicker
             props={props}
             k="productId"

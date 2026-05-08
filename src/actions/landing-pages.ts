@@ -97,7 +97,6 @@ export async function getLandingPageBySlug(
 ): Promise<ActionResult<LandingPageWithProducts>> {
   try {
     const supabase = createAdminClient();
-
     const { data, error } = await supabase
       .from("landing_pages")
       .select(`

@@ -148,7 +148,6 @@ export function BlockRenderer({ block, ctx }: Props) {
 // ── Route each block type to its renderer ─────────────────────
 function BlockContent({ block, ctx }: { block: BlockV2; ctx: RenderContext }) {
   const { type, props, classes } = block;
-
   // ── Layout ───────────────────────────────────────────────────
   if (type === "block-hero")
     return <HeroBlock props={props} classes={classes} ctx={ctx} />;
@@ -555,9 +554,10 @@ function ImageBlock({ props, classes, ctx }: BlockProps) {
   const hasProduct = linkType === "product" && Boolean(props.productId);
   const hasCustomLink = linkType === "custom" && Boolean(props.linkUrl);
 
-  const product =
-    ctx.products.find((p) => p.id === props.productId) ?? ctx.products[0];
-  const productUrl = product.affiliate_url ?? product.marketplace_url ?? "#";
+  const product = hasProduct
+    ? (ctx.products.find((p) => p.id === props.productId) ?? ctx.products[0])
+    : undefined;
+  const productUrl = product?.affiliate_url ?? product?.marketplace_url ?? "#";
 
   const [href, setHref] = useState("");
   const [isResolving, setIsResolving] = useState(false);
@@ -618,9 +618,6 @@ function ImageBlock({ props, classes, ctx }: BlockProps) {
 
     // Track product click if it's a product link
     if (hasProduct && ctx.onProductClick) {
-      const product =
-        ctx.products.find((p) => p.id === props.productId) ?? ctx.products[0];
-
       if (product) {
         const clickType = product.affiliate_url ? "affiliate" : "marketplace";
         ctx.onProductClick(product.id, clickType);
@@ -717,9 +714,10 @@ function GalleryImageItem({
   const [href, setHref] = useState("");
   const [isResolving, setIsResolving] = useState(false);
 
-  const product =
-    ctx.products.find((p) => p.id === props.productId) ?? ctx.products[0];
-  const productUrl = product.affiliate_url ?? product.marketplace_url ?? "#";
+  const product = hasProduct
+    ? (ctx.products.find((p) => p.id === props.productId) ?? ctx.products[0])
+    : undefined;
+  const productUrl = product?.affiliate_url ?? product?.marketplace_url ?? "#";
 
   useEffect(() => {
     const resolveHref = async () => {
@@ -2406,9 +2404,10 @@ function ButtonItem({
   const hasProduct = linkType === "product" && Boolean(btn.productId);
   const hasCustomLink = linkType === "custom" && Boolean(btn.url);
 
-  const product =
-    ctx.products.find((p) => p.id === props.productId) ?? ctx.products[0];
-  const productUrl = product.affiliate_url ?? product.marketplace_url ?? "#";
+  const product = hasProduct
+    ? (ctx.products.find((p) => p.id === props.productId) ?? ctx.products[0])
+    : undefined;
+  const productUrl = product?.affiliate_url ?? product?.marketplace_url ?? "#";
 
   const [href, setHref] = useState("");
   const [isResolving, setIsResolving] = useState(false);
@@ -2534,11 +2533,12 @@ function FloatButtonBlock({
   const linkType = props.type || "scroll-top";
   const hasRotator = linkType === "whatsapp" && Boolean(props.waRotatorId);
   const hasProduct = linkType === "product" && Boolean(props.productId);
-  const hasCustomLink = linkType === "custom" && Boolean(props.targetUrl);
+  const hasCustomLink = linkType === "custom" && Boolean(props.customUrl);
 
-  const product =
-    ctx.products.find((p) => p.id === props.productId) ?? ctx.products[0];
-  const productUrl = product.affiliate_url ?? product.marketplace_url ?? "#";
+  const product = hasProduct
+    ? (ctx.products.find((p) => p.id === props.productId) ?? ctx.products[0])
+    : undefined;
+  const productUrl = product?.affiliate_url ?? product?.marketplace_url ?? "#";
 
   const [href, setHref] = useState("");
   const [isResolving, setIsResolving] = useState(false);
@@ -3141,9 +3141,10 @@ function AutoRedirectBlock({
   const hasProduct = linkType === "product" && Boolean(props.productId);
   const hasCustomLink = linkType === "custom" && Boolean(props.targetUrl);
 
-  const product =
-    ctx.products.find((p) => p.id === props.productId) ?? ctx.products[0];
-  const productUrl = product.affiliate_url ?? product.marketplace_url ?? "#";
+  const product = hasProduct
+    ? (ctx.products.find((p) => p.id === props.productId) ?? ctx.products[0])
+    : undefined;
+  const productUrl = product?.affiliate_url ?? product?.marketplace_url ?? "#";
 
   const [finalURL, setFinalURL] = useState<string>("");
   const [isResolving, setIsResolving] = useState(false);
@@ -3248,9 +3249,10 @@ function BackRedirectBlock({
   const hasProduct = linkType === "product" && Boolean(props.productId);
   const hasCustomLink = linkType === "custom" && Boolean(props.redirectUrl);
 
-  const product =
-    ctx.products.find((p) => p.id === props.productId) ?? ctx.products[0];
-  const productUrl = product.affiliate_url ?? product.marketplace_url ?? "#";
+  const product = hasProduct
+    ? (ctx.products.find((p) => p.id === props.productId) ?? ctx.products[0])
+    : undefined;
+  const productUrl = product?.affiliate_url ?? product?.marketplace_url ?? "#";
 
   useEffect(() => {
     if (!props.enabled) return;
